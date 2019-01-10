@@ -18,6 +18,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('userLogin','UserController@userLogin');
+//Route::post('userLogin', array('middleware' => 'cors', 'uses' => 'UserController@userLogin'));
+
 Route::post('userRegister','UserController@userRegister');
 // Route::group(['middleware'=>'auth:api'], function(){
 	Route::get('userDetails','UserController@userDetails');

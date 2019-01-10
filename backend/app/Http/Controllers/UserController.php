@@ -15,22 +15,22 @@ class UserController extends Controller
     //
     public function userLogin(Request $request){
     	$validator = Validator::make($request->all(), [
-    		'email'=>'required|email',
+    		'username'=>'required',
     		'password'=>'required'
     	]);
 
     	if($validator->fails()){
-    		return response()->json(['success'=>false,'error'=>$validator->errors()], 401);
+    		return response()->json(['success'=>false,'error'=>$validator->errors(),'code'=>401]);
     	}
 
-    	if(Auth::attempt(['email'=>request('email'), 'password'=>request('password')])){
+    	if(Auth::attempt(['username'=>request('username'), 'password'=>request('password')])){
     		$user = Auth::user();
     		// $success['token'] = $user->createToken('MyApp')->accessToken;
     		return response()->json(['success'=>true,'error'=>$validator->errors(),'code'=>200,'data'=>$user], 200);
     	}
 
     	else{
-    		return response()->json(['error'=>'unauthorized'], 401);
+    		return response()->json(['success'=>false,'error'=>'unauthorized','code'=>200]);
     	}
     }
 
@@ -39,12 +39,12 @@ class UserController extends Controller
     	try {
     		$validator = Validator::make($request->all(), [
     		'name'=> 'required',
-    		'email'=> 'required|email',
+    		'username'=> 'required',
     		'password' => 'required',
     	]);
 
     	if($validator->fails()){
-    		return response()->json(['error'=>$validator->errors()], 401);
+    		return response()->json(['success'=>false,'error'=>$validator->errors(),'code'=>401]);
     	}
 
     	$input = $request->all();
@@ -52,7 +52,7 @@ class UserController extends Controller
     	$user = User::create($input);
     	// $success['token'] = $user->createToken('MyApp')->accessToken;
     	$success['name'] = $user->name;
-    	return response()->json(['success'=>true], 200);
+    	return response()->json(['success'=>true,'error'=>$validator->errors(),'code'=>200,'data'=>$user], 200);
     		
     	} catch (Exception $e) {
     		return response()->json([
