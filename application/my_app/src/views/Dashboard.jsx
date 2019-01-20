@@ -5,7 +5,7 @@ class Dashboard extends React.Component {
     doLogout = e => {
 
         localStorage.clear();
-        this.props.history.push('/');
+        this.props.history.push('/login');
 
     }
 
