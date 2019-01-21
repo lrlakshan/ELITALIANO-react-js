@@ -19,11 +19,11 @@ import Dashboard from "@material-ui/icons/Dashboard";
 import Menu from "@material-ui/icons/Menu";
 
 // core components
-import Button from "components/CustomButtons/Button";
+import Button from "../../components/CustomButtons/Button";
 
-import pagesRoutes from "routes/pages.jsx";
+//import pagesRoutes from "routes/pages.jsx";
 
-import pagesHeaderStyle from "assets/jss/material-dashboard-pro-react/components/pagesHeaderStyle.jsx";
+import pagesHeaderStyle from "../../assets/jss/material-dashboard-pro-react/components/pagesHeaderStyle.jsx";
 
 class PagesHeader extends React.Component {
   constructor(props) {
@@ -63,7 +63,7 @@ class PagesHeader extends React.Component {
             />
           </NavLink>
         </ListItem>
-        {pagesRoutes.map((prop, key) => {
+        {/* {pagesRoutes.map((prop, key) => {
           if (prop.redirect) {
             return null;
           }
@@ -86,7 +86,7 @@ class PagesHeader extends React.Component {
               </NavLink>
             </ListItem>
           );
-        })}
+        })} */}
       </List>
     );
     return (

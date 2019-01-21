@@ -16,22 +16,20 @@ import Notes from "../views/Notes";
 //import pagesRoutes from "./pages.jsx";
 
 // @material-ui/icons
-import DashboardIcon from "@material-ui/icons/Dashboard";
-import Image from "@material-ui/icons/Image";
-import Apps from "@material-ui/icons/Apps";
+import InsertChart from "@material-ui/icons/InsertChart";
+import Image from "@material-ui/icons/EuroSymbol";
+import StoreMallDirectory from "@material-ui/icons/StoreMallDirectory";
 // import ContentPaste from "@material-ui/icons/ContentPaste";
-import GridOn from "@material-ui/icons/GridOn";
-import Place from "@material-ui/icons/Place";
-import WidgetsIcon from "@material-ui/icons/Widgets";
-import Timeline from "@material-ui/icons/Timeline";
-import DateRange from "@material-ui/icons/DateRange";
+import Accounts from "@material-ui/icons/ImportContacts";
+import ShoppingCart from "@material-ui/icons/ShoppingCart";
+import Note from "@material-ui/icons/SpeakerNotes";
 
 
 var dashRoutes = [
   {
     path: "/main/dashboard",
     name: "Dashboard",
-    icon: DashboardIcon,
+    icon: InsertChart,
     component: Dashboard
   },
   {
@@ -39,7 +37,7 @@ var dashRoutes = [
     path: "/main/inventory",
     name: "Inventory",
     state: "openComponents",
-    icon: Apps,
+    icon: StoreMallDirectory,
     views: [
       {
         path: "/main/viewStocks",
@@ -66,7 +64,7 @@ var dashRoutes = [
     path: "/main/Accounts",
     name: "Accounts",
     state: "openForms",
-    icon: GridOn,
+    icon: Accounts,
     views: [
       {
         path: "/main/salesHistory",
@@ -127,9 +125,7 @@ var dashRoutes = [
       },
     ]
   },
-  { path: "/main/cashier", name: "Cashier", icon: WidgetsIcon, component: Cashier },
-  { path: "/main/notes", name: "Notes", icon: Timeline, component: Notes },
-  // { path: "/calendar", name: "Calendar", icon: DateRange, component: Calendar },
-  // { redirect: true, path: "/", pathTo: "/", name: "Dashboard" }
+  { path: "/main/cashier", name: "Cashier", icon: ShoppingCart, component: Cashier },
+  { path: "/main/notes", name: "Notes", icon: Note, component: Notes }
 ];
 export default dashRoutes;

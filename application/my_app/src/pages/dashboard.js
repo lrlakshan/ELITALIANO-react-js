@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
-import { Switch, Route, Redirect, withRouter } from "react-router-dom";
+import { Switch, Route, Redirect } from "react-router-dom";
 // creates a beautiful scrollbar
 import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
@@ -49,12 +49,6 @@ class dashboard extends Component {
         this.resizeFunction = this.resizeFunction.bind(this);
     }
     componentDidMount() {
-        // const oUser = JSON.parse(localStorage.getItem('user'));
-        // if (oUser) {
-        //     this.props.history.push('/main');
-        // } else {
-        //     this.doLogout();
-        // }
 
         if (navigator.platform.indexOf("Win") > -1) {
             ps = new PerfectScrollbar(this.refs.mainPanel, {
