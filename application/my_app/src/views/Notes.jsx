@@ -1,14 +1,14 @@
 import React from 'react';
 
-class Dashboard extends React.Component {
+class Notes extends React.Component {
 
     render() {
         return (
             <div>
-                This is Dashboard
+                This is Notes
             </div>
         );
     }
 }
 
-export default Dashboard;
+export default Notes;

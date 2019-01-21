@@ -1,14 +1,14 @@
 import React from 'react';
 
-class Dashboard extends React.Component {
+class ProdcutChanges extends React.Component {
 
     render() {
         return (
             <div>
-                This is Dashboard
+                This is ProdcutChanges
             </div>
         );
     }
 }
 
-export default Dashboard;
+export default ProdcutChanges;

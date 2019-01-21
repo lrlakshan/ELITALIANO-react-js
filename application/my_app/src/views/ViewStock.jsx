@@ -1,14 +1,14 @@
 import React from 'react';
 
-class Dashboard extends React.Component {
+class ViewStock extends React.Component {
 
     render() {
         return (
             <div>
-                This is Dashboard
+                This is ViewStock
             </div>
         );
     }
 }
 
-export default Dashboard;
+export default ViewStock;

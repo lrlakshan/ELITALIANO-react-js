@@ -1,5 +1,17 @@
 import Dashboard from "../views/Dashboard";
-import Buttons from "../views/Buttons";
+import ViewStocks from "../views/ViewStock";
+import Purchases from "../views/Purchases";
+import ProductChanges from "../views/ProductChanges";
+import SalesHistory from "../views/SalesHistory";
+import PurchaseHistory from "../views/PurchaseHistory";
+import ExpenseHistory from "../views/ExpenseHistory";
+import CashPaid from "../views/CashPaid";
+import CashRecieved from "../views/CashRecieved";
+import Summary from "../views/Summary";
+import Recievable from "../views/Recievable";
+import Payable from "../views/Payable";
+import Cashier from "../views/Cashier";
+import Notes from "../views/Notes";
 
 //import pagesRoutes from "./pages.jsx";
 
@@ -23,136 +35,100 @@ var dashRoutes = [
     component: Dashboard
   },
   {
-    //collapse: true,
-    path: "/main/buttons",
-    name: "buttons",
-    //state: "openComponents",
+    collapse: true,
+    path: "/main/inventory",
+    name: "Inventory",
+    state: "openComponents",
     icon: Apps,
-    component: Buttons,
-    // views: [
-    //   {
-    //     path: "/components/buttons",
-    //     name: "Buttons",
-    //     mini: "B",
-    //     component: Buttons
-    //   },
-    //     {
-    //       path: "/components/grid-system",
-    //       name: "Grid System",
-    //       mini: "GS",
-    //       component: GridSystem
-    //     },
-    //     {
-    //       path: "/components/panels",
-    //       name: "Panels",
-    //       mini: "P",
-    //       component: Panels
-    //     },
-    //     {
-    //       path: "/components/sweet-alert",
-    //       name: "Sweet Alert",
-    //       mini: "SA",
-    //       component: SweetAlert
-    //     },
-    //     {
-    //       path: "/components/notifications",
-    //       name: "Notifications",
-    //       mini: "N",
-    //       component: Notifications
-    //     },
-    //     { path: "/components/icons", name: "Icons", mini: "I", component: Icons },
-    //     {
-    //       path: "/components/typography",
-    //       name: "Typography",
-    //       mini: "T",
-    //       component: Typography
-    //     }
-    //]
+    views: [
+      {
+        path: "/main/viewStocks",
+        name: "View Stocks",
+        mini: "",
+        component: ViewStocks
+      },
+      {
+        path: "/main/purchases",
+        name: "Purchases from Supplier",
+        mini: "",
+        component: Purchases
+      },
+      {
+        path: "/main/productChanges",
+        name: "Product Changes",
+        mini: "",
+        component: ProductChanges
+      },
+    ]
   },
-  // {
-  //   collapse: true,
-  //   path: "/forms",
-  //   name: "Forms",
-  //   state: "openForms",
-  //   icon: "content_paste",
-  //   views: [
-  //     {
-  //       path: "/forms/regular-forms",
-  //       name: "Regular Forms",
-  //       mini: "RF",
-  //       component: RegularForms
-  //     },
-  //     {
-  //       path: "/forms/extended-forms",
-  //       name: "Extended Forms",
-  //       mini: "EF",
-  //       component: ExtendedForms
-  //     },
-  //     {
-  //       path: "/forms/validation-forms",
-  //       name: "Validation Forms",
-  //       mini: "VF",
-  //       component: ValidationForms
-  //     },
-  //     { path: "/forms/wizard", name: "Wizard", mini: "W", component: Wizard }
-  //   ]
-  // },
-  // {
-  //   collapse: true,
-  //   path: "/tables",
-  //   name: "Tables",
-  //   state: "openTables",
-  //   icon: GridOn,
-  //   views: [
-  //     {
-  //       path: "/tables/regular-tables",
-  //       name: "Regular Tables",
-  //       mini: "RT",
-  //       component: RegularTables
-  //     },
-  //     {
-  //       path: "/tables/extended-tables",
-  //       name: "Extended Tables",
-  //       mini: "ET",
-  //       component: ExtendedTables
-  //     },
-  //     {
-  //       path: "/tables/react-tables",
-  //       name: "React Tables",
-  //       mini: "RT",
-  //       component: ReactTables
-  //     }
-  //   ]
-  // },
-  // {
-  //   collapse: true,
-  //   path: "/maps",
-  //   name: "Maps",
-  //   state: "openMaps",
-  //   icon: Place,
-  //   views: [
-  //     {
-  //       path: "/maps/google-maps",
-  //       name: "Google Maps",
-  //       mini: "GM",
-  //       component: GoogleMaps
-  //     },
-  //     {
-  //       path: "/maps/full-screen-maps",
-  //       name: "Full Screen Map",
-  //       mini: "FSM",
-  //       component: FullScreenMap
-  //     },
-  //     {
-  //       path: "/maps/vector-maps",
-  //       name: "Vector Map",
-  //       mini: "VM",
-  //       component: VectorMap
-  //     }
-  //   ]
-  // },
-  // { path: "/widgets", name: "Widgets", icon: WidgetsIcon, component: Widgets },
-  // { path: "/charts", name: "Charts", icon: Timeline, component: Charts },
+  {
+    collapse: true,
+    path: "/main/Accounts",
+    name: "Accounts",
+    state: "openForms",
+    icon: GridOn,
+    views: [
+      {
+        path: "/main/salesHistory",
+        name: "Sales History",
+        mini: "",
+        component: SalesHistory
+      },
+      {
+        path: "/main/purchaseHistory",
+        name: "Purchase History",
+        mini: "",
+        component: PurchaseHistory
+      },
+      {
+        path: "/main/expenseHistory",
+        name: "Expense History",
+        mini: "",
+        component: ExpenseHistory
+      },
+      {
+        path: "/main/cashPaid",
+        name: "Cash Paid",
+        mini: "",
+        component: CashPaid
+      },
+      {
+        path: "/main/cashRecieved",
+        name: "Cash Recieved",
+        mini: "",
+        component: CashRecieved
+      },
+      {
+        path: "/main/summary",
+        name: "Summary",
+        mini: "",
+        component: Summary
+      },
+    ]
+  },
+  {
+    collapse: true,
+    path: "/main/payable_recievable_payable",
+    name: "Recievable/Payable",
+    state: "openTables",
+    icon: Image,
+    views: [
+      {
+        path: "/main/recievable",
+        name: "Cash Recievable",
+        mini: "",
+        component: Recievable
+      },
+      {
+        path: "/main/payable",
+        name: "Cash Payable",
+        mini: "",
+        component: Payable
+      },
+    ]
+  },
+  { path: "/main/cashier", name: "Cashier", icon: WidgetsIcon, component: Cashier },
+  { path: "/main/notes", name: "Notes", icon: Timeline, component: Notes },
   // { path: "/calendar", name: "Calendar", icon: DateRange, component: Calendar },
   // { redirect: true, path: "/", pathTo: "/", name: "Dashboard" }
 ];

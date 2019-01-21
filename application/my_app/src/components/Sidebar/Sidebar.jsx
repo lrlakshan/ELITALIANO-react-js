@@ -78,6 +78,11 @@ class Sidebar extends React.Component {
     st[collapse] = !this.state[collapse];
     this.setState(st);
   }
+  doLogout = e => {
+    localStorage.clear();
+    this.props.history.push('/login');
+
+  };
   render() {
     const {
       classes,
@@ -145,7 +150,7 @@ class Sidebar extends React.Component {
               onClick={() => this.openCollapse("openAvatar")}
             >
               <ListItemText
-                primary={rtlActive ? "تانيا أندرو" : "Tania Andrew"}
+                primary={rtlActive ? "تانيا أندرو" : JSON.parse(localStorage.getItem('user')).name}
                 secondary={
                   <b
                     className={
@@ -201,18 +206,19 @@ class Sidebar extends React.Component {
                 </ListItem>
                 <ListItem className={classes.collapseItem}>
                   <NavLink
-                    to="#"
+                    to="/login"
                     className={
                       classes.itemLink + " " + classes.userCollapseLinks
                     }
                   >
                     <span className={collapseItemMini}>
-                      {rtlActive ? "و" : "S"}
+                      {rtlActive ? "و" : "L"}
                     </span>
                     <ListItemText
-                      primary={rtlActive ? "إعدادات" : "Settings"}
+                      primary={rtlActive ? "إعدادات" : "Logout"}
                       disableTypography={true}
                       className={collapseItemText}
+                      onClick={this.doLogout}
                     />
                   </NavLink>
                 </ListItem>
