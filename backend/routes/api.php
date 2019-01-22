@@ -24,3 +24,6 @@ Route::post('userRegister','UserController@userRegister');
 // Route::group(['middleware'=>'auth:api'], function(){
 	Route::get('userDetails','UserController@userDetails');
 // })
+
+Route::post('addProducts','productController@addProducts');
+Route::get('productDetails','productController@productDetails');
