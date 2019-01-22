@@ -14,9 +14,9 @@ import Grow from "@material-ui/core/Grow";
 import Divider from "@material-ui/core/Divider";
 import Popper from "@material-ui/core/Popper";
 // core components
-import Button from "components/CustomButtons/Button.jsx";
+import Button from "../../components/CustomButtons/Button.jsx";
 
-import customDropdownStyle from "assets/jss/material-dashboard-pro-react/components/customDropdownStyle.jsx";
+import customDropdownStyle from "../../assets/jss/material-dashboard-pro-react/components/customDropdownStyle.jsx";
 
 class CustomDropdown extends React.Component {
   constructor(props) {
@@ -39,9 +39,9 @@ class CustomDropdown extends React.Component {
 
     this.setState({ open: false });
   }
-  handleCloseMenu(param){
+  handleCloseMenu(param) {
     this.setState({ open: false });
-    if(this.props && this.props.onClick){
+    if (this.props && this.props.onClick) {
       this.props.onClick(param);
     }
   }
@@ -163,10 +163,10 @@ class CustomDropdown extends React.Component {
                 {innerDropDown ? (
                   dropDownMenu
                 ) : (
-                  <ClickAwayListener onClickAway={this.handleClose} ref="cacat">
-                    {dropDownMenu}
-                  </ClickAwayListener>
-                )}
+                    <ClickAwayListener onClickAway={this.handleClose} ref="cacat">
+                      {dropDownMenu}
+                    </ClickAwayListener>
+                  )}
               </Paper>
             </Grow>
           )}

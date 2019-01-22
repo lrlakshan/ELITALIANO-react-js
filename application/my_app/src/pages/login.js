@@ -10,8 +10,8 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import Icon from "@material-ui/core/Icon";
 
 // @material-ui/icons
-import Face from "@material-ui/icons/Face";
-// import LockOutline from "@material-ui/icons/LockOutline";
+import Face from "@material-ui/icons/AccountCircle";
+import LockOutline from "@material-ui/icons/Lock";
 
 // core components
 import GridContainer from "../components/Grid/GridContainer.jsx";
@@ -146,9 +146,7 @@ class login extends React.Component {
                                                         inputProps={{
                                                             endAdornment: (
                                                                 <InputAdornment position="end">
-                                                                    <Icon className={classes.inputAdornmentIcon}>
-                                                                        lock_outline
-                                                    </Icon>
+                                                                    <LockOutline className={classes.inputAdornmentIcon} />
                                                                 </InputAdornment>
                                                             )
                                                         }}
