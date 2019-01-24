@@ -18,6 +18,7 @@ class productController extends Controller
 	    	'productName'=> 'required',
 	    	'purchasePrice' => 'required',
 	    	'sellingPrice'=> 'required',
+	    	'marketPrice'=> 'required',
 	    	'amountAvailable' => 'required',
     	]);
 
