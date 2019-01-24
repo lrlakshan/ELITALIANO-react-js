@@ -1730,8 +1730,8 @@ button.rbc-input::-moz-focus-inner {
 
 .ReactTable .rt-thead .rt-th.-cursor-pointer > div:first-of-type:after {
   opacity: 0.4;
-  content: "\F0DC";
-  font-weight: bold;
+  content: "\25BC";
+  font-weight: lighter;
   position: relative;
   display: inline-block;
   bottom: 0px;
@@ -1739,9 +1739,9 @@ button.rbc-input::-moz-focus-inner {
   font-family: Font Awesome\ 5 Free; }
 
 .ReactTable .rt-thead .rt-th.-cursor-pointer.-sort-desc > div:first-of-type:after {
-  content: "\F0DD";
+  content: "\25B2";
   top: -3px;
-  font-weight: bold;
+  font-weight: lighter;
   position: relative;
   display: inline-block;
   bottom: 0px;
@@ -1750,9 +1750,9 @@ button.rbc-input::-moz-focus-inner {
   opacity: 0.8; }
 
 .ReactTable .rt-thead .rt-th.-cursor-pointer.-sort-asc > div:first-of-type:after {
-  content: "\F0DE";
+  content: "\25BC";
   top: 3px;
-  font-weight: bold;
+  font-weight: lighter;
   position: relative;
   display: inline-block;
   bottom: 0px;

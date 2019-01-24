@@ -82,7 +82,7 @@
 .ReactTable .rt-thead .rt-th.-cursor-pointer > div:first-of-type{
   &:after{
     opacity: 0.4;
-    content: "\F0DC";
+    content: "\25B2";
     font-weight: bold;
     position: relative;
     display: inline-block;
@@ -93,7 +93,7 @@
 }
 .ReactTable .rt-thead .rt-th.-cursor-pointer.-sort-desc > div:first-of-type{
   &:after{
-    content: "\F0DD";
+    content: "\25BC";
     top: -3px;
     font-weight: bold;
     position: relative;
