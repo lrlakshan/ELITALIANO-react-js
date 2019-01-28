@@ -19,7 +19,6 @@ class productController extends Controller
 	    	'purchasePrice' => 'required',
 	    	'sellingPrice'=> 'required',
 	    	'marketPrice'=> 'required',
-	    	'amountAvailable' => 'required',
     	]);
 
     	if($validator->fails()){
@@ -27,9 +26,7 @@ class productController extends Controller
     	}
 
     	$input = $request->all();
-    	//$input['password'] = bcrypt($input['password']);
     	$user = product::create($input);
-    	// $success['token'] = $user->createToken('MyApp')->accessToken;
     	$success['name'] = $user->name;
     	return response()->json(['success'=>true,'error'=>$validator->errors(),'code'=>200,'data'=>$user], 200);
     		
@@ -40,6 +37,61 @@ class productController extends Controller
     			'code'=>500
     		], 500);
     	}
+    }
+
+    public function updateProducts(Request $request){
+
+    	try {
+
+    		$validator = Validator::make($request->all(), [
+    		'productId'=> 'required',
+	    	'productName'=> 'required',
+	    	'purchasePrice' => 'required',
+	    	'sellingPrice'=> 'required',
+	    	'marketPrice'=> 'required',
+    	]);
+
+    	if($validator->fails()){
+    		return response()->json(['success'=>false,'error'=>$validator->errors(),'code'=>401]);
+    	}
+
+    	$data = $request->all();
+    	$productId = $data['productId'];
+
+    	if($productId != "" && !empty($productId)){
+
+    		$update = product::where('productId', $productId)->first();
+
+    		if($update){
+    				product::where('productId', $productId)->update([
+	    			'productName' => $request->productName,
+	    			'purchasePrice' => $request->purchasePrice,
+	    			'sellingPrice' => $request->sellingPrice,
+	    			'marketPrice' => $request->marketPrice
+	    		]);
+
+	    		return response()->json([
+	    			'success'=>true,
+	    			'error'=>[],
+	    			'code'=>200
+	    		],200);
+    		}	
+    	}
+    	return response()->json([
+	    			'success'=>false,
+	    			'error'=>'Record not found',
+	    			'code'=>401
+	    		],401);
+    		
+    	} catch (Exception $e) {
+    		return response()->json([
+    			'success'=>false,
+    			'error'=>($e->getMessage()),
+    			'code'=>500
+    		], 500);
+    	}
+
+
     }
 
     public function productDetails(){
