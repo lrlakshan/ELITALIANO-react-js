@@ -2,7 +2,7 @@
 // // // SweetAlert view styles
 // #############################
 
-import buttonStyle from "assets/jss/material-dashboard-pro-react/components/buttonStyle.jsx";
+import buttonStyle from "../../material-dashboard-pro-react/components/buttonStyle.jsx";
 
 const sweetAlertStyle = {
   cardTitle: {

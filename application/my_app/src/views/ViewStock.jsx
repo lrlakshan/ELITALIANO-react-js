@@ -3,6 +3,8 @@ import React from "react";
 import ReactTable from "react-table";
 import Helper from '../utils/Helper';
 import LoadingOverlay from 'react-loading-overlay';
+import SweetAlert from "react-bootstrap-sweetalert";
+
 
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
@@ -20,6 +22,7 @@ import Dvr from "@material-ui/icons/Dvr";
 import Favorite from "@material-ui/icons/Favorite";
 import Close from "@material-ui/icons/Close";
 import AddCircle from "@material-ui/icons/AddCircle";
+import LocalMall from "@material-ui/icons/LocalMall";
 // core components
 import GridContainer from "../components/Grid/GridContainer.jsx";
 import GridItem from "../components/Grid/GridItem.jsx";
@@ -31,6 +34,7 @@ import CardHeader from "../components/Card/CardHeader.jsx";
 import CustomInput from "../components/CustomInput/CustomInput.jsx";
 
 import { cardTitle } from "../assets/jss/material-dashboard-pro-react.jsx";
+import sweetAlertStyle from "../assets/jss/material-dashboard-pro-react/views/sweetAlertStyle.jsx";
 
 const styles = {
     cardIconTitle: {
@@ -49,7 +53,8 @@ const styles = {
     },
     addButton: {
         float: "right"
-    }
+    },
+    ...sweetAlertStyle
 };
 
 function filterCaseInsensitive(filter, row) {
@@ -69,56 +74,68 @@ class viewStock extends React.Component {
             products: [],
             loading: false,
             open: false,
+            successAlert: false,
+            failAlert: false,
+            formTitle: "",
+            formIcon: null,
+            formButtonText: "",
+            succesAlertMsg: "",
+            failedAlertMsg: "",
+
+            //input states
             productIdState: "",
             productNameState: "",
             purchasePriceState: "",
             sellingPriceState: "",
             marketPriceState: "",
 
-            // register form
-            registerEmail: "",
-            registerEmailState: "",
-            registerPassword: "",
-            registerPasswordState: "",
-            registerConfirmPassword: "",
-            registerConfirmPasswordState: "",
-            registerCheckbox: false,
-            registerCheckboxState: "",
-            // type validation
-            required: "",
-            requiredState: "",
-            typeEmail: "",
-            typeEmailState: "",
-            number: "",
-            numberState: "",
-            url: "",
-            urlState: "",
-            equalTo: "",
-            whichEqualTo: "",
-            equalToState: "",
-            // range validation
-            minLength: "",
-            minLengthState: "",
-            maxLength: "",
-            maxLengthState: "",
-            range: "",
-            rangeState: "",
-            minValue: "",
-            minValueState: "",
-            maxValue: "",
-            maxValueState: ""
+            //input values
+            productId: "",
+            productName: "",
+            purchasePrice: "",
+            sellingPrice: "",
+            marketPrice: "",
         };
-        this.registerClick = this.registerClick.bind(this);
-        this.loginClick = this.loginClick.bind(this);
-        this.typeClick = this.typeClick.bind(this);
-        this.rangeClick = this.rangeClick.bind(this);
+        this.addNewClick = this.addNewClick.bind(this);
     }
     handleClickOpen = () => {
-        this.setState({ open: true });
+        this.setState({
+            open: true,
+            formTitle: "Add new products",
+            formButtonText: "Add"
+        });
+    };
+
+    hideAlert_success = () => {
+        this.setState({
+            successAlert: false,
+            succesAlertMsg: "",
+            failedAlertMsg: "",
+        });
+        this.handleClose();
+        this.getProductDetails();
+    };
+
+    hideAlert_fail = () => {
+        this.setState({
+            failAlert: false
+        });
     };
 
     handleClose = () => {
-        this.setState({ open: false });
+        this.setState({
+            open: false,
+            productIdState: "",
+            productNameState: "",
+            purchasePriceState: "",
+            sellingPriceState: "",
+            marketPriceState: "",
+            productId: "",
+            productName: "",
+            purchasePrice: "",
+            sellingPrice: "",
+            marketPrice: "",
+        });
     };
 
     componentDidMount() {
@@ -139,53 +156,40 @@ class viewStock extends React.Component {
                         productName: data[i].productName,
                         purchasePrice: data[i].purchasePrice,
                         sellingPrice: data[i].sellingPrice,
+                        marketPrice: data[i].marketPrice,
                         amountAvailable: data[i].amountAvailable,
                         actions: (
                             // we've added some custom button actions
                             <div className="actions-right">
-                                {/* use this button to add a like kind of action */}
-                                <Button
-                                    justIcon
-                                    round
-                                    simple
-                                    // onClick={() => {
-                                    //     let obj = this.state.data.find(o => o.id === key);
-                                    //     alert(
-                                    //         "You've clicked LIKE button on \n{ \nName: " +
-                                    //         obj.name +
-                                    //         ", \nposition: " +
-                                    //         obj.position +
-                                    //         ", \noffice: " +
-                                    //         obj.office +
-                                    //         ", \nage: " +
-                                    //         obj.age +
-                                    //         "\n}."
-                                    //     );
-                                    // }}
-                                    color="info"
-                                    className="like"
-                                >
-                                    <Favorite />
-                                </Button>{" "}
                                 {/* use this button to add a edit kind of action */}
                                 <Button
                                     justIcon
                                     round
                                     simple
-                                    // onClick={() => {
-                                    //     let obj = this.state.data.find(o => o.id === key);
-                                    //     alert(
-                                    //         "You've clicked EDIT button on \n{ \nName: " +
-                                    //         obj.name +
-                                    //         ", \nposition: " +
-                                    //         obj.position +
-                                    //         ", \noffice: " +
-                                    //         obj.office +
-                                    //         ", \nage: " +
-                                    //         obj.age +
-                                    //         "\n}."
-                                    //     );
-                                    // }}
+                                    onClick={() => {
+                                        //let obj = this.state.data.find(o => o.id === key);
+                                        this.setState({
+                                            open: true,
+                                            formTitle: "Edit Products",
+                                            formButtonText: "Edit",
+                                            productId: data[i].productId,
+                                            productName: data[i].productName,
+                                            purchasePrice: data[i].purchasePrice,
+                                            sellingPrice: data[i].sellingPrice,
+                                            marketPrice: data[i].marketPrice,
+                                        })
+                                        // alert(
+                                        //     "You've clicked EDIT button on \n{ \nName: " +
+                                        //     obj.name +
+                                        //     ", \nposition: " +
+                                        //     obj.position +
+                                        //     ", \noffice: " +
+                                        //     obj.office +
+                                        //     ", \nage: " +
+                                        //     obj.age +
+                                        //     "\n}."
+                                        // );
+                                    }}
                                     color="warning"
                                     className="edit"
                                 >
@@ -369,66 +373,74 @@ class viewStock extends React.Component {
                 break;
         }
     }
-    registerClick() {
-        if (this.state.productIdState === "") {
+    addNewClick() {
+        if (this.state.productId === "") {
             this.setState({ productIdState: "error" });
         }
-        if (this.state.productNameState === "") {
+        if (this.state.productName === "") {
             this.setState({ productNameState: "error" });
         }
-        if (this.state.purchasePriceState === "") {
+        if (this.state.purchasePrice === "") {
             this.setState({ purchasePriceState: "error" });
         }
-        if (this.state.sellingPriceState === "") {
+        if (this.state.sellingPrice === "") {
             this.setState({ sellingPriceState: "error" });
         }
-        if (this.state.marketPriceState === "") {
+        if (this.state.marketPrice === "") {
             this.setState({ marketPriceState: "error" });
         }
-    }
-    loginClick() {
-        if (this.state.loginEmailState === "") {
-            this.setState({ loginEmailState: "error" });
-        }
-        if (this.state.loginPasswordState === "") {
-            this.setState({ loginPasswordState: "error" });
-        }
-    }
-    typeClick() {
-        if (this.state.requiredState === "") {
-            this.setState({ requiredState: "error" });
-        }
-        if (this.state.typeEmailState === "") {
-            this.setState({ typeEmailState: "error" });
-        }
-        if (this.state.numberState === "") {
-            this.setState({ numberState: "error" });
-        }
-        if (this.state.urlState === "") {
-            this.setState({ urlState: "error" });
-        }
-        if (this.state.equalToState === "") {
-            this.setState({ equalToState: "error" });
-        }
-    }
-    rangeClick() {
-        if (this.state.minLengthState === "") {
-            this.setState({ minLengthState: "error" });
-        }
-        if (this.state.maxLengthState === "") {
-            this.setState({ maxLengthState: "error" });
-        }
-        if (this.state.rangeState === "") {
-            this.setState({ rangeState: "error" });
-        }
-        if (this.state.minValueState === "") {
-            this.setState({ minValueState: "error" });
-        }
-        if (this.state.maxValueState === "") {
-            this.setState({ maxValueState: "error" });
-        }
-    }
+        if (this.state.productId !== "" && this.state.marketPrice !== "" && this.state.sellingPrice !== "" && this.state.purchasePrice !== "" && this.state.productName !== "") {
+            if (this.state.formTitle === 'Add new products') {
+                Helper.http
+                    .jsonPost("addProducts", {
+                        productId: this.state.productId,
+                        productName: this.state.productName,
+                        purchasePrice: this.state.purchasePrice,
+                        sellingPrice: this.state.sellingPrice,
+                        marketPrice: this.state.marketPrice,
+                    })
+                    .then(response => {
+                        this.setState({
+                            successAlert: true,
+                            succesAlertMsg: "New product added Successfully"
+                        });
 
+                    })
+                    .catch(exception => {
+                        console.log(exception);
+                        this.setState({
+                            failAlert: true,
+                            failedAlertMsg: "Dupplicate entry of Product ID",
+                        });
+                    });
+            }
+            if (this.state.formTitle === 'Edit Products') {
+                Helper.http
+                    .jsonPost("updateProducts", {
+                        productId: this.state.productId,
+                        productName: this.state.productName,
+                        purchasePrice: this.state.purchasePrice,
+                        sellingPrice: this.state.sellingPrice,
+                        marketPrice: this.state.marketPrice,
+                    })
+                    .then(response => {
+                        this.setState({
+                            successAlert: true,
+                            succesAlertMsg: "Product details edited successfully"
+                        });
+
+                    })
+                    .catch(exception => {
+                        console.log(exception);
+                        this.setState({
+                            failAlert: true,
+                            failedAlertMsg: "You cannot change the Product ID"
+                        });
+                    });
+            }
+
+        }
+    }
 
     render() {
         const { classes } = this.props;
@@ -455,13 +467,20 @@ class viewStock extends React.Component {
                                     <ReactTable
                                         data={this.state.products}
                                         filterable
+                                        nextText='next>>'
+                                        previousText='<<previous'
                                         defaultFilterMethod={filterCaseInsensitive}
+                                        defaultSorted={[
+                                            {
+                                                id: "productId"
+                                            }
+                                        ]}
                                         columns={[
                                             {
                                                 Header: "ID",
                                                 accessor: "productId",
                                                 filterable: false,
-                                                width: 100
+                                                width: 70
                                             },
                                             {
                                                 Header: "Product Name",
@@ -477,14 +496,19 @@ class viewStock extends React.Component {
                                                 accessor: "sellingPrice"
                                             },
                                             {
+                                                Header: "Market Price",
+                                                accessor: "marketPrice"
+                                            },
+                                            {
                                                 Header: "Stock",
                                                 accessor: "amountAvailable",
                                                 filterable: false,
-                                                width: 100
+                                                width: 70
                                             },
                                             {
                                                 Header: "Actions",
                                                 accessor: "actions",
+                                                width: 100,
                                                 sortable: false,
                                                 filterable: false
                                             }
@@ -506,9 +530,9 @@ class viewStock extends React.Component {
                     <Card className={classes.cardSize}>
                         <CardHeader color="info" icon>
                             <CardIcon color="info">
-                                <MailOutline />
+                                <LocalMall />
                             </CardIcon>
-                            <h4 className={classes.cardIconTitle}>Add New Products</h4>
+                            <h4 className={classes.cardIconTitle}>{this.state.formTitle}</h4>
                         </CardHeader>
                         <CardBody>
                             <form>
@@ -525,6 +549,8 @@ class viewStock extends React.Component {
                                             this.change(event, "productId", "length", 1),
                                         type: "number"
                                     }}
+                                    onChange={(event) => this.setState({ productId: event.target.value })}
+                                    defaultValue={this.state.productId.toString()}
                                 />
                                 <CustomInput
                                     success={this.state.productNameState === "success"}
@@ -539,6 +565,8 @@ class viewStock extends React.Component {
                                             this.change(event, "productName", "length", 1),
                                         type: "text"
                                     }}
+                                    onChange={(event) => this.setState({ productName: event.target.value })}
+                                    defaultValue={this.state.productName}
                                 />
                                 <CustomInput
                                     success={this.state.purchasePriceState === "success"}
@@ -553,6 +581,8 @@ class viewStock extends React.Component {
                                             this.change(event, "purchasePrice", "length", 1),
                                         type: "number"
                                     }}
+                                    onChange={(event) => this.setState({ purchasePrice: event.target.value })}
+                                    defaultValue={this.state.purchasePrice.toString()}
                                 />
                                 <CustomInput
                                     success={this.state.sellingPriceState === "success"}
@@ -567,6 +597,8 @@ class viewStock extends React.Component {
                                             this.change(event, "sellingPrice", "length", 1),
                                         type: "number"
                                     }}
+                                    onChange={(event) => this.setState({ sellingPrice: event.target.value })}
+                                    defaultValue={this.state.sellingPrice.toString()}
                                 />
                                 <CustomInput
                                     success={this.state.marketPriceState === "success"}
@@ -581,12 +613,14 @@ class viewStock extends React.Component {
                                             this.change(event, "marketPrice", "length", 1),
                                         type: "number"
                                     }}
+                                    onChange={(event) => this.setState({ marketPrice: event.target.value })}
+                                    defaultValue={this.state.marketPrice.toString()}
                                 />
                                 <div>
                                     <Button
                                         size='sm'
                                         color="info"
-                                        onClick={this.registerClick}
+                                        onClick={this.handleClose}
                                         className={classes.addButton}
                                     >
                                         Cancel
@@ -594,16 +628,42 @@ class viewStock extends React.Component {
                                     <Button
                                         size='sm'
                                         color="info"
-                                        onClick={this.registerClick}
+                                        onClick={this.addNewClick}
                                         className={classes.addButton}
                                     >
-                                        Add
+                                        {this.state.formButtonText}
                                     </Button>
                                 </div>
                             </form>
                         </CardBody>
                     </Card>
                 </Dialog>
+                <SweetAlert
+                    show={this.state.successAlert}
+                    success
+                    style={{ display: "block", marginTop: "-150px" }}
+                    title="successful!"
+                    onConfirm={() => this.hideAlert_success()}
+                    onCancel={() => this.hideAlert_success()}
+                    confirmBtnCssClass={
+                        this.props.classes.button + " " + this.props.classes.success
+                    }
+                >
+                    {this.state.succesAlertMsg}
+                </SweetAlert>
+                <SweetAlert
+                    show={this.state.failAlert}
+                    danger
+                    style={{ display: "block", marginTop: "-150px" }}
+                    title="Failed!"
+                    onConfirm={() => this.hideAlert_fail()}
+                    onCancel={() => this.hideAlert_fail()}
+                    confirmBtnCssClass={
+                        this.props.classes.button + " " + this.props.classes.danger
+                    }
+                >
+                    {this.state.failedAlertMsg}
+                </SweetAlert>
             </div>
         );
     }
