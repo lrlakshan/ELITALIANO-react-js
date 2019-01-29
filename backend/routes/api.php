@@ -28,3 +28,4 @@ Route::post('userRegister','UserController@userRegister');
 Route::post('addProducts','productController@addProducts');
 Route::get('productDetails','productController@productDetails');
 Route::post('updateProducts','productController@updateProducts');
+Route::post('deleteProducts','productController@deleteProducts');
