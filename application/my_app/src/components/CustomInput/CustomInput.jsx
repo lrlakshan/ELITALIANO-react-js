@@ -27,7 +27,8 @@ function CustomInput({ ...props }) {
     success,
     helpText,
     onChange,
-    defaultValue
+    defaultValue,
+    disabled
   } = props;
 
   const labelClasses = classNames({
@@ -78,6 +79,7 @@ function CustomInput({ ...props }) {
           disabled: classes.disabled,
           underline: underlineClasses
         }}
+        disabled={disabled}
         id={id}
         type={type}
         onChange={onChange}
@@ -107,7 +109,8 @@ CustomInput.propTypes = {
   white: PropTypes.bool,
   helpText: PropTypes.node,
   onChange: PropTypes.func,
-  defaultValue: PropTypes.string
+  defaultValue: PropTypes.string,
+  disabled: PropTypes.bool,
 };
 
 export default withStyles(customInputStyle)(CustomInput);

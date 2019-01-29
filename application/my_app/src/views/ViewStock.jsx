@@ -560,6 +560,7 @@ class viewStock extends React.Component {
                         <CardBody>
                             <form>
                                 <CustomInput
+                                    disabled={this.state.formTitle === "Add new products" ? false : true}
                                     success={this.state.productIdState === "success"}
                                     error={this.state.productIdState === "error"}
                                     labelText="Product ID *"
@@ -690,7 +691,7 @@ class viewStock extends React.Component {
                 <SweetAlert
                     show={this.state.deleteAlert}
                     warning
-                    style={{ display: "block", marginTop: "-100px" }}
+                    style={{ display: "block", marginTop: "-150px" }}
                     title="Are you sure?"
                     onConfirm={() => this.hideAlert_delete_success()}
                     onCancel={() => this.hideAlert_delete()}
@@ -709,7 +710,7 @@ class viewStock extends React.Component {
                 <SweetAlert
                     show={this.state.deleteAlertSuccess}
                     success
-                    style={{ display: "block", marginTop: "-100px" }}
+                    style={{ display: "block", marginTop: "-150px" }}
                     title="Deleted!"
                     onConfirm={() => this.Alert_delete_success_close()}
                     onCancel={() => this.Alert_delete_success_close()}
