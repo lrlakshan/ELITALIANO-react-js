@@ -81,6 +81,8 @@ class viewStock extends React.Component {
             formButtonText: "",
             succesAlertMsg: "",
             failedAlertMsg: "",
+            deleteAlert: false,
+            deleteAlertSuccess: false,
 
             //input states
             productIdState: "",
@@ -120,6 +122,45 @@ class viewStock extends React.Component {
         this.setState({
             failAlert: false
         });
+    };
+
+    Alert_delete_success_close = () => {
+        this.setState({
+            deleteAlertSuccess: false,
+            productId: ""
+        });
+    };
+
+    hideAlert_delete = () => {
+        this.setState({
+            deleteAlert: false,
+            productId: ""
+        });
+    };
+
+    hideAlert_delete_success = () => {
+        Helper.http
+            .jsonPost("deleteProducts", {
+                productId: this.state.productId
+            })
+            .then(response => {
+                this.setState({
+                    deleteAlertSuccess: true,
+                    productId: "",
+                    deleteAlert: false
+                });
+                this.getProductDetails();
+            })
+            .catch(exception => {
+                console.log(exception);
+                this.setState({
+                    failAlert: true,
+                    deleteAlert: false,
+                    failedAlertMsg: "Cannot complete this delete",
+                    productId: ""
+                });
+            });
+
     };
 
     handleClose = () => {
@@ -178,17 +219,6 @@ class viewStock extends React.Component {
                                             sellingPrice: data[i].sellingPrice,
                                             marketPrice: data[i].marketPrice,
                                         })
-                                        // alert(
-                                        //     "You've clicked EDIT button on \n{ \nName: " +
-                                        //     obj.name +
-                                        //     ", \nposition: " +
-                                        //     obj.position +
-                                        //     ", \noffice: " +
-                                        //     obj.office +
-                                        //     ", \nage: " +
-                                        //     obj.age +
-                                        //     "\n}."
-                                        // );
                                     }}
                                     color="warning"
                                     className="edit"
@@ -201,17 +231,10 @@ class viewStock extends React.Component {
                                     round
                                     simple
                                     onClick={() => {
-                                        var data = this.state.data;
-                                        // data.find((o, i) => {
-                                        //     if (o.id === key) {
-                                        //         // here you should add some custom code so you can delete the data
-                                        //         // from this component and from your server as well
-                                        //         data.splice(i, 1);
-                                        //         return true;
-                                        //     }
-                                        //     return false;
-                                        // });
-                                        this.setState({ data: data });
+                                        this.setState({
+                                            deleteAlert: true,
+                                            productId: data[i].productId,
+                                        });
                                     }}
                                     color="danger"
                                     className="remove"
@@ -664,6 +687,38 @@ class viewStock extends React.Component {
                 >
                     {this.state.failedAlertMsg}
                 </SweetAlert>
+                <SweetAlert
+                    show={this.state.deleteAlert}
+                    warning
+                    style={{ display: "block", marginTop: "-100px" }}
+                    title="Are you sure?"
+                    onConfirm={() => this.hideAlert_delete_success()}
+                    onCancel={() => this.hideAlert_delete()}
+                    confirmBtnCssClass={
+                        this.props.classes.button + " " + this.props.classes.success
+                    }
+                    cancelBtnCssClass={
+                        this.props.classes.button + " " + this.props.classes.danger
+                    }
+                    confirmBtnText="Yes, delete it!"
+                    cancelBtnText="Cancel"
+                    showCancel
+                >
+                    You will not be able to recover this data!
+                </SweetAlert>
+                <SweetAlert
+                    show={this.state.deleteAlertSuccess}
+                    success
+                    style={{ display: "block", marginTop: "-100px" }}
+                    title="Deleted!"
+                    onConfirm={() => this.Alert_delete_success_close()}
+                    onCancel={() => this.Alert_delete_success_close()}
+                    confirmBtnCssClass={
+                        this.props.classes.button + " " + this.props.classes.success
+                    }
+                >
+                    Product has been deleted.
+        </SweetAlert>
             </div>
         );
     }
