@@ -25,7 +25,15 @@ Route::post('userRegister','UserController@userRegister');
 	Route::get('userDetails','UserController@userDetails');
 // })
 
+//api's from products table
 Route::post('addProducts','productController@addProducts');
 Route::get('productDetails','productController@productDetails');
 Route::post('updateProducts','productController@updateProducts');
 Route::post('deleteProducts','productController@deleteProducts');
+Route::post('getSelectedProductDetails','productController@getSelectedProductDetails');
+
+//api's from purchases table
+Route::post('addPurchases','purchaseController@addPurchases');
+
+//api's from supplier_details table
+Route::get('supplierDetails','supplierDetailController@supplierDetails');
