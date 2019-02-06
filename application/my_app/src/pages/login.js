@@ -24,6 +24,7 @@ import CardFooter from "../components/Card/CardFooter.jsx";
 
 //images
 import bgImage from "../assets/img/register.jpeg";
+import logo from "../assets/img/logo.png";
 
 import loginPageStyle from "../assets/jss/material-dashboard-pro-react/views/loginPageStyle.jsx";
 
@@ -102,22 +103,7 @@ class login extends React.Component {
                                                 >
                                                     <h4 className={classes.cardTitle}>Log in</h4>
                                                     <div className={classes.socialLine}>
-                                                        {[
-                                                            "fab fa-facebook-square",
-                                                            "fab fa-twitter",
-                                                            "fab fa-google-plus"
-                                                        ].map((prop, key) => {
-                                                            return (
-                                                                <Button
-                                                                    color="transparent"
-                                                                    justIcon
-                                                                    key={key}
-                                                                    className={classes.customButtonClass}
-                                                                >
-                                                                    <i className={prop} />
-                                                                </Button>
-                                                            );
-                                                        })}
+                                                        <img src={logo} width="100px"></img>
                                                     </div>
                                                 </CardHeader>
                                                 <CardBody>

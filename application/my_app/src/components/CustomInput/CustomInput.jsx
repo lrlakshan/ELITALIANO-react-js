@@ -28,6 +28,7 @@ function CustomInput({ ...props }) {
     helpText,
     onChange,
     defaultValue,
+    value,
     disabled
   } = props;
 
@@ -84,6 +85,7 @@ function CustomInput({ ...props }) {
         type={type}
         onChange={onChange}
         defaultValue={defaultValue}
+        value={value}
         {...inputProps}
       />
       {helpText !== undefined ? (
@@ -111,6 +113,7 @@ CustomInput.propTypes = {
   onChange: PropTypes.func,
   defaultValue: PropTypes.string,
   disabled: PropTypes.bool,
+  value: PropTypes.string
 };
 
 export default withStyles(customInputStyle)(CustomInput);

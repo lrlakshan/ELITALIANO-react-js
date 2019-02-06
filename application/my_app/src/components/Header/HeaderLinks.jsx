@@ -18,6 +18,8 @@ import Popper from "@material-ui/core/Popper";
 import Person from "@material-ui/icons/Person";
 import Notifications from "@material-ui/icons/Notifications";
 import Dashboard from "@material-ui/icons/Dashboard";
+import elitaliano from "../../assets/img/elitaliano.png";
+
 
 // core components
 import Button from "../../components/CustomButtons/Button";
@@ -62,6 +64,7 @@ class HeaderLinks extends React.Component {
     return (
       <div className={wrapper}>
         <div className={managerClasses}>
+
           <Button
             color="transparent"
             justIcon
@@ -93,57 +96,7 @@ class HeaderLinks extends React.Component {
               </span>
             </Hidden>
           </Button>
-          <Popper
-            open={open}
-            anchorEl={this.anchorEl}
-            transition
-            disablePortal
-            placement="bottom"
-            className={classNames({
-              [classes.popperClose]: !open,
-              [classes.pooperResponsive]: true,
-              [classes.pooperNav]: true
-            })}
-          >
-            {({ TransitionProps, placement }) => (
-              <Grow
-                {...TransitionProps}
-                id="menu-list"
-                style={{ transformOrigin: "0 0 0" }}
-              >
-                <Paper className={classes.dropdown}>
-                  <ClickAwayListener onClickAway={this.handleClose}>
-                    <MenuList role="menu">
-                      <MenuItem
-                        onClick={this.handleClose}
-                        className={dropdownItem}
-                      >
-                        {rtlActive
-                          ? "إجلاء أوزار الأسيوي حين بل, كما"
-                          : "My Profile"}
-                      </MenuItem>
-                      <MenuItem
-                        onClick={this.handleClose}
-                        className={dropdownItem}
-                      >
-                        {rtlActive
-                          ? "شعار إعلان الأرضية قد ذلك"
-                          : "Lock"}
-                      </MenuItem>
-                      <MenuItem
-                        onClick={this.doLogout}
-                        className={dropdownItem}
-                      >
-                        {rtlActive
-                          ? "ثمّة الخاصّة و على. مع جيما"
-                          : "Logout"}
-                      </MenuItem>
-                    </MenuList>
-                  </ClickAwayListener>
-                </Paper>
-              </Grow>
-            )}
-          </Popper>
+
         </div>
       </div>
     );

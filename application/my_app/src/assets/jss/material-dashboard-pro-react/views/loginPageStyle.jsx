@@ -58,7 +58,8 @@ const loginPageStyle = theme => ({
   },
   cardTitle: {
     ...cardTitle,
-    color: "#FFFFFF"
+    color: "#FFFFFF",
+    marginBottom: "0px",
   },
   textCenter: {
     textAlign: "center"
@@ -87,7 +88,12 @@ const loginPageStyle = theme => ({
     marginBottom: "20px"
   },
   socialLine: {
-    padding: "0.9375rem 0"
+    padding: "0"
+  },
+  avatarImg: {
+    width: "100%",
+    verticalAlign: "middle",
+    border: "0"
   },
 
 });

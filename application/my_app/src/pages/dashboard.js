@@ -10,7 +10,7 @@ import "perfect-scrollbar/css/perfect-scrollbar.css";
 import withStyles from "@material-ui/core/styles/withStyles";
 
 // core components
-import Header from "../components/Header/Header.jsx";
+// import Header from "../components/Header/Header.jsx";
 import Footer from "../components/Footer/Footer.jsx";
 import Sidebar from "../components/Sidebar/Sidebar.jsx";
 
@@ -121,13 +121,13 @@ class dashboard extends Component {
                     {...rest}
                 />
                 <div className={mainPanel} ref="mainPanel">
-                    <Header
+                    {/* <Header
                         sidebarMinimize={this.sidebarMinimize.bind(this)}
                         miniActive={this.state.miniActive}
                         routes={dashboardRoutes}
                         handleDrawerToggle={this.handleDrawerToggle}
                         {...rest}
-                    />
+                    /> */}
                     {/* On the /maps/full-screen-maps route we want the map to be on full screen - this is not possible if the content and conatiner classes are present because they have some paddings which would make the map smaller */}
                     {this.getRoute() ? (
                         <div className={classes.content}>
@@ -136,7 +136,7 @@ class dashboard extends Component {
                     ) : (
                             <div className={classes.map}>{switchRoutes}</div>
                         )}
-                    {this.getRoute() ? <Footer fluid /> : null}
+                    {/* {this.getRoute() ? <Footer fluid /> : null} */}
                 </div>
             </div>
         );
