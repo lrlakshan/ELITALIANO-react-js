@@ -57,13 +57,11 @@ const styles = {
     ...sweetAlertStyle
 };
 
+//function to allow filter by name irrespective of case sensitive
 function filterCaseInsensitive(filter, row) {
     const id = filter.pivotId || filter.id;
     return (
-        row[id] !== undefined ?
-            String(row[id].toLowerCase()).startsWith(filter.value.toLowerCase())
-            :
-            true
+        row[id] !== undefined ? String(row[id].toLowerCase()).startsWith(filter.value.toLowerCase()) : true
     );
 }
 
@@ -100,6 +98,8 @@ class viewStock extends React.Component {
         };
         this.addNewClick = this.addNewClick.bind(this);
     }
+
+    //add new product button function
     handleClickOpen = () => {
         this.setState({
             open: true,
@@ -108,6 +108,7 @@ class viewStock extends React.Component {
         });
     };
 
+    //success message sweet alert hide function
     hideAlert_success = () => {
         this.setState({
             successAlert: false,
@@ -118,12 +119,14 @@ class viewStock extends React.Component {
         this.getProductDetails();
     };
 
+    //failed message sweet alert hide function
     hideAlert_fail = () => {
         this.setState({
             failAlert: false
         });
     };
 
+    //item delete success message hide function
     Alert_delete_success_close = () => {
         this.setState({
             deleteAlertSuccess: false,
@@ -131,6 +134,7 @@ class viewStock extends React.Component {
         });
     };
 
+    //are you sure to delete sweet alert cancel button function
     hideAlert_delete = () => {
         this.setState({
             deleteAlert: false,
@@ -138,6 +142,7 @@ class viewStock extends React.Component {
         });
     };
 
+    //Are you sure to delete function confirm button function
     hideAlert_delete_success = () => {
         Helper.http
             .jsonPost("deleteProducts", {
@@ -160,9 +165,9 @@ class viewStock extends React.Component {
                     productId: ""
                 });
             });
-
     };
 
+    //add new items and edit items dialog forms close handling function
     handleClose = () => {
         this.setState({
             open: false,
@@ -183,6 +188,7 @@ class viewStock extends React.Component {
         this.getProductDetails();
     }
 
+    //get products and details in the stock
     getProductDetails = () => {
         const products = [];
         this.setState({ loading: true });
@@ -500,36 +506,46 @@ class viewStock extends React.Component {
                                         ]}
                                         columns={[
                                             {
-                                                Header: "ID",
+                                                Header: () => (
+                                                    <strong>ID</strong>),
                                                 accessor: "productId",
                                                 filterable: false,
-                                                width: 70
+                                                width: 80
                                             },
                                             {
-                                                Header: "Product Name",
+                                                Header: () => (
+                                                    <strong>Product Name</strong>),
                                                 accessor: "productName",
                                                 width: 250
                                             },
                                             {
-                                                Header: "Purchase Price",
-                                                accessor: "purchasePrice"
+                                                Header: () => (
+                                                    <strong>Purchase Price</strong>),
+                                                accessor: "purchasePrice",
+                                                Cell: row => <div className="actions-right">{row.value}</div>
                                             },
                                             {
-                                                Header: "Selling Price",
-                                                accessor: "sellingPrice"
+                                                Header: () => (
+                                                    <strong>Selling Price</strong>),
+                                                accessor: "sellingPrice",
+                                                Cell: row => <div className="actions-right">{row.value}</div>
                                             },
                                             {
-                                                Header: "Market Price",
-                                                accessor: "marketPrice"
+                                                Header: () => (
+                                                    <strong>Market Price</strong>),
+                                                accessor: "marketPrice",
+                                                Cell: row => <div className="actions-right">{row.value}</div>
                                             },
                                             {
-                                                Header: "Stock",
+                                                Header: () => (
+                                                    <strong>Stock</strong>),
                                                 accessor: "amountAvailable",
                                                 filterable: false,
-                                                width: 70
+                                                width: 80,
+                                                Cell: row => <div className="actions-right">{row.value}</div>
                                             },
                                             {
-                                                Header: "Actions",
+                                                Header: "",
                                                 accessor: "actions",
                                                 width: 100,
                                                 sortable: false,
@@ -719,7 +735,7 @@ class viewStock extends React.Component {
                     }
                 >
                     Product has been deleted.
-        </SweetAlert>
+                </SweetAlert>
             </div>
         );
     }
