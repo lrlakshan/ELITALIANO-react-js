@@ -34,6 +34,12 @@ Route::post('getSelectedProductDetails','productController@getSelectedProductDet
 
 //api's from purchases table
 Route::post('addPurchases','purchaseController@addPurchases');
+Route::post('getPurchaseListDetails','purchaseController@getPurchaseListDetails');
+Route::post('deletePurchases','purchaseController@deletePurchases');
+Route::post('clearList','purchaseController@clearList');
 
 //api's from supplier_details table
 Route::get('supplierDetails','supplierDetailController@supplierDetails');
+
+//api's from purchase_invoices table
+Route::get('purchaseInvoiceNextNumber','purchaseInvoiceController@purchaseInvoiceNextNumber');

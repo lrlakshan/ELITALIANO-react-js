@@ -174,16 +174,16 @@ class productController extends Controller
 
     	if($productId != "" && !empty($productId)){
 
-    		$delete = product::where('productId', $productId)->first();
+    		$details = product::where('productId', $productId)->first();
 
-    		if($delete){
-    				// product::where('productId', $productId)->delete();
+    		if($details){
+    				// product::where('productId', $productId)->details();
 
 	    		return response()->json([
 	    			'success'=>true,
 	    			'error'=>[],
 	    			'code'=>200,
-	    			'data'=>$delete
+	    			'data'=>$details
 	    		],200);
     		}	
     	}

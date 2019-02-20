@@ -13,6 +13,6 @@ class purchase extends Model
      * @var array
      */
     protected $fillable = [
-        'invoiceNum', 'date', 'productId', 'amountPurchases',
+        'invoiceNum', 'date', 'productId', 'supplierId', 'amountPurchases',
     ];
 }
