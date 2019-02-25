@@ -99,6 +99,7 @@ class Purchases extends React.Component {
             alertOpen: false,
             alertDiscription: "",
             selecedSupplierId: "",
+            totalBill: "0.00",
 
 
             //delete alert states
@@ -118,7 +119,6 @@ class Purchases extends React.Component {
         this.getMenuList();
         this.getSupplierList();
         this.getPurchaseInvoiceNextNumber();
-        console.log('list', this.state.PurchaseDetailsList)
     }
 
     getMenuList = () => {
@@ -155,7 +155,6 @@ class Purchases extends React.Component {
                 //     productList.push(_data);
                 // }
                 this.setState({ purchaseInvoiceNextNumber: response.data });
-                console.log('number', this.state.purchaseInvoiceNextNumber);
                 this.getPurchaseDetails();
             })
             .catch(exception => {
@@ -178,7 +177,6 @@ class Purchases extends React.Component {
                     supplierList.push(_data);
                 }
                 this.setState({ supplierList });
-                console.log('data', this.state.supplierList);
             })
             .catch(exception => {
                 console.log(exception);
@@ -195,7 +193,10 @@ class Purchases extends React.Component {
             })
             .then(response => {
                 let data = response.data;
-                this.setState({ numberOfRows: data.length });
+                this.setState({ 
+                    numberOfRows: data.length,
+                    totalBill: (response.sum.totalBill != null) ? response.sum.totalBill : "0.00"
+                });
                 for (let i = 0; i < data.length; i++) {
                     const _data = {
                         id: data[i].id,
@@ -227,7 +228,6 @@ class Purchases extends React.Component {
                     PurchaseDetailsList,
                     tableLoading: false
                 });
-                console.log('purchase list', this.state.PurchaseDetailsList);
             })
             .catch(exception => {
                 console.log(exception);
@@ -262,21 +262,6 @@ class Purchases extends React.Component {
             [event.target.name]: event.target.value,
             selecedSupplierId: event.target.value
         });
-        // Helper.http
-        //     .jsonPost("getSelectedSupplierDetails", {
-        //         id: event.target.value
-        //     })
-        //     .then(response => {
-
-        //         // this.setState({
-        //         //     amountAvailable: response.data.amountAvailable,
-        //         //     purchasePrice: response.data.purchasePrice
-        //         // });
-        //         console.log(response);
-        //     })
-        //     .catch(exception => {
-        //         console.log(exception);
-        //     });
     };
 
     //add to list button handle function
@@ -792,7 +777,7 @@ class Purchases extends React.Component {
                                         <br />
                                         <br />
                                         <br />
-                                        <h3 className={classes.marginCenter}><small>Rs. 124,560.00</small></h3>
+                                        <h3 className={classes.marginCenter}><small>Rs.{(this.state.totalBill < 1000000) ? parseInt(this.state.totalBill, 10).toLocaleString() + ".00" : parseInt(this.state.totalBill, 10).toLocaleString()}</small></h3>
                                     </CardBody>
                                 </GridItem>
                             </GridContainer>
@@ -827,7 +812,7 @@ class Purchases extends React.Component {
                                             accessor: "amountPurchases",
                                             filterable: false,
                                             sortable: false,
-                                            width: 40,
+                                            width: 50,
                                             Cell: row => <div className="actions-right">{row.value}</div>
                                         },
                                         {
@@ -847,7 +832,7 @@ class Purchases extends React.Component {
                                             accessor: "amount",
                                             filterable: false,
                                             sortable: false,
-                                            width: 80,
+                                            width: 90,
                                             Cell: row => <div className="actions-right">{row.value}</div>
                                         },
                                         {
