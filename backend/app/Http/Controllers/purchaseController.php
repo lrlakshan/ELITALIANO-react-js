@@ -65,11 +65,18 @@ class purchaseController extends Controller
                             ->where('invoiceNum','=',$request->all())
                             ->get();
 
+        $totalBill = DB::table('purchases')
+                            ->join('products', 'products.productId', '=', 'purchases.productId')
+                            ->select(DB::raw('sum(products.purchasePrice*purchases.amountPurchases) AS totalBill'))
+                            ->where('invoiceNum','=',$request->all())
+                            ->first();
+
         return response()->json([
                 'success'=>true,
                 'error'=>null,
                 'code'=>200,
                 'total'=>count($purchaseDetails),
+                'sum'=>$totalBill,
                 'data'=>$purchaseDetails
             ], 200);
             
