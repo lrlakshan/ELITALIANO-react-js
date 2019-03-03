@@ -62,6 +62,30 @@ const styles = {
         marginBottom: "0px",
         width: "150px"
     },
+    Right: {
+        position: "absolute",
+        marginTop: "30px",
+        marginRight: "70px",
+        marginBottom: "0px",
+        textAlign: "right",
+        // display: "inline",
+        paddingLeft: "80%",
+    },
+    Left: {
+        position: "absolute",
+        marginTop: "30px",
+        marginBottom: "0px",
+        textAlign: 'left',
+        paddingLeft:"110px",
+        // display:"inline"
+    },
+    ProceedButtonStyle: {
+        position: "absolute",
+        marginTop: "50px",
+        marginLeft: "80%",
+        marginBottom: "20px",
+        contentAlign: "right"
+    },
     ...extendedFormsStyle,
     ...extendedTablesStyle,
     ...sweetAlertStyle
@@ -100,6 +124,7 @@ class Purchases extends React.Component {
             alertDiscription: "",
             selecedSupplierId: "",
             totalBill: "0.00",
+            checkoutOpen: false,
 
 
             //delete alert states
@@ -264,6 +289,13 @@ class Purchases extends React.Component {
         });
     };
 
+    //checkout button function
+    checkOutOpen = () => {
+        this.setState({
+            checkoutOpen: true
+        });
+    };
+
     //add to list button handle function
     addToListButtonClick = () => {
         if (this.state.simpleSelectSupplier === "") {
@@ -373,6 +405,11 @@ class Purchases extends React.Component {
     //alert dialog box close
     handleClose = () => {
         this.setState({ alertOpen: false });
+    };
+
+    //alert dialog box close
+    checkoutClose = () => {
+        this.setState({ checkoutOpen: false });
     };
 
     //validation rules
@@ -528,6 +565,92 @@ class Purchases extends React.Component {
         const { classes } = this.props;
         return (
             <div>
+                {/* checkout dialog box */}
+                <Dialog
+                    open={this.state.checkoutOpen}
+                    onClose={this.checkoutClose}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                    maxWidth="lg"
+                    scroll="body"
+                >
+                    <Card >
+                        <CardHeader color="primary" icon>
+                            <CardIcon color="primary">
+                                <LibraryBooks />
+                            </CardIcon>
+                            <h4 className={classes.cardIconTitle}>Checkout</h4>
+                        </CardHeader>
+                        <br />
+                        <GridContainer>
+                            <GridItem xs={12}>
+                                <CardBody>
+                                    <ReactTable
+                                        loading={this.state.tableLoading}
+                                        data={this.state.PurchaseDetailsList}
+                                        noDataText=""
+                                        defaultFilterMethod={filterCaseInsensitive}
+                                        defaultSorted={[
+                                            {
+                                                id: "id",
+                                                desc: true
+                                            }
+                                        ]}
+                                        columns={[
+                                            {
+                                                Header: () => (
+                                                    <strong>Product Name</strong>),
+                                                accessor: "productName",
+                                                filterable: false,
+                                                sortable: false,
+                                                width: 150
+                                            },
+                                            {
+                                                Header: () => (
+                                                    <strong>Qty</strong>),
+                                                accessor: "amountPurchases",
+                                                filterable: false,
+                                                sortable: false,
+                                                width: 50,
+                                                Cell: row => <div className="actions-right">{row.value}</div>
+                                            },
+                                            {
+                                                Header: () => (
+                                                    <div className="actions-right">
+                                                        <strong>Price</strong></div>),
+                                                accessor: "purchasePrice",
+                                                filterable: false,
+                                                sortable: false,
+                                                width: 70,
+                                                Cell: row => <div className="actions-right">{row.value}</div>
+                                            },
+                                            {
+                                                Header: () => (
+                                                    <div className="actions-right">
+                                                        <strong>Amount</strong></div>),
+                                                accessor: "amount",
+                                                filterable: false,
+                                                sortable: false,
+                                                width: 100,
+                                                Cell: row => <div className="actions-right">{row.value}</div>
+                                            }
+                                        ]}
+                                        pageSize={this.state.numberOfRows}
+                                        showPaginationBottom={false}
+                                        className="-striped -highlight"
+                                    />
+                                    <h3 className={classes.Left} >Total</h3><h3 className={classes.Right}><small>Rs.{(this.state.totalBill < 1000000) ? parseInt(this.state.totalBill, 10).toLocaleString() + ".00" : parseInt(this.state.totalBill, 10).toLocaleString()}</small></h3> 
+                                    <br />
+                                    <br />
+                                    <Button color="success" className={classes.ProceedButtonStyle} onClick={this.addToListButtonClick}>
+                                        <Bill className={classes.icons} /> Proceed
+                                    </Button>                  
+                                </CardBody>
+                            </GridItem>
+                        </GridContainer>
+                    </Card>
+                </Dialog>
+                {/* alert dialog box */}
                 <Dialog
                     open={this.state.alertOpen}
                     onClose={this.handleClose}
@@ -764,7 +887,7 @@ class Purchases extends React.Component {
                                         <Button 
                                             color="github" 
                                             className={classes.marginCenter} 
-                                            onClick={this.handleClickOpen}
+                                            onClick={this.checkOutOpen}
                                             disabled={this.state.PurchaseDetailsList.length == 0}
                                         >
                                             <Bill className={classes.icons} /> Checkout
@@ -832,7 +955,7 @@ class Purchases extends React.Component {
                                             accessor: "amount",
                                             filterable: false,
                                             sortable: false,
-                                            width: 90,
+                                            width: 100,
                                             Cell: row => <div className="actions-right">{row.value}</div>
                                         },
                                         {
