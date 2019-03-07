@@ -84,7 +84,25 @@ const styles = {
         marginTop: "50px",
         marginLeft: "80%",
         marginBottom: "20px",
-        contentAlign: "right"
+    },
+    closeIcon: {
+        position: "absolute",
+        marginLeft: "96%",
+        marginBottom: "0px",
+    },
+    paymentAndInvoicecloseIcon: {
+        position: "absolute",
+        marginLeft: "89%",
+        marginBottom: "0px",
+    },
+    cardSize: {
+        width: "100%"
+    },
+    proceedCardSize: {
+        width: "380px"
+    },
+    addButton: {
+        float: "right"
     },
     ...extendedFormsStyle,
     ...extendedTablesStyle,
@@ -125,7 +143,11 @@ class Purchases extends React.Component {
             selecedSupplierId: "",
             totalBill: "0.00",
             checkoutOpen: false,
-
+            proceedOpen: false,
+            cashPaid: "0.00",
+            balance: "0.00",
+            nextButtonDisabled: true,
+            invoiceOpen: false,
 
             //delete alert states
             deleteAlert: false,
@@ -296,6 +318,47 @@ class Purchases extends React.Component {
         });
     };
 
+    //checkout dialog box close
+    checkoutClose = () => {
+        this.setState({ checkoutOpen: false });
+    };
+
+    //proceed button function
+    proceedOpen = () => {
+        this.setState({
+            proceedOpen: true,
+            checkoutOpen: false,
+            balance: this.state.totalBill,
+            cashPaid: "0.00"
+        });
+    };
+
+    //payment dialog box close and checkout dialog box open again
+    proceedClose = () => {
+        this.setState({
+            proceedOpen: false,
+            checkoutOpen: true,
+            nextButtonDisabled: true
+        });
+    };
+
+    //Next button function
+    nextButton = () => {
+        this.setState({
+            invoiceOpen: true,
+            proceedOpen: false,
+        });
+    };
+
+    //invocie dialog box close and payment dialog box open again
+    invoiceClose = () => {
+        this.setState({
+            invoiceOpen: false,
+            proceedOpen: true,
+            nextButtonDisabled: true
+        });
+    };
+
     //add to list button handle function
     addToListButtonClick = () => {
         if (this.state.simpleSelectSupplier === "") {
@@ -407,9 +470,13 @@ class Purchases extends React.Component {
         this.setState({ alertOpen: false });
     };
 
-    //alert dialog box close
-    checkoutClose = () => {
-        this.setState({ checkoutOpen: false });
+    //calculate remaining cash to be paid to the customer
+    calBalance = () => {
+        let x = this.state.totalBill - this.state.cashPaid;
+        this.setState({ 
+            balance: x,
+            nextButtonDisabled: false
+         });
     };
 
     //validation rules
@@ -568,13 +635,23 @@ class Purchases extends React.Component {
                 {/* checkout dialog box */}
                 <Dialog
                     open={this.state.checkoutOpen}
-                    onClose={this.checkoutClose}
                     aria-labelledby="alert-dialog-title"
                     aria-describedby="alert-dialog-description"
                     maxWidth="lg"
                     scroll="body"
                 >
-                    <Card >
+                    <Button
+                        justIcon
+                        round
+                        simple
+                        onClick={this.checkoutClose}
+                        color="danger"
+                        className={classes.closeIcon}
+                    >
+                        <Close />
+                    </Button>
+                    <br/>
+                    <Card className={classes.cardSize}>
                         <CardHeader color="primary" icon>
                             <CardIcon color="primary">
                                 <LibraryBooks />
@@ -582,72 +659,187 @@ class Purchases extends React.Component {
                             <h4 className={classes.cardIconTitle}>Checkout</h4>
                         </CardHeader>
                         <br />
-                        <GridContainer>
-                            <GridItem xs={12}>
-                                <CardBody>
-                                    <ReactTable
-                                        loading={this.state.tableLoading}
-                                        data={this.state.PurchaseDetailsList}
-                                        noDataText=""
-                                        defaultFilterMethod={filterCaseInsensitive}
-                                        defaultSorted={[
-                                            {
-                                                id: "id",
-                                                desc: true
-                                            }
-                                        ]}
-                                        columns={[
-                                            {
-                                                Header: () => (
-                                                    <strong>Product Name</strong>),
-                                                accessor: "productName",
-                                                filterable: false,
-                                                sortable: false,
-                                                width: 150
-                                            },
-                                            {
-                                                Header: () => (
-                                                    <strong>Qty</strong>),
-                                                accessor: "amountPurchases",
-                                                filterable: false,
-                                                sortable: false,
-                                                width: 50,
-                                                Cell: row => <div className="actions-right">{row.value}</div>
-                                            },
-                                            {
-                                                Header: () => (
-                                                    <div className="actions-right">
-                                                        <strong>Price</strong></div>),
-                                                accessor: "purchasePrice",
-                                                filterable: false,
-                                                sortable: false,
-                                                width: 70,
-                                                Cell: row => <div className="actions-right">{row.value}</div>
-                                            },
-                                            {
-                                                Header: () => (
-                                                    <div className="actions-right">
-                                                        <strong>Amount</strong></div>),
-                                                accessor: "amount",
-                                                filterable: false,
-                                                sortable: false,
-                                                width: 100,
-                                                Cell: row => <div className="actions-right">{row.value}</div>
-                                            }
-                                        ]}
-                                        pageSize={this.state.numberOfRows}
-                                        showPaginationBottom={false}
-                                        className="-striped -highlight"
-                                    />
-                                    <h3 className={classes.Left} >Total</h3><h3 className={classes.Right}><small>Rs.{(this.state.totalBill < 1000000) ? parseInt(this.state.totalBill, 10).toLocaleString() + ".00" : parseInt(this.state.totalBill, 10).toLocaleString()}</small></h3> 
-                                    <br />
-                                    <br />
-                                    <Button color="success" className={classes.ProceedButtonStyle} onClick={this.addToListButtonClick}>
-                                        <Bill className={classes.icons} /> Proceed
-                                    </Button>                  
-                                </CardBody>
-                            </GridItem>
-                        </GridContainer>
+                        <CardBody>
+                            <ReactTable
+                                loading={this.state.tableLoading}
+                                data={this.state.PurchaseDetailsList}
+                                noDataText=""
+                                defaultFilterMethod={filterCaseInsensitive}
+                                defaultSorted={[
+                                    {
+                                        id: "id",
+                                        desc: true
+                                    }
+                                ]}
+                                columns={[
+                                    {
+                                        Header: () => (
+                                            <strong>Product Name</strong>),
+                                        accessor: "productName",
+                                        filterable: false,
+                                        sortable: false,
+                                        width: 150
+                                    },
+                                    {
+                                        Header: () => (
+                                            <strong>Qty</strong>),
+                                        accessor: "amountPurchases",
+                                        filterable: false,
+                                        sortable: false,
+                                        width: 50,
+                                        Cell: row => <div className="actions-right">{row.value}</div>
+                                    },
+                                    {
+                                        Header: () => (
+                                            <div className="actions-right">
+                                                <strong>Price</strong></div>),
+                                        accessor: "purchasePrice",
+                                        filterable: false,
+                                        sortable: false,
+                                        width: 70,
+                                        Cell: row => <div className="actions-right">{row.value}</div>
+                                    },
+                                    {
+                                        Header: () => (
+                                            <div className="actions-right">
+                                                <strong>Amount</strong></div>),
+                                        accessor: "amount",
+                                        filterable: false,
+                                        sortable: false,
+                                        width: 100,
+                                        Cell: row => <div className="actions-right">{row.value}</div>
+                                    }
+                                ]}
+                                pageSize={this.state.numberOfRows}
+                                showPaginationBottom={false}
+                                className="-striped -highlight"
+                            />
+                            <h3 className={classes.Left} >Total</h3><h3 className={classes.Right}><small>Rs.{(this.state.totalBill < 1000000) ? parseInt(this.state.totalBill, 10).toLocaleString() + ".00" : parseInt(this.state.totalBill, 10).toLocaleString()}</small></h3> 
+                            <br />
+                            <br />
+                            <Button color="success" className={classes.ProceedButtonStyle} onClick={this.proceedOpen}>
+                                <Bill className={classes.icons} /> Proceed
+                            </Button>                  
+                        </CardBody>
+                    </Card>
+                </Dialog>
+                {/* payment dialog box */}
+                <Dialog
+                    open={this.state.proceedOpen}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                    // maxWidth="sm"
+                    // scroll="body"
+                >
+                    <Button
+                        justIcon
+                        round
+                        simple
+                        onClick={this.proceedClose}
+                        color="danger"
+                        className={classes.paymentAndInvoicecloseIcon}
+                    >
+                        <Close />
+                    </Button>
+                    <br />
+                    <Card className={classes.proceedCardSize}>
+                        <CardHeader color="primary" icon>
+                            <CardIcon color="primary">
+                                <Bill />
+                            </CardIcon>
+                            <h4 className={classes.cardIconTitle}>Payment</h4>
+                        </CardHeader>
+                        <br />
+                        <CardBody>
+                            <form>
+                                <CustomInput
+                                    disabled={true}
+                                    labelText="Total Bill"
+                                    id="totalBill"
+                                    formControlProps={{
+                                        fullWidth: true
+                                    }}
+                                    defaultValue={parseInt(this.state.totalBill, 10).toLocaleString() + ".00"}
+                                />
+                                <CustomInput
+                                    labelText="Cash Paid"
+                                    id="cashPaid"
+                                    formControlProps={{
+                                        fullWidth: true
+                                    }}
+                                    inputProps={{
+                                        type: "number"
+                                    }}
+                                    onChange={(event) => this.setState({ cashPaid: event.target.value })}
+                                    defaultValue={this.state.cashPaid}
+                                />
+                                <div>
+                                    <Button
+                                        size='sm'
+                                        color="info"
+                                        onClick={this.calBalance}
+                                        className={classes.addButton}
+                                    >
+                                        Calculate
+                                    </Button>
+                                </div>
+                                <CustomInput
+                                    disabled={true}
+                                    labelText="Balance"
+                                    id="balance"
+                                    formControlProps={{
+                                        fullWidth: true
+                                    }}
+                                    value={parseInt(this.state.balance, 10).toLocaleString() + ".00"}
+                                />
+                                <div>
+                                    <Button
+                                        disabled= {this.state.nextButtonDisabled}
+                                        size='sm'
+                                        color="info"
+                                        onClick={this.nextButton}
+                                        className={classes.addButton}
+                                    >
+                                        Next>>
+                                    </Button>
+                                </div>
+                            </form>
+                        </CardBody>
+                    </Card>
+                </Dialog>
+
+                {/* Invoice dialog box */}
+                <Dialog
+                    open={this.state.invoiceOpen}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                // maxWidth="sm"
+                // scroll="body"
+                >
+                    <Button
+                        justIcon
+                        round
+                        simple
+                        onClick={this.invoiceClose}
+                        color="danger"
+                        className={classes.paymentAndInvoicecloseIcon}
+                    >
+                        <Close />
+                    </Button>
+                    <br />
+                    <Card className={classes.proceedCardSize}>
+                        <CardHeader color="primary" icon>
+                            <CardIcon color="primary">
+                                <Bill />
+                            </CardIcon>
+                            <h4 className={classes.cardIconTitle}>Invoice</h4>
+                        </CardHeader>
+                        <br />
+                        <CardBody>
+                            <form>
+                                
+                            </form>
+                        </CardBody>
                     </Card>
                 </Dialog>
                 {/* alert dialog box */}
