@@ -50,7 +50,15 @@ import extendedFormsStyle from "../assets/jss/material-dashboard-pro-react/views
 import extendedTablesStyle from "../assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.jsx";
 import sweetAlertStyle from "../assets/jss/material-dashboard-pro-react/views/sweetAlertStyle.jsx";
 
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import "../assets/scss/purchaseInvoice.css"
+import elitaliano_logo from '../assets/img/elitaliano_logo.png';
+
 const styles = {
+    dialogPaper: {
+        maxWidth: '850px',
+    },
     cardIconTitle: {
         ...cardTitle,
         marginTop: "15px",
@@ -76,13 +84,13 @@ const styles = {
         marginTop: "30px",
         marginBottom: "0px",
         textAlign: 'left',
-        paddingLeft:"110px",
+        paddingLeft: "110px",
         // display:"inline"
     },
     ProceedButtonStyle: {
         position: "absolute",
         marginTop: "50px",
-        marginLeft: "80%",
+        marginLeft: "87%",
         marginBottom: "20px",
     },
     closeIcon: {
@@ -90,18 +98,29 @@ const styles = {
         marginLeft: "96%",
         marginBottom: "0px",
     },
-    paymentAndInvoicecloseIcon: {
+    paymentCloseIcon: {
         position: "absolute",
         marginLeft: "89%",
+        marginBottom: "0px",
+    },
+    invoiceCloseIcon: {
+        position: "absolute",
+        marginLeft: "94%",
         marginBottom: "0px",
     },
     cardSize: {
         width: "100%"
     },
-    proceedCardSize: {
-        width: "380px"
+    paymentCardSize: {
+        width: "400px"
+    },
+    printInvoiceSize: {
+        width: "842px"
     },
     addButton: {
+        float: "right"
+    },
+    invoiceButton: {
         float: "right"
     },
     ...extendedFormsStyle,
@@ -148,6 +167,10 @@ class Purchases extends React.Component {
             balance: "0.00",
             nextButtonDisabled: true,
             invoiceOpen: false,
+            purchaseCompleted: false,
+            selectedDate: Moment(Date()).format("YYYY-MM-DD"),
+            details:"",
+            pdfPrinted: false,
 
             //delete alert states
             deleteAlert: false,
@@ -156,10 +179,50 @@ class Purchases extends React.Component {
             //input states
             amountPurchasesState: ""
         };
+        this.updateState = this.updateState.bind(this);
     }
 
-    onChangeFunction(component, value) {
-        this.setState({ amountAvailable: value });
+    //get the selected date from the calender and convert it to YYYY-MM-DD format
+    updateState(date) {
+        // This function gives you the moment object of date selected. 
+        var dateString = date._d;
+        var dateObj = new Date(dateString);
+        var momentObj = Moment(dateObj);
+        var momentString = momentObj.format('YYYY-MM-DD'); 
+        this.setState({selectedDate:momentString});
+    }
+
+    //print PDF button click
+    printPDF = () => {
+        const input = document.getElementById('divToPrint');
+        console.log(this.state.purchaseInvoiceNextNumber);
+        html2canvas(input)
+            .then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                var imgWidth = 210;
+                var pageHeight = 295;
+                var imgHeight = canvas.height * imgWidth / canvas.width;
+                var heightLeft = imgHeight;
+                const pdf = new jsPDF();
+                var position = 0;
+
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                pdf.save(this.state.purchaseInvoiceNextNumber + "-" + this.state.details);
+
+                //un comment this to enable print feature
+                // pdf.autoPrint();
+                // window.open(pdf.output('bloburl'), '_blank');
+
+                this.setState({pdfPrinted: true});
+            });
     }
 
     componentDidMount() {
@@ -168,6 +231,7 @@ class Purchases extends React.Component {
         this.getPurchaseInvoiceNextNumber();
     }
 
+    //get the product list for product drop down
     getMenuList = () => {
         const productList = [];
         Helper.http
@@ -202,6 +266,7 @@ class Purchases extends React.Component {
                 //     productList.push(_data);
                 // }
                 this.setState({ purchaseInvoiceNextNumber: response.data });
+                this.removeListInReload();
                 this.getPurchaseDetails();
             })
             .catch(exception => {
@@ -240,7 +305,7 @@ class Purchases extends React.Component {
             })
             .then(response => {
                 let data = response.data;
-                this.setState({ 
+                this.setState({
                     numberOfRows: data.length,
                     totalBill: (response.sum.totalBill != null) ? response.sum.totalBill : "0.00"
                 });
@@ -259,7 +324,8 @@ class Purchases extends React.Component {
                                     justIcon
                                     round
                                     simple
-                                    onClick={() => { this.listItemDelete(data[i].id);
+                                    onClick={() => {
+                                        this.listItemDelete(data[i].id);
                                     }}
                                     color="danger"
                                     className="remove"
@@ -305,7 +371,7 @@ class Purchases extends React.Component {
 
     //select supplier from the drop down menu and send to backend
     handleSelectedSupplier = event => {
-        this.setState({ 
+        this.setState({
             [event.target.name]: event.target.value,
             selecedSupplierId: event.target.value
         });
@@ -344,10 +410,17 @@ class Purchases extends React.Component {
 
     //Next button function
     nextButton = () => {
-        this.setState({
-            invoiceOpen: true,
-            proceedOpen: false,
-        });
+        if(this.state.details == ""){
+            this.setState({
+                alertOpen: true,
+                alertDiscription: "You have to add a small note on the purchase"
+            });
+        } else{
+            this.setState({
+                invoiceOpen: true,
+                proceedOpen: false,
+            });
+        }
     };
 
     //invocie dialog box close and payment dialog box open again
@@ -355,7 +428,8 @@ class Purchases extends React.Component {
         this.setState({
             invoiceOpen: false,
             proceedOpen: true,
-            nextButtonDisabled: true
+            nextButtonDisabled: true,
+            pdfPrinted: false
         });
     };
 
@@ -373,7 +447,7 @@ class Purchases extends React.Component {
             })
         } else {
             if (this.state.amountPurchases <= 0) {
-                this.setState({ 
+                this.setState({
                     amountPurchasesState: "error",
                     alertOpen: true,
                     alertDiscription: "You have to enter a valid amount as amount purchases"
@@ -384,7 +458,7 @@ class Purchases extends React.Component {
                 Helper.http
                     .jsonPost("addPurchases", {
                         invoiceNum: this.state.purchaseInvoiceNextNumber,
-                        date: Moment(Date()).format("YYYY-MM-DD"),
+                        date: this.state.selectedDate,
                         productId: this.state.productId,
                         supplierId: this.state.selecedSupplierId,
                         amountPurchases: this.state.amountPurchases
@@ -408,6 +482,51 @@ class Purchases extends React.Component {
             }
         }
 
+    }
+
+    //final purchase doen button click. This will call purchase invoice API
+    purchaseDoneButtonClick = () => {
+        Helper.http
+            .jsonPost("addPurchaseInvoice", {
+                invoiceNum: this.state.purchaseInvoiceNextNumber,
+                supplierId: this.state.selecedSupplierId,
+                date: this.state.selectedDate,
+                details: this.state.details,
+                totalBill: this.state.totalBill,
+                cashPaid: this.state.cashPaid,
+                balance: this.state.balance,
+            })
+            .then(response => {
+                this.setState({
+                    purchaseCompleted: true,
+                    invoiceOpen:false
+                });
+                // this.getMenuList();
+                // this.getSupplierList();
+                // this.getPurchaseInvoiceNextNumber();
+                // this.getPurchaseDetails();
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    //removing previous puchase list after reloading
+    removeListInReload = () => {
+        Helper.http
+            .jsonPost("clearList", {
+                invoiceNum: this.state.purchaseInvoiceNextNumber
+            })
+            .then(response => {
+                this.setState({
+                    alertOpen: true,
+                    alertDiscription: "Your previous list has been cleared. Re-Enter your list you wish to buy"
+                });
+                this.getPurchaseDetails();
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
     }
 
     //remove all button click function
@@ -465,6 +584,26 @@ class Purchases extends React.Component {
         });
     };
 
+    //purchase complete sweet alert close function
+    purchase_complete_alert_close = () => {
+         this.setState({
+            purchaseCompleted: false,
+        });
+        window.location.reload();
+
+        ////-------use this code if reload takes too much time. check it after live deployment------
+
+        // this.setState({
+        //     purchaseCompleted: false,
+        //     selectedDate: Moment(Date()).format("YYYY-MM-DD"),
+        //     simpleSelectSupplier:""
+        // });
+        // this.getPurchaseInvoiceNextNumber();
+        // this.getPurchaseDetails();
+
+        //------------------------------------------------------------------------------------
+    };
+
     //alert dialog box close
     handleClose = () => {
         this.setState({ alertOpen: false });
@@ -473,10 +612,17 @@ class Purchases extends React.Component {
     //calculate remaining cash to be paid to the customer
     calBalance = () => {
         let x = this.state.totalBill - this.state.cashPaid;
-        this.setState({ 
-            balance: x,
-            nextButtonDisabled: false
-         });
+        if(x<0){
+            this.setState({
+                alertOpen: true,
+                alertDiscription: "You are entering a cash paid amount which is greater than the total bill"
+            });
+        }else{
+            this.setState({
+                balance: x,
+                nextButtonDisabled: false
+            });
+        }
     };
 
     //validation rules
@@ -632,6 +778,7 @@ class Purchases extends React.Component {
         const { classes } = this.props;
         return (
             <div>
+
                 {/* checkout dialog box */}
                 <Dialog
                     open={this.state.checkoutOpen}
@@ -650,7 +797,7 @@ class Purchases extends React.Component {
                     >
                         <Close />
                     </Button>
-                    <br/>
+                    <br />
                     <Card className={classes.cardSize}>
                         <CardHeader color="primary" icon>
                             <CardIcon color="primary">
@@ -658,6 +805,14 @@ class Purchases extends React.Component {
                             </CardIcon>
                             <h4 className={classes.cardIconTitle}>Checkout</h4>
                         </CardHeader>
+                        <br />
+                        <Button 
+                            size='sm'
+                            color="info" 
+                            className={classes.ProceedButtonStyle} 
+                            onClick={this.proceedOpen}>
+                            <Bill className={classes.icons} /> Proceed
+                            </Button>
                         <br />
                         <CardBody>
                             <ReactTable
@@ -714,12 +869,9 @@ class Purchases extends React.Component {
                                 showPaginationBottom={false}
                                 className="-striped -highlight"
                             />
-                            <h3 className={classes.Left} >Total</h3><h3 className={classes.Right}><small>Rs.{(this.state.totalBill < 1000000) ? parseInt(this.state.totalBill, 10).toLocaleString() + ".00" : parseInt(this.state.totalBill, 10).toLocaleString()}</small></h3> 
+                            <h3 className={classes.Left} >Total</h3><h3 className={classes.Right}><small>Rs.{(this.state.totalBill < 1000000) ? parseInt(this.state.totalBill, 10).toLocaleString() + ".00" : parseInt(this.state.totalBill, 10).toLocaleString()}</small></h3>
                             <br />
                             <br />
-                            <Button color="success" className={classes.ProceedButtonStyle} onClick={this.proceedOpen}>
-                                <Bill className={classes.icons} /> Proceed
-                            </Button>                  
                         </CardBody>
                     </Card>
                 </Dialog>
@@ -728,8 +880,8 @@ class Purchases extends React.Component {
                     open={this.state.proceedOpen}
                     aria-labelledby="alert-dialog-title"
                     aria-describedby="alert-dialog-description"
-                    // maxWidth="sm"
-                    // scroll="body"
+                // maxWidth="sm"
+                // scroll="body"
                 >
                     <Button
                         justIcon
@@ -737,12 +889,12 @@ class Purchases extends React.Component {
                         simple
                         onClick={this.proceedClose}
                         color="danger"
-                        className={classes.paymentAndInvoicecloseIcon}
+                        className={classes.paymentCloseIcon}
                     >
                         <Close />
                     </Button>
                     <br />
-                    <Card className={classes.proceedCardSize}>
+                    <Card className={classes.paymentCardSize}>
                         <CardHeader color="primary" icon>
                             <CardIcon color="primary">
                                 <Bill />
@@ -753,7 +905,18 @@ class Purchases extends React.Component {
                         <CardBody>
                             <form>
                                 <CustomInput
-                                    disabled={true}
+                                    labelText="Details"
+                                    id="details"
+                                    formControlProps={{
+                                        fullWidth: true
+                                    }}
+                                    inputProps={{
+                                        type: "text"
+                                    }}
+                                    onChange={(event) => this.setState({ details: event.target.value })}
+                                    defaultValue={this.state.details}
+                                />
+                                <CustomInput
                                     labelText="Total Bill"
                                     id="totalBill"
                                     formControlProps={{
@@ -794,7 +957,7 @@ class Purchases extends React.Component {
                                 />
                                 <div>
                                     <Button
-                                        disabled= {this.state.nextButtonDisabled}
+                                        disabled={this.state.nextButtonDisabled}
                                         size='sm'
                                         color="info"
                                         onClick={this.nextButton}
@@ -813,8 +976,9 @@ class Purchases extends React.Component {
                     open={this.state.invoiceOpen}
                     aria-labelledby="alert-dialog-title"
                     aria-describedby="alert-dialog-description"
-                // maxWidth="sm"
-                // scroll="body"
+                    maxWidth="md"
+                    scroll="body"
+                    classes={{ paper: classes.dialogPaper }}
                 >
                     <Button
                         justIcon
@@ -822,12 +986,12 @@ class Purchases extends React.Component {
                         simple
                         onClick={this.invoiceClose}
                         color="danger"
-                        className={classes.paymentAndInvoicecloseIcon}
+                        className={classes.invoiceCloseIcon}
                     >
                         <Close />
                     </Button>
                     <br />
-                    <Card className={classes.proceedCardSize}>
+                    <Card className={classes.printInvoiceSize}>
                         <CardHeader color="primary" icon>
                             <CardIcon color="primary">
                                 <Bill />
@@ -836,9 +1000,105 @@ class Purchases extends React.Component {
                         </CardHeader>
                         <br />
                         <CardBody>
-                            <form>
-                                
-                            </form>
+                            <div >
+                                <Button 
+                                    disabled={!this.state.pdfPrinted}
+                                    size='sm'
+                                    color="info"
+                                    onClick={this.purchaseDoneButtonClick}
+                                    className={classes.invoiceButton}
+                                > Purchase
+                            </Button>
+                                <Button
+                                    size='sm'
+                                    color="info"
+                                    onClick={this.printPDF}
+                                    className={classes.invoiceButton}
+                                > Print PDF
+                            </Button>
+                            </div>
+                            <div id="divToPrint" className="container">
+                                <div >
+                                    <h1 className="no-margin">Purchase Invoice</h1>
+                                </div>
+                                <div className="inv-header">
+                                    <div>
+                                        <img src={elitaliano_logo} className="inv-logo" />
+                                        <h2>ELITALIANO</h2>
+                                        <ul>
+                                            <li>Liyanage Distributors</li>
+                                            <li>1394/7, Hokandara road,Pannipitiya</li>
+                                            <li>Lakshan : +94 71 303 2396</li>
+                                            <li>Janith : +94 71 329 9627</li>
+                                            <li>Email : elitaliano.lanka@gmail.com</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th>Invoice Number</th>
+                                                    <td>{this.state.purchaseInvoiceNextNumber}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Issue Date</th>
+                                                    <td>{this.state.selectedDate}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Total</th>
+                                                    <td>{parseInt(this.state.totalBill, 10).toLocaleString() + ".00"}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div className="inv-body">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name</th>
+                                                <th>Quantity</th>
+                                                <th>Price</th>
+                                                <th>Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                this.state.PurchaseDetailsList.map((item, index) =>
+                                                    <tr key = {item.id}>
+                                                        <td>
+                                                            <p>{item.productName}</p>
+                                                        </td>
+                                                        <td>{item.amountPurchases}</td>
+                                                        <td>{item.purchasePrice}</td>
+                                                        <td>{item.amount}</td>
+                                                    </tr>
+                                                )
+                                            }
+
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="inv-footer">
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <th>Total</th>
+                                                <td>{parseInt(this.state.totalBill, 10).toLocaleString() + ".00"}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Cash Paid</th>
+                                                <td>{parseInt(this.state.cashPaid, 10).toLocaleString() + ".00"}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Balance</th>
+                                                <td>{parseInt(this.state.balance, 10).toLocaleString() + ".00"}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </CardBody>
                     </Card>
                 </Dialog>
@@ -891,6 +1151,19 @@ class Purchases extends React.Component {
                 >
                     Purchase list has been deleted.
                 </SweetAlert>
+                <SweetAlert
+                    show={this.state.purchaseCompleted}
+                    success
+                    style={{ display: "block", marginTop: "-150px" }}
+                    title="Successful"
+                    onConfirm={() => this.purchase_complete_alert_close()}
+                    onCancel={() => this.purchase_complete_alert_close()}
+                    confirmBtnCssClass={
+                        this.props.classes.button + " " + this.props.classes.success
+                    }
+                >
+                    Your purchase has been completed
+                </SweetAlert>
                 <GridContainer>
                     <GridItem xs={12} sm={12} md={6}>
                         <Card>
@@ -908,6 +1181,7 @@ class Purchases extends React.Component {
                                         <FormControl
                                             fullWidth
                                             className={classes.selectFormControl}
+                                            disabled={this.state.PurchaseDetailsList.length != 0}
                                         >
                                             <InputLabel
                                                 htmlFor="simple-selectSupplier"
@@ -942,7 +1216,7 @@ class Purchases extends React.Component {
                                                         classes={{
                                                             root: classes.selectMenuItem,
                                                             selected: classes.selectMenuItemSelected
-                                                        }} 
+                                                        }}
                                                     >
                                                         {supplier.supplierName}
                                                     </MenuItem>
@@ -958,6 +1232,10 @@ class Purchases extends React.Component {
                                                 timeFormat={false}
                                                 dateFormat="YYYY-MM-DD"
                                                 defaultValue={Moment(Date()).format("YYYY-MM-DD")}
+                                                onChange={this.updateState}
+                                                inputProps={
+                                                    { disabled: this.state.PurchaseDetailsList.length != 0}
+                                           }
                                             />
                                         </FormControl>
                                         <br />
@@ -1064,21 +1342,21 @@ class Purchases extends React.Component {
                                         <Button color="success" className={classes.marginCenter} onClick={this.addToListButtonClick}>
                                             <Add className={classes.icons} /> Add To List
                                         </Button>
-                                        <Button 
-                                            color="danger" 
-                                            className={classes.marginCenter} 
+                                        <Button
+                                            color="danger"
+                                            className={classes.marginCenter}
                                             onClick={() => {
                                                 this.setState({
                                                     deleteAlert: true,
                                                 });
                                             }}
-                                            disabled = {this.state.PurchaseDetailsList.length == 0}
+                                            disabled={this.state.PurchaseDetailsList.length == 0}
                                         >
                                             <Remove className={classes.icons} /> Remove All
                                         </Button>
-                                        <Button 
-                                            color="github" 
-                                            className={classes.marginCenter} 
+                                        <Button
+                                            color="github"
+                                            className={classes.marginCenter}
                                             onClick={this.checkOutOpen}
                                             disabled={this.state.PurchaseDetailsList.length == 0}
                                         >
