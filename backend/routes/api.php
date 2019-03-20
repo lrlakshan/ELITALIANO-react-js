@@ -43,3 +43,4 @@ Route::get('supplierDetails','supplierDetailController@supplierDetails');
 
 //api's from purchase_invoices table
 Route::get('purchaseInvoiceNextNumber','purchaseInvoiceController@purchaseInvoiceNextNumber');
+Route::post('addPurchaseInvoice','purchaseInvoiceController@addPurchaseInvoice');
