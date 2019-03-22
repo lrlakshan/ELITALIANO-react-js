@@ -81,6 +81,8 @@ class viewStock extends React.Component {
             failedAlertMsg: "",
             deleteAlert: false,
             deleteAlertSuccess: false,
+            alertOpen: false,
+            alertDiscription: "",
 
             //input states
             productIdState: "",
@@ -184,6 +186,13 @@ class viewStock extends React.Component {
         });
     };
 
+    //alert dialog box close
+    alertClose = () => {
+        this.setState({ 
+            alertOpen: false,
+        });
+    };
+
     componentDidMount() {
         this.getProductDetails();
     }
@@ -237,10 +246,18 @@ class viewStock extends React.Component {
                                     round
                                     simple
                                     onClick={() => {
-                                        this.setState({
-                                            deleteAlert: true,
-                                            productId: data[i].productId,
-                                        });
+                                        if (data[i].amountAvailable == 0){
+                                            this.setState({
+                                                deleteAlert: true,
+                                                productId: data[i].productId,
+                                            });
+                                        }else{
+                                            this.setState({
+                                                alertOpen: true,
+                                                alertDiscription: "You cannot delete this item as there are unsolds stocks are available"
+                                            });
+                                        }
+                                        
                                     }}
                                     color="danger"
                                     className="remove"
@@ -736,6 +753,22 @@ class viewStock extends React.Component {
                 >
                     Product has been deleted.
                 </SweetAlert>
+                <Dialog
+                    open={this.state.alertOpen}
+                    onClose={this.alertClose}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">{"Alert"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            {this.state.alertDiscription}
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.alertClose} color="info" autoFocus simple> Got it! </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         );
     }
