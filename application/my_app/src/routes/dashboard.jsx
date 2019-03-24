@@ -1,7 +1,7 @@
 import Dashboard from "../views/Dashboard";
 import ViewStocks from "../views/ViewStock";
 import Purchases from "../views/Purchases";
-import ProductChanges from "../views/ProductChanges";
+import supplierReturn from "../views/supplierReturn";
 import SalesHistory from "../views/SalesHistory";
 import PurchaseHistory from "../views/PurchaseHistory";
 import ExpenseHistory from "../views/ExpenseHistory";
@@ -52,10 +52,10 @@ var dashRoutes = [
         component: Purchases
       },
       {
-        path: "/main/productChanges",
-        name: "Product Changes",
+        path: "/main/supplierReturn",
+        name: "Return to Supplier",
         mini: "",
-        component: ProductChanges
+        component: supplierReturn
       },
     ]
   },
