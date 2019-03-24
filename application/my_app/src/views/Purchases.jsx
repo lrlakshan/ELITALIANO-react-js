@@ -146,6 +146,7 @@ class Purchases extends React.Component {
         this.state = {
             simpleSelectSupplier: "",
             simpleSelectProduct: "",
+            selectedSupplierName: "",
             productList: [],
             supplierList: [],
             PurchaseDetailsList: [],
@@ -215,7 +216,7 @@ class Purchases extends React.Component {
                     pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
                     heightLeft -= pageHeight;
                 }
-                pdf.save(this.state.purchaseInvoiceNextNumber + "-" + this.state.details);
+                pdf.save(this.state.purchaseInvoiceNextNumber + "-" + this.state.selectedSupplierName + "-" + this.state.details);
 
                 //un comment this to enable print feature
                 // pdf.autoPrint();
@@ -375,6 +376,19 @@ class Purchases extends React.Component {
             [event.target.name]: event.target.value,
             selecedSupplierId: event.target.value
         });
+        Helper.http
+            .jsonPost("getSelectedSupplierName", {
+                id: event.target.value
+            })
+            .then(response => {
+
+                this.setState({
+                    selectedSupplierName: response.data.supplierName
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
     };
 
     //checkout button function

@@ -241,7 +241,7 @@ class viewStock extends React.Component {
                                     <Dvr />
                                 </Button>{" "}
                                 {/* use this button to remove the data row */}
-                                <Button
+                                {/* <Button
                                     justIcon
                                     round
                                     simple
@@ -263,7 +263,7 @@ class viewStock extends React.Component {
                                     className="remove"
                                 >
                                     <Close />
-                                </Button>{" "}
+                                </Button>{" "} */}
                             </div>
                         )
                     };
