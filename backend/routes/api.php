@@ -40,6 +40,7 @@ Route::post('clearList','purchaseController@clearList');
 
 //api's from supplier_details table
 Route::get('supplierDetails','supplierDetailController@supplierDetails');
+Route::post('getSelectedSupplierName','supplierDetailController@getSelectedSupplierName');
 
 //api's from purchase_invoices table
 Route::get('purchaseInvoiceNextNumber','purchaseInvoiceController@purchaseInvoiceNextNumber');
