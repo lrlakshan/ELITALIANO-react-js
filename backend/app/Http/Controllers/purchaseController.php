@@ -19,6 +19,7 @@ class purchaseController extends Controller
 	    	'date'=> 'required',
 	    	'productId' => 'required',
             'supplierId' => 'required',
+            'purchasePrice'=> 'required',
 	    	'amountPurchases'=> 'required',
     	]);
 
@@ -56,6 +57,7 @@ class purchaseController extends Controller
                             ->join('products', 'products.productId', '=', 'purchases.productId')
                             ->select(
                                 'purchases.id',
+                                'purchases.productId',
                                 'products.productName', 
                                 'products.purchasePrice', 
                                 'purchases.amountPurchases',
