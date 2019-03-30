@@ -475,6 +475,7 @@ class Purchases extends React.Component {
                         date: this.state.selectedDate,
                         productId: this.state.productId,
                         supplierId: this.state.selecedSupplierId,
+                        purchasePrice: this.state.purchasePrice,
                         amountPurchases: this.state.amountPurchases
                     })
                     .then(response => {

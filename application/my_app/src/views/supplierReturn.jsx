@@ -8,6 +8,10 @@ import SweetAlert from "react-bootstrap-sweetalert";
 
 
 // @material-ui/core components
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
 import withStyles from "@material-ui/core/styles/withStyles";
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -36,6 +40,7 @@ import CustomInput from "../components/CustomInput/CustomInput.jsx";
 
 import { cardTitle } from "../assets/jss/material-dashboard-pro-react.jsx";
 import sweetAlertStyle from "../assets/jss/material-dashboard-pro-react/views/sweetAlertStyle.jsx";
+import extendedFormsStyle from "../assets/jss/material-dashboard-pro-react/views/extendedFormsStyle.jsx";
 
 const styles = {
     cardIconTitle: {
@@ -55,7 +60,8 @@ const styles = {
     addButton: {
         float: "right"
     },
-    ...sweetAlertStyle
+    ...sweetAlertStyle,
+    ...extendedFormsStyle,
 };
 
 class supplierReturn extends React.Component {
@@ -63,14 +69,25 @@ class supplierReturn extends React.Component {
         super(props);
         this.state = {
             invoices: [],
+            items: [],
             loading: false,
             open: false,
+            formTitle: "",
+            invoiceNum: "",
+            simpleSelectItem: ""
         };
     }
 
     componentDidMount() {
         this.getPurchaseInvoiceDetails();
     }
+
+    //close the popup form
+    handleClose = () => {
+        this.setState({
+            open: false,
+        });
+    };
 
     //get purhcase invoice details
     getPurchaseInvoiceDetails = () => {
@@ -103,14 +120,11 @@ class supplierReturn extends React.Component {
                                         //let obj = this.state.data.find(o => o.id === key);
                                         this.setState({
                                             open: true,
-                                            formTitle: "Edit Products",
-                                            formButtonText: "Edit",
-                                            productId: data[i].productId,
-                                            productName: data[i].productName,
-                                            purchasePrice: data[i].purchasePrice,
-                                            sellingPrice: data[i].sellingPrice,
-                                            marketPrice: data[i].marketPrice,
+                                            formTitle: "Return Items",
+                                            formButtonText: "Save",
+                                            // invoiceNum: data[i].invoiceNum,
                                         })
+                                        this.loadItemsOfSelectedInvoice(data[i].invoiceNum);
                                     }}
                                     color="warning"
                                     className="edit"
@@ -124,6 +138,55 @@ class supplierReturn extends React.Component {
                 }
                 this.setState({ invoices });
                 this.setState({ loading: false });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    //get the items of the selected invoice number
+    loadItemsOfSelectedInvoice = (InvoiceNumber) => {
+        const items = [];
+
+        Helper.http
+            .jsonPost("getPurchaseListDetails", {
+                invoiceNum: InvoiceNumber,
+            })
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        id: data[i].id,
+                        productId: data[i].productId,
+                        productName: data[i].productName,
+                        purchasePrice: data[i].purchasePrice,
+                        amountPurchases: data[i].amountPurchases,
+                    };
+                    items.push(_data);
+                }
+                this.setState({ items });
+                this.setState({ loading: false });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    handleSelectedItem = event => {
+        this.setState({
+            [event.target.name]: event.target.value,
+            productId: event.target.value
+        });
+        Helper.http
+            .jsonPost("getSelectedProductDetails", {
+                productId: event.target.value
+            })
+            .then(response => {
+
+                this.setState({
+                    amountAvailable: response.data.amountAvailable,
+                    purchasePrice: response.data.purchasePrice
+                });
             })
             .catch(exception => {
                 console.log(exception);
@@ -211,6 +274,86 @@ class supplierReturn extends React.Component {
                         </Card>
                     </GridItem>
                 </GridContainer>
+                <Dialog
+                    open={this.state.open}
+                    onClose={this.handleClose}
+                    aria-labelledby="form-dialog-title">
+                    <Card className={classes.cardSize}>
+                        <CardHeader color="info" icon>
+                            <CardIcon color="info">
+                                <LocalMall />
+                            </CardIcon>
+                            <h4 className={classes.cardIconTitle}>{this.state.formTitle}</h4>
+                        </CardHeader>
+                        <CardBody>
+                            <form>
+                                <InputLabel className={classes.label}>Items of Bill</InputLabel>
+                                <FormControl
+                                    fullWidth
+                                    className={classes.selectFormControl}
+                                >
+                                    <InputLabel
+                                        htmlFor="simple-selectSupplier"
+                                        className={classes.selectLabel}
+                                    >Selcet Return Item</InputLabel>
+                                    <Select
+                                        MenuProps={{
+                                            className: classes.selectMenu
+                                        }}
+                                        classes={{
+                                            select: classes.select
+                                        }}
+                                        value={this.state.simpleSelectItem}
+                                        onChange={this.handleSelectedItem}
+                                        inputProps={{
+                                            name: "simpleSelectItem",
+                                            id: "simple-selectItem"
+                                        }}
+                                    >
+                                        <MenuItem
+                                            disabled
+                                            classes={{
+                                                root: classes.selectMenuItem
+                                            }}
+                                        >
+                                            Select Item
+                                        </MenuItem>
+                                        {this.state.items.map((product, index) =>
+                                            <MenuItem
+                                                key={product.productId}
+                                                value={product.productId}
+                                                classes={{
+                                                    root: classes.selectMenuItem,
+                                                    selected: classes.selectMenuItemSelected
+                                                }}
+                                            >
+                                                {product.productName}
+                                            </MenuItem>
+                                        )}
+                                    </Select>
+                                </FormControl>
+                                <div>
+                                    <Button
+                                        size='sm'
+                                        color="info"
+                                        onClick={this.handleClose}
+                                        className={classes.addButton}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        size='sm'
+                                        color="info"
+                                        onClick={this.addNewClick}
+                                        className={classes.addButton}
+                                    >
+                                        {this.state.formButtonText}
+                                    </Button>
+                                </div>
+                            </form>
+                        </CardBody>
+                    </Card>
+                </Dialog>
             </div>
         );
     }
