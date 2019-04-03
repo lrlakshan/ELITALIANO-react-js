@@ -42,7 +42,14 @@ Route::post('clearList','purchaseController@clearList');
 Route::get('supplierDetails','supplierDetailController@supplierDetails');
 Route::post('getSelectedSupplierName','supplierDetailController@getSelectedSupplierName');
 
+//api from customer_details table
+Route::post('getSelectedCustomerByMobile','customerDetailController@getSelectedCustomerByMobile');
+Route::post('getSelectedCustomerByName','customerDetailController@getSelectedCustomerByName');
+Route::post('getSelectedCustomerByMobile','customerDetailController@getSelectedCustomerByMobile');
+
 //api's from purchase_invoices table
 Route::get('purchaseInvoiceNextNumber','purchaseInvoiceController@purchaseInvoiceNextNumber');
 Route::get('getInvoiceDetails','purchaseInvoiceController@getInvoiceDetails');
 Route::post('addPurchaseInvoice','purchaseInvoiceController@addPurchaseInvoice');
+
+
