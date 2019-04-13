@@ -61,7 +61,7 @@ class login extends React.Component {
             })
             .catch(exception => {
             });
-        console.log('this is submit', this.state.username);
+        // console.log('this is submit', this.state.username);
     };
 
     componentDidMount() {

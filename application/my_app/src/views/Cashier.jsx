@@ -3,6 +3,7 @@ import ReactTable from "react-table";
 import Datetime from "react-datetime";
 import ReactSearchBox from 'react-search-box'
 import Helper from '../utils/Helper';
+import LoadingOverlay from 'react-loading-overlay';
 import SweetAlert from "react-bootstrap-sweetalert";
 
 // @material-ui/core components
@@ -20,6 +21,7 @@ import Checkbox from "@material-ui/core/Checkbox";
 import Moment from "moment";
 
 // @material-ui/icons
+import Person from "@material-ui/icons/GroupAdd";
 import LibraryBooks from "@material-ui/icons/LibraryBooks";
 import Add from "@material-ui/icons/AddToQueue";
 import Remove from "@material-ui/icons/RemoveFromQueue";
@@ -116,9 +118,14 @@ const styles = {
         marginLeft: "89%",
         marginBottom: "0px",
     },
-    invoiceCloseIcon: {
+    selectCustomerCloseIcon: {
         position: "absolute",
         marginLeft: "95%",
+        marginBottom: "0px",
+    },
+    addNewCustomerCloseIcon: {
+        position: "absolute",
+        marginLeft: "92%",
         marginBottom: "0px",
     },
     cardSize: {
@@ -155,14 +162,27 @@ class Cashier extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            alertOpen: false,
             customerSelectOpen: false,
             customerTableLoading: false,
+            AddNewCustomerForm: false,
+            customerIdNextNumber: '',
             customerNames: [],
             selectedCustomerId: '',
             selectedCustomerName: '',
+            newCustomerName: '',
+            newCustomerMobile: '',
             typingName: '',
-            typingMobile: ''
+            typingMobile: '',
+            addNewCustomerloading: false,
+            successAlert: false,
+            succesAlertMsg: "",
+
+            //states success false
+            newCustomerNameState: '',
+            newCustomerMobileState: ''
         };
+        this.customerSaveButtonClick = this.customerSaveButtonClick.bind(this);
     }
 
     //select the customer from search bar
@@ -273,6 +293,83 @@ class Cashier extends React.Component {
             customerSelectOpen: true
         })
     } 
+    
+    //Add new customer form open button
+    AddNewCustomerButtonClick = () => {
+        this.setState({ loading: true });
+        Helper.http
+            .jsonGet("customerIdNextNumber")
+            .then(response => {
+                this.setState({ 
+                    AddNewCustomerForm: true,
+                    customerIdNextNumber: response.data
+                 });
+                this.setState({ loading: false });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    //Add new customer form close button
+    AddNewCustomerFormClose = () => {
+        this.setState({
+            AddNewCustomerForm: false,
+            newCustomerNameState: '',
+            newCustomerMobileState: ''
+        })
+    } 
+
+    //Saving the new customer
+    customerSaveButtonClick = () => {
+        this.setState({
+            addNewCustomerloading: true
+        })
+        if (this.state.newCustomerName === "") {
+            this.setState({ newCustomerNameState: "error" });
+        }
+        if (this.state.newCustomerMobile === "") {
+            this.setState({ newCustomerMobileState: "error" });
+        } 
+        if (this.state.newCustomerName !== "" && this.state.newCustomerMobile !== ""){
+            Helper.http
+                .jsonPost("addNewCustomer", {
+                    customerName: this.state.newCustomerName,
+                    mobileNumber: this.state.newCustomerMobile,
+                })
+                .then(response => {
+                    this.setState({
+                        addNewCustomerloading: false,
+                        newCustomerNameState: '',
+                        newCustomerMobileState: '',
+                        newCustomerName: '',
+                        newCustomerMobile: '',
+                        successAlert: true,
+                        succesAlertMsg: "New customer added successfully"
+                    });
+                })
+                .catch(exception => {
+                    console.log(exception);
+                    if(exception === '23000'){
+                        this.setState({
+                            alertOpen: true,
+                            alertDiscription: "The mobile number you entered is already in the system",
+                            addNewCustomerloading: false
+                        });
+                    } else if (exception === 2002){
+                        this.setState({
+                            alertOpen: true,
+                            alertDiscription: "Please Check your connection",
+                            addNewCustomerloading: false
+                        });
+                    }
+                });
+        }
+        this.setState({
+            addNewCustomerloading: false
+        })
+    } 
+
     //save the selected customer ID and customer name in a state
     selectCustomer = (customerId, customerName) => {
         this.setState({
@@ -296,6 +393,77 @@ class Cashier extends React.Component {
             customerNames: []
         })
     }
+
+    //alert dialog box close
+    handleClose = () => {
+        this.setState({ alertOpen: false });
+    };
+
+    //success message sweet alert hide function
+    hideAlert_success = () => {
+        this.setState({
+            successAlert: false,
+            succesAlertMsg: "",
+            AddNewCustomerForm: false
+        });
+    };
+
+    // function that verifies if a string has a given length or not
+    verifyLength(value, length) {
+        if (value.length >= length) {
+            return true;
+        }
+        return false;
+    }
+    // function that verifies if value contains only numbers
+    verifyNumber(value) {
+        var numberRex = new RegExp("^[0-9]+$");
+        if (numberRex.test(value)) {
+            return true;
+        }
+        return false;
+    }
+
+    change(event, stateName, type, stateNameEqualTo, maxValue) {
+        switch (type) {
+            case "number":
+                if (this.verifyNumber(event.target.value)) {
+                    this.setState({ [stateName + "State"]: "success" });
+                } else {
+                    this.setState({ [stateName + "State"]: "error" });
+                }
+                break;
+            case "newCustomerNameLength":
+                if (this.verifyLength(event.target.value, stateNameEqualTo)) {
+                    this.setState({ 
+                        [stateName + "State"]: "success",
+                        newCustomerName: event.target.value 
+                    });
+                } else {
+                    this.setState({ 
+                        [stateName + "State"]: "error",
+                        newCustomerName: event.target.value  
+                    });
+                }
+                break;
+            case "newCustomerMobileLength":
+                if (this.verifyLength(event.target.value, stateNameEqualTo)) {
+                    this.setState({
+                        [stateName + "State"]: "success",
+                        newCustomerMobile: event.target.value
+                    });
+                } else {
+                    this.setState({
+                        [stateName + "State"]: "error",
+                        newCustomerMobile: event.target.value 
+                    });
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     render() {
         const { classes } = this.props;
         return (
@@ -309,13 +477,18 @@ class Cashier extends React.Component {
                     maxWidth="lg"
                     scroll="body"
                 >
+                    <LoadingOverlay
+                        active={this.state.loading}
+                        spinner
+                        text='Loading...'
+                    >
                     <Button
                         justIcon
                         round
                         simple
                         onClick={this.customerSelectClose}
                         color="danger"
-                        className={classes.invoiceCloseIcon}
+                        className={classes.selectCustomerCloseIcon}
                     >
                         <Close />
                     </Button>
@@ -333,7 +506,7 @@ class Cashier extends React.Component {
                                     <CardBody>
                                         <Button
                                             color="info"
-                                            onClick={this.purchaseDoneButtonClick}
+                                            onClick={this.AddNewCustomerButtonClick}
                                             className={classes.AddNewCustomerButton}
                                         > <AddCircle className={classes.icons} />Add New
                                         </Button>
@@ -441,7 +614,128 @@ class Cashier extends React.Component {
                             
                         </CardBody>
                     </Card>
+                    </LoadingOverlay>
                 </Dialog>
+
+                {/* Add new customer detials */}
+                <Dialog
+                    open={this.state.AddNewCustomerForm}
+                    aria-labelledby="form-dialog-title">
+                    <LoadingOverlay
+                        active={this.state.addNewCustomerloading}
+                        spinner
+                        text='Please Wait...'
+                    >
+                    <Button
+                        justIcon
+                        round
+                        simple
+                        onClick={this.AddNewCustomerFormClose}
+                        color="danger"
+                        className={classes.addNewCustomerCloseIcon}
+                    >
+                        <Close />
+                    </Button>
+                    <br />
+                    <Card className={classes.cardSize}>
+                        <CardHeader color="info" icon>
+                            <CardIcon color="info">
+                                <Person />
+                            </CardIcon>
+                            <h4 className={classes.cardIconTitle}>Add New Customer</h4>
+                        </CardHeader>
+                        <CardBody>
+                            <form>
+                                <CustomInput
+                                    disabled={true}
+                                    labelText="Customer ID"
+                                    id="customerId"
+                                    formControlProps={{
+                                        fullWidth: true
+                                    }}
+                                    defaultValue={this.state.customerIdNextNumber.toString()}
+                                />
+                                <CustomInput
+                                    success={this.state.newCustomerNameState === "success"}
+                                    error={this.state.newCustomerNameState === "error"}
+                                    labelText="Customer Name *"
+                                    id="newCustomerName"
+                                    formControlProps={{
+                                        fullWidth: true
+                                    }}
+                                    inputProps={{
+                                        onChange: event =>
+                                            this.change(event, "newCustomerName", "newCustomerNameLength", 1),
+                                        type: "text"
+                                    }}
+                                    onChange={(event) => this.setState({ newCustomerName: event.target.value })}
+                                    defaultValue={this.state.newCustomerName}
+                                />
+                                <CustomInput
+                                    success={this.state.newCustomerMobileState === "success"}
+                                    error={this.state.newCustomerMobileState === "error"}
+                                    labelText="MobileNumber *"
+                                    id="newCustomerMobile"
+                                    formControlProps={{
+                                        fullWidth: true
+                                    }}
+                                    inputProps={{
+                                        onChange: event =>
+                                            this.change(event, "newCustomerMobile", "newCustomerMobileLength", 1),
+                                        type: "number"
+                                    }}
+                                    onChange={(event) => this.setState({ newCustomerMobile: event.target.value })}
+                                    defaultValue={this.state.newCustomerMobile.toString()}
+                                />
+                                <div>
+                                    <Button
+                                        size='sm'
+                                        color="info"
+                                        onClick={this.customerSaveButtonClick}
+                                        className={classes.addButton}
+                                    >
+                                        Save
+                                    </Button>
+                                </div>
+                            </form>
+                        </CardBody>
+                    </Card>
+                    </LoadingOverlay>
+                </Dialog>
+
+                {/* alert dialog box */}
+                <Dialog
+                    open={this.state.alertOpen}
+                    onClose={this.handleClose}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">{"Alert"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            {this.state.alertDiscription}
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleClose} color="info" autoFocus simple> Got it! </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* success alert */}
+                <SweetAlert
+                    show={this.state.successAlert}
+                    success
+                    style={{ display: "block", marginTop: "-150px" }}
+                    title="successful!"
+                    onConfirm={() => this.hideAlert_success()}
+                    onCancel={() => this.hideAlert_success()}
+                    confirmBtnCssClass={
+                        this.props.classes.button + " " + this.props.classes.success
+                    }
+                >
+                    {this.state.succesAlertMsg}
+                </SweetAlert>
+
                 <GridContainer>
                     <GridItem xs={12} sm={12} md={6}>
                         <Card>
@@ -475,7 +769,7 @@ class Cashier extends React.Component {
                                         color="success" 
                                         className={classes.CustomerSelectFormOpenButton} 
                                             onClick={this.CustomerSelectFormOpenButtonClick}>
-                                            <Add className={classes.icons} />
+                                            <AddCircle className={classes.icons} />
                                         </Button>
                                         <br />
                                         <br />
