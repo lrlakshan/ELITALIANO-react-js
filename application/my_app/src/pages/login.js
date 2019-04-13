@@ -21,6 +21,11 @@ import Card from "../components/Card/Card.jsx";
 import CardBody from "../components/Card/CardBody.jsx";
 import CardHeader from "../components/Card/CardHeader.jsx";
 import CardFooter from "../components/Card/CardFooter.jsx";
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 //images
 import bgImage from "../assets/img/register.jpeg";
@@ -31,37 +36,58 @@ import loginPageStyle from "../assets/jss/material-dashboard-pro-react/views/log
 class login extends React.Component {
     constructor(props) {
         super(props);
-        // we use this to make the card to appear after the page has been rendered
         this.state = {
             cardAnimaton: "cardHidden",
             username: '',
             password: '',
-            loading: false
+            usernameState: '',
+            passwordState: '',
+            loading: false,
+            alertOpen: false,
         };
     }
 
     handleSubmit = e => {
-        this.setState({ loading: true });
+        
         e.preventDefault();
-        Helper.http
-            .jsonPost("userLogin", {
-                username: this.state.username,
-                password: this.state.password
-            })
-            .then(response => {
-                if (response.success) {
-                    localStorage.setItem('user', JSON.stringify(response.data));
-                    this.setState({ loading: false });
-                    this.props.history.push('/main/dashboard');
-                    console.log("---success---", response, JSON.parse(localStorage.getItem('user')));
-
-                } else {
-                    console.log("---res data---", response);
-                }
-            })
-            .catch(exception => {
-            });
-        // console.log('this is submit', this.state.username);
+        if (this.state.username === "") {
+            this.setState({ usernameState: "error" });
+        }
+        if (this.state.password === "") {
+            this.setState({ passwordState: "error" });
+        }
+        if (this.state.username !== "" && this.state.password !== "") {
+            this.setState({ loading: true });
+            Helper.http
+                .jsonPost("userLogin", {
+                    username: this.state.username,
+                    password: this.state.password
+                })
+                .then(response => {
+                    if (response.success) {
+                        localStorage.setItem('user', JSON.stringify(response.data));
+                        this.setState({ loading: false });
+                        this.props.history.push('/main/dashboard');
+                    }
+                })
+                .catch(exception => {
+                    if(exception === 2002){
+                        this.setState({
+                            alertOpen: true,
+                            alertDiscription: "Please Check your connection",
+                        });
+                        this.setState({ loading: false });
+                    }
+                    if (exception === 'unauthorized') {
+                        this.setState({
+                            alertOpen: true,
+                            alertDiscription: "Entered username and password is incorrect. Please check and try again",
+                        });
+                        this.setState({ loading: false });
+                    }
+                });
+        } 
+        
     };
 
     componentDidMount() {
@@ -76,10 +102,91 @@ class login extends React.Component {
         clearTimeout(this.timeOutFunction);
         this.timeOutFunction = null;
     }
+
+    //alert dialog box close
+    handleClose = () => {
+        this.setState({ alertOpen: false });
+    };
+
+    // function that verifies if a string has a given length or not
+    verifyLength(value, length) {
+        if (value.length >= length) {
+            return true;
+        }
+        return false;
+    }
+    // function that verifies if value contains only numbers
+    verifyNumber(value) {
+        var numberRex = new RegExp("^[0-9]+$");
+        if (numberRex.test(value)) {
+            return true;
+        }
+        return false;
+    }
+
+    change(event, stateName, type, stateNameEqualTo, maxValue) {
+        switch (type) {
+            case "number":
+                if (this.verifyNumber(event.target.value)) {
+                    this.setState({ [stateName + "State"]: "success" });
+                } else {
+                    this.setState({ [stateName + "State"]: "error" });
+                }
+                break;
+            case "usernameLength":
+                if (this.verifyLength(event.target.value, stateNameEqualTo)) {
+                    this.setState({
+                        [stateName + "State"]: "success",
+                        username: event.target.value
+                    });
+                } else {
+                    this.setState({
+                        [stateName + "State"]: "error",
+                        username: event.target.value
+                    });
+                }
+                break;
+            case "passwordLength":
+                if (this.verifyLength(event.target.value, stateNameEqualTo)) {
+                    this.setState({
+                        [stateName + "State"]: "success",
+                        password: event.target.value
+                    });
+                } else {
+                    this.setState({
+                        [stateName + "State"]: "error",
+                        password: event.target.value
+                    });
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     render() {
         const { classes } = this.props;
         return (
             <div>
+                {/* alert dialog box */}
+                <Dialog
+                    open={this.state.alertOpen}
+                    onClose={this.handleClose}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">{"Alert"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            {this.state.alertDiscription}
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleClose} color="info" autoFocus simple> Got it! </Button>
+                    </DialogActions>
+                </Dialog>
+
+
                 <LoadingOverlay
                     active={this.state.loading}
                     spinner
@@ -108,6 +215,8 @@ class login extends React.Component {
                                                 </CardHeader>
                                                 <CardBody>
                                                     <CustomInput
+                                                        success={this.state.usernameState === "success"}
+                                                        error={this.state.usernameState === "error"}
                                                         labelText="Username"
                                                         id="username"
                                                         formControlProps={{
@@ -118,13 +227,17 @@ class login extends React.Component {
                                                                 <InputAdornment position="end">
                                                                     <Face className={classes.inputAdornmentIcon} />
                                                                 </InputAdornment>
-                                                            )
+                                                            ),
+                                                            onChange: event =>
+                                                                this.change(event, "username", "usernameLength", 1),
+                                                            type: "text"
                                                         }}
                                                         onChange={(event) => this.setState({ username: event.target.value })} />
                                                     <CustomInput
+                                                        success={this.state.passwordState === "success"}
+                                                        error={this.state.passwordState === "error"}
                                                         labelText="Password"
                                                         id="password"
-                                                        type="password"
                                                         formControlProps={{
                                                             fullWidth: true
                                                         }}
@@ -133,22 +246,23 @@ class login extends React.Component {
                                                                 <InputAdornment position="end">
                                                                     <LockOutline className={classes.inputAdornmentIcon} />
                                                                 </InputAdornment>
-                                                            )
+                                                            ),
+                                                            onChange: event =>
+                                                                this.change(event, "password", "passwordLength", 1),
+                                                            type: "password"
                                                         }}
                                                         onChange={(event) => this.setState({ password: event.target.value })} />
                                                 </CardBody>
                                                 <CardFooter className={classes.justifyContentCenter}>
                                                     <Button color="rose" simple size="lg" onClick={this.handleSubmit} >
                                                         Sign In
-                  </Button>
+                                                </Button>
                                                 </CardFooter>
                                             </Card>
                                         </form>
                                     </GridItem>
                                 </GridContainer>
-
                             </div>
-
                         </div>
                     </div>
                 </LoadingOverlay>
