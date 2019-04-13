@@ -13,6 +13,6 @@ class customer_detail extends Model
      * @var array
      */
     protected $fillable = [
-        'mobileNumber', 'name'
+        'customerName','mobileNumber', 'name'
     ];
 }

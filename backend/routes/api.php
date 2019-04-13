@@ -46,6 +46,8 @@ Route::post('getSelectedSupplierName','supplierDetailController@getSelectedSuppl
 Route::post('getSelectedCustomerByMobile','customerDetailController@getSelectedCustomerByMobile');
 Route::post('getSelectedCustomerByName','customerDetailController@getSelectedCustomerByName');
 Route::post('getSelectedCustomerByMobile','customerDetailController@getSelectedCustomerByMobile');
+Route::get('customerIdNextNumber','customerDetailController@customerIdNextNumber');
+Route::post('addNewCustomer','customerDetailController@addNewCustomer');
 
 //api's from purchase_invoices table
 Route::get('purchaseInvoiceNextNumber','purchaseInvoiceController@purchaseInvoiceNextNumber');

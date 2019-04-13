@@ -10,6 +10,33 @@ use Exception;
 
 class customerDetailController extends Controller
 {
+
+	//add new customer. Insert customer details
+	public function addNewCustomer(Request $request){
+
+    	try {
+    		$validator = Validator::make($request->all(), [
+    		'mobileNumber'=> 'required',
+    		'customerName'=> 'required',
+    	]);
+
+    	if($validator->fails()){
+    		return response()->json(['success'=>false,'error'=>$validator->errors(),'code'=>401]);
+    	}
+
+    	$input = $request->all();
+    	$user = customer_detail::create($input);
+    	return response()->json(['success'=>true,'error'=>$validator->errors(),'code'=>200,'data'=>$user], 200);
+    		
+    	} catch (Exception $e) {
+    		return response()->json([
+    			'success'=>false,
+    			'error'=>($e->getCode()),
+    			'code'=>500
+    		], 500);
+    	}
+    }
+
     //get the selected customer using the mobile number
     public function getSelectedCustomerByMobile(Request $request){
 
@@ -91,6 +118,27 @@ class customerDetailController extends Controller
 	    			'error'=>'Customer did not found. Search again correctly or add as a new customer',
 	    			'code'=>401
 	    		],401);
+    		
+    	} catch (Exception $e) {
+    		return response()->json([
+    			'success'=>false,
+    			'error'=>($e->getMessage()),
+    			'code'=>500
+    		], 500);
+    	}
+    }
+
+    //get the next customer ID number
+    public function customerIdNextNumber(){
+    	try {
+    	$next_customer_id_number = array();
+    	$next_customer_id_number = customer_detail::max('id')+1;
+	    	return response()->json([
+	    		'success'=>true,
+	    		'error'=>null,
+	    		'code'=>200,
+	    		'data'=>$next_customer_id_number
+	    	], 200);
     		
     	} catch (Exception $e) {
     		return response()->json([
