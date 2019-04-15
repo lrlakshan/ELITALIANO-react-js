@@ -50,7 +50,6 @@ class purchaseInvoiceController extends Controller
 	    		'success'=>true,
 	    		'error'=>null,
 	    		'code'=>200,
-	    		//'total'=>count($invoice),
 	    		'data'=>$next_invoice_number
 	    	], 200);
     		

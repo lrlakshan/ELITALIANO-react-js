@@ -38,6 +38,19 @@ Route::post('getPurchaseListDetails','purchaseController@getPurchaseListDetails'
 Route::post('deletePurchases','purchaseController@deletePurchases');
 Route::post('clearList','purchaseController@clearList');
 
+//api's from purchase_invoices table
+Route::get('purchaseInvoiceNextNumber','purchaseInvoiceController@purchaseInvoiceNextNumber');
+Route::get('getInvoiceDetails','purchaseInvoiceController@getInvoiceDetails');
+Route::post('addPurchaseInvoice','purchaseInvoiceController@addPurchaseInvoice');
+
+//api from sales table
+Route::post('addSales','saleController@addSales');
+Route::post('getsaleListDetails','saleController@getsaleListDetails');
+Route::post('deleteSales','saleController@deleteSales');
+
+//api from sale_invoice table
+Route::get('salesInvoiceNextNumber','saleInvoiceController@salesInvoiceNextNumber');
+
 //api's from supplier_details table
 Route::get('supplierDetails','supplierDetailController@supplierDetails');
 Route::post('getSelectedSupplierName','supplierDetailController@getSelectedSupplierName');
@@ -49,9 +62,6 @@ Route::post('getSelectedCustomerByMobile','customerDetailController@getSelectedC
 Route::get('customerIdNextNumber','customerDetailController@customerIdNextNumber');
 Route::post('addNewCustomer','customerDetailController@addNewCustomer');
 
-//api's from purchase_invoices table
-Route::get('purchaseInvoiceNextNumber','purchaseInvoiceController@purchaseInvoiceNextNumber');
-Route::get('getInvoiceDetails','purchaseInvoiceController@getInvoiceDetails');
-Route::post('addPurchaseInvoice','purchaseInvoiceController@addPurchaseInvoice');
+
 
 
