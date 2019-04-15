@@ -47,6 +47,7 @@ Route::post('addPurchaseInvoice','purchaseInvoiceController@addPurchaseInvoice')
 Route::post('addSales','saleController@addSales');
 Route::post('getsaleListDetails','saleController@getsaleListDetails');
 Route::post('deleteSales','saleController@deleteSales');
+Route::post('salesClearList','saleController@salesClearList');
 
 //api from sale_invoice table
 Route::get('salesInvoiceNextNumber','saleInvoiceController@salesInvoiceNextNumber');

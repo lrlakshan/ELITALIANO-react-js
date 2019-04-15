@@ -10,7 +10,7 @@ use Exception;
 
 class purchaseController extends Controller
 {
-    //
+    //add new purchases to purchases table
     public function addPurchases(Request $request){
 
     	try {
@@ -40,6 +40,7 @@ class purchaseController extends Controller
     	}
     }
 
+    //get the purchase details 
     public function getPurchaseListDetails(Request $request){
 
         try {
@@ -91,6 +92,7 @@ class purchaseController extends Controller
         }
     }
 
+    //delete purchased items one by one
     public function deletePurchases(Request $request){
 
         try {
@@ -135,6 +137,7 @@ class purchaseController extends Controller
         }
     }
 
+    //clear all existing purchases in the table when page is reload
     public function clearList(Request $request){
 
         try {
