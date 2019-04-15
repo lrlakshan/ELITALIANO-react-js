@@ -166,8 +166,15 @@ class Cashier extends React.Component {
             customerSelectOpen: false,
             customerTableLoading: false,
             AddNewCustomerForm: false,
+            tableLoading: false,
+            salesInvoiceNextNumber: null,
+            totalBill: "0.00",
+            purchasePrice: "0.00",
+            numberOfRows: 1,
             customerIdNextNumber: '',
             customerNames: [],
+            productList :[],
+            saleDetailsList: [],
             selectedCustomerId: '',
             selectedCustomerName: '',
             newCustomerName: '',
@@ -177,12 +184,37 @@ class Cashier extends React.Component {
             addNewCustomerloading: false,
             successAlert: false,
             succesAlertMsg: "",
+            simpleSelectProduct: "",
+            selectedDate: Moment(Date()).format("YYYY-MM-DD"),
+
+            //cashier product details states
+            amountAvailable: "0",
+            marketPrice: '0.00',
+            sellingPrice: '0.00',
+            amountPurchases: 0,
 
             //states success false
             newCustomerNameState: '',
-            newCustomerMobileState: ''
+            newCustomerMobileState: '',
+            amountPurchasesState: ''
         };
         this.customerSaveButtonClick = this.customerSaveButtonClick.bind(this);
+        this.updateState = this.updateState.bind(this);
+    }
+
+    componentDidMount() {
+        this.getMenuList();
+        this.getSalesInvoiceNextNumber();
+    }
+
+    //get the selected date from the calender and convert it to YYYY-MM-DD format
+    updateState(date) {
+        // This function gives you the moment object of date selected. 
+        var dateString = date._d;
+        var dateObj = new Date(dateString);
+        var momentObj = Moment(dateObj);
+        var momentString = momentObj.format('YYYY-MM-DD');
+        this.setState({ selectedDate: momentString });
     }
 
     //select the customer from search bar
@@ -316,7 +348,9 @@ class Cashier extends React.Component {
         this.setState({
             AddNewCustomerForm: false,
             newCustomerNameState: '',
-            newCustomerMobileState: ''
+            newCustomerMobileState: '',
+            newCustomerName: '',
+            newCustomerMobile: ''
         })
     } 
 
@@ -349,7 +383,6 @@ class Cashier extends React.Component {
                     });
                 })
                 .catch(exception => {
-                    console.log(exception);
                     if(exception === '23000'){
                         this.setState({
                             alertOpen: true,
@@ -408,6 +441,164 @@ class Cashier extends React.Component {
         });
     };
 
+    //get the product list for product drop down
+    getMenuList = () => {
+        const productList = [];
+        Helper.http
+            .jsonGet("productDetails")
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        productId: data[i].productId,
+                        productName: data[i].productName,
+                    };
+                    productList.push(_data);
+                }
+                this.setState({ productList });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    //select item from the select product drop down menu and send to backend
+    handleSelectedProduct = event => {
+        this.setState({
+            [event.target.name]: event.target.value,
+            productId: event.target.value
+        });
+        Helper.http
+            .jsonPost("getSelectedProductDetails", {
+                productId: event.target.value
+            })
+            .then(response => {
+
+                this.setState({
+                    amountAvailable: response.data.amountAvailable,
+                    marketPrice: response.data.marketPrice,
+                    sellingPrice: response.data.sellingPrice,
+                    purchasePrice: response.data.purchasePrice,
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    //add to list button handle function
+    addToListButtonClick = () => {
+        if (this.state.simpleSelectProduct === "") {
+            this.setState({
+                alertOpen: true,
+                alertDiscription: "You have to select a product from the dropdown menu. If not you have to add the product details from Inventory => View Stocks => Add New"
+            })
+        } else {
+            if (this.state.amountPurchases <= 0) {
+                this.setState({
+                    amountPurchasesState: "error",
+                    alertOpen: true,
+                    alertDiscription: "You have to enter a valid amount as amount purchases"
+                });
+            }
+            if (this.state.amountPurchases > 0) {
+                this.setState({ tableLoading: true });
+                Helper.http
+                    .jsonPost("addSales", {
+                        invoiceNum: this.state.salesInvoiceNextNumber,
+                        date: this.state.selectedDate,
+                        productId: this.state.productId,
+                        customerId: this.state.selectedCustomerId,
+                        purchasePrice: this.state.purchasePrice,
+                        sellingPrice: this.state.sellingPrice,
+                        amountPurchases: this.state.amountPurchases
+                    })
+                    .then(response => {
+                        this.setState({
+                            tableLoading: false,
+                            productList: [],
+                            amountAvailable: "0",
+                            purchasePrice: "0.00",
+                            sellingPrice: "0.00",
+                            amountPurchasesState: "",
+                            amountPurchases: 0,
+                            simpleSelectProduct: ""
+                        });
+                        this.getMenuList();
+                        this.getSalesDetails();
+                    })
+                    .catch(exception => {
+                        console.log(exception);
+                    });
+            }
+        }
+    }
+
+    //get the next sales invoice number after the last bil generated
+    getSalesInvoiceNextNumber = () => {
+        Helper.http
+            .jsonGet("salesInvoiceNextNumber")
+            .then(response => {
+                this.setState({ salesInvoiceNextNumber: response.data });
+                this.getSalesDetails();
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    //preview items in the current invoice number 
+    getSalesDetails = () => {
+        const saleDetailsList = [];
+        this.setState({ tableLoading: true });
+        Helper.http
+            .jsonPost("getsaleListDetails", {
+                invoiceNum: this.state.salesInvoiceNextNumber,
+            })
+            .then(response => {
+                let data = response.data;
+                this.setState({
+                    numberOfRows: data.length,
+                    totalBill: (response.sum.totalBill != null) ? response.sum.totalBill : "0.00"
+                });
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        id: data[i].id,
+                        productName: data[i].productName,
+                        amountPurchases: data[i].amountPurchases,
+                        sellingPrice: data[i].sellingPrice,
+                        amount: data[i].amount,
+                        actions: (
+                            // we've added some custom button actions
+                            <div className="actions-right">
+                                {/* use this button to remove the data row */}
+                                <Button
+                                    justIcon
+                                    round
+                                    simple
+                                    onClick={() => {
+                                        this.listItemDelete(data[i].id);
+                                    }}
+                                    color="danger"
+                                    className="remove"
+                                >
+                                    <Close />
+                                </Button>{" "}
+                            </div>
+                        )
+                    };
+                    saleDetailsList.push(_data);
+                }
+                this.setState({
+                    saleDetailsList,
+                    tableLoading: false
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    }
+
     // function that verifies if a string has a given length or not
     verifyLength(value, length) {
         if (value.length >= length) {
@@ -457,6 +648,15 @@ class Cashier extends React.Component {
                         [stateName + "State"]: "error",
                         newCustomerMobile: event.target.value 
                     });
+                }
+                break;
+            case "amoutPurchaseNumber":
+                if (event.target.value <= 0) {
+                    this.setState({ [stateName + "State"]: "error" });
+                    this.setState({ amountPurchases: event.target.value })
+                } else {
+                    this.setState({ [stateName + "State"]: "success" });
+                    this.setState({ amountPurchases: event.target.value })
                 }
                 break;
             default:
@@ -743,12 +943,26 @@ class Cashier extends React.Component {
                                 <CardIcon color="primary">
                                     <LibraryBooks />
                                 </CardIcon>
-                                <h4 className={classes.cardIconTitle}>Invoice number <small> - 224</small></h4>
+                                <h4 className={classes.cardIconTitle}>Invoice number <small> - {this.state.salesInvoiceNextNumber}</small></h4>
                             </CardHeader>
                             <br />
                             <GridContainer>
                                 <GridItem xs={12} sm={12} md={6}>
                                     <CardBody>
+                                        <InputLabel className={classes.label}>Date</InputLabel>
+                                        <br />
+                                        <FormControl >
+                                            <Datetime
+                                                timeFormat={false}
+                                                dateFormat="YYYY-MM-DD"
+                                                defaultValue={Moment(Date()).format("YYYY-MM-DD")}
+                                                onChange={this.updateState}
+                                            inputProps={
+                                                { disabled: this.state.saleDetailsList.length != 0 }
+                                            }
+                                            />
+                                        </FormControl>
+                                        <br />
                                         <FormControl >
                                             <CustomInput
                                                 labelText="Select Customer"
@@ -771,23 +985,7 @@ class Cashier extends React.Component {
                                             onClick={this.CustomerSelectFormOpenButtonClick}>
                                             <AddCircle className={classes.icons} />
                                         </Button>
-                                        <br />
-                                        <br />
-                                        <InputLabel className={classes.label}>Date</InputLabel>
-                                        <br />
-                                        <FormControl >
-                                            <Datetime
-                                                timeFormat={false}
-                                                dateFormat="YYYY-MM-DD"
-                                                defaultValue={Moment(Date()).format("YYYY-MM-DD")}
-                                                onChange={this.updateState}
-                                                // inputProps={
-                                                //     { disabled: this.state.PurchaseDetailsList.length != 0 }
-                                                // }
-                                            />
-                                        </FormControl>
-                                        <br />
-                                        <br />
+
                                         <FormControl >
                                             <CustomInput
                                                 labelText="Amount Available"
@@ -799,7 +997,7 @@ class Cashier extends React.Component {
                                                 inputProps={{
                                                     type: "number"
                                                 }}
-                                                // value={this.state.amountAvailable.toString()}
+                                                value={this.state.amountAvailable.toString()}
                                             />
                                         </FormControl>
                                         <FormControl >
@@ -813,7 +1011,7 @@ class Cashier extends React.Component {
                                                 inputProps={{
                                                     type: "number"
                                                 }}
-                                                // value={this.state.purchasePrice.toString()}
+                                                value={this.state.marketPrice.toString()}
                                             />
                                         </FormControl>
                                         <FormControl >
@@ -827,16 +1025,17 @@ class Cashier extends React.Component {
                                                 inputProps={{
                                                     type: "number"
                                                 }}
-                                                // value={this.state.purchasePrice.toString()}
+                                                value={this.state.sellingPrice.toString()}
                                             />
                                         </FormControl>
                                         <FormControl >
                                             <CustomInput
-                                                // success={this.state.amountPurchasesState === "success"}
-                                                // error={this.state.amountPurchasesState === "error"}
+                                                success={this.state.amountPurchasesState === "success"}
+                                                error={this.state.amountPurchasesState === "error"}
+                                                disabled={this.state.selectedCustomerName === ''}
                                                 labelText="Amount Purchases"
                                                 id="amountPurchases"
-                                                // value={this.state.amountPurchases.toString()}
+                                                value={this.state.amountPurchases.toString()}
                                                 formControlProps={{
                                                     fullWidth: true
                                                 }}
@@ -845,7 +1044,6 @@ class Cashier extends React.Component {
                                                         this.change(event, "amountPurchases", "amoutPurchaseNumber"),
                                                     type: "number"
                                                 }}
-                                                onChange={(event) => this.setState({ amountPurchases: event.target.value })}
                                             />
                                         </FormControl>
                                         <h1>Total</h1>
@@ -864,14 +1062,15 @@ class Cashier extends React.Component {
                                             >
                                                 Selcet Product
                                             </InputLabel>
-                                            {/* <Select
+                                            <Select
+                                                disabled = {this.state.selectedCustomerName === ''}
                                                 MenuProps={{
                                                     className: classes.selectMenu
                                                 }}
                                                 classes={{
                                                     select: classes.select
                                                 }}
-                                                // value={this.state.simpleSelectProduct}
+                                                value={this.state.simpleSelectProduct}
                                                 onChange={this.handleSelectedProduct}
                                                 inputProps={{
                                                     name: "simpleSelectProduct",
@@ -897,12 +1096,16 @@ class Cashier extends React.Component {
                                                         {product.productName}
                                                     </MenuItem>
                                                 )}
-                                            </Select> */}
+                                            </Select>
                                         </FormControl>
                                         <br />
                                         <br />
-                                        <Button color="success" className={classes.marginCenter} onClick={this.addToListButtonClick}>
-                                            <Add className={classes.icons} /> Add To List
+                                        <Button 
+                                            disabled={this.state.selectedCustomerName === ''}
+                                            color="success" 
+                                            className={classes.marginCenter} 
+                                            onClick={this.addToListButtonClick}>
+                                                <Add className={classes.icons} /> Add To List
                                         </Button>
                                         <Button
                                             color="danger"
@@ -912,7 +1115,7 @@ class Cashier extends React.Component {
                                                     deleteAlert: true,
                                                 });
                                             }}
-                                            // disabled={this.state.PurchaseDetailsList.length == 0}
+                                            disabled={this.state.saleDetailsList.length == 0}
                                         >
                                             <Remove className={classes.icons} /> Remove All
                                         </Button>
@@ -920,7 +1123,7 @@ class Cashier extends React.Component {
                                             color="github"
                                             className={classes.marginCenter}
                                             onClick={this.checkOutOpen}
-                                            // disabled={this.state.PurchaseDetailsList.length == 0}
+                                            disabled={this.state.saleDetailsList.length == 0}
                                         >
                                             <Bill className={classes.icons} /> Checkout
                                         </Button>
@@ -932,7 +1135,8 @@ class Cashier extends React.Component {
                                         <br />
                                         <br />
                                         <br />
-                                        {/* <h3 className={classes.marginCenter}><small>Rs.{(this.state.totalBill < 1000000) ? parseInt(this.state.totalBill, 10).toLocaleString() + ".00" : parseInt(this.state.totalBill, 10).toLocaleString()}</small></h3> */}
+                                        <br />
+                                        <h3 className={classes.marginCenter}><small>Rs.{(this.state.totalBill < 1000000) ? parseInt(this.state.totalBill, 10).toLocaleString() + ".00" : parseInt(this.state.totalBill, 10).toLocaleString()}</small></h3>
                                     </CardBody>
                                 </GridItem>
                             </GridContainer>
@@ -942,8 +1146,8 @@ class Cashier extends React.Component {
                         <Card>
                             <CardBody>
                                 <ReactTable
-                                    // loading={this.state.tableLoading}
-                                    // data={this.state.PurchaseDetailsList}
+                                    loading={this.state.tableLoading}
+                                    data={this.state.saleDetailsList}
                                     noDataText=""
                                     defaultFilterMethod={filterCaseInsensitive}
                                     defaultSorted={[
@@ -998,7 +1202,7 @@ class Cashier extends React.Component {
                                             filterable: false
                                         }
                                     ]}
-                                    // pageSize={this.state.numberOfRows}
+                                    pageSize={this.state.numberOfRows}
                                     showPaginationBottom={false}
                                     className="-striped -highlight"
                                 />

@@ -273,7 +273,13 @@ class viewStock extends React.Component {
                 this.setState({ loading: false });
             })
             .catch(exception => {
-                console.log(exception);
+                if (exception) {
+                    this.setState({
+                        alertOpen: true,
+                        alertDiscription: "Please Check your connection",
+                    });
+                this.setState({ loading: false });
+                }
             });
     };
 

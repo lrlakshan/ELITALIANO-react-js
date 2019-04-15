@@ -138,8 +138,6 @@ function filterCaseInsensitive(filter, row) {
     );
 }
 
-// const gridItems = this.state.purchaseInvoiceNextNumber.map((list) => { list }
-// );
 class Purchases extends React.Component {
     constructor(props) {
         super(props);
@@ -196,7 +194,6 @@ class Purchases extends React.Component {
     //print PDF button click
     printPDF = () => {
         const input = document.getElementById('divToPrint');
-        console.log(this.state.purchaseInvoiceNextNumber);
         html2canvas(input)
             .then((canvas) => {
                 const imgData = canvas.toDataURL('image/png');
@@ -258,14 +255,6 @@ class Purchases extends React.Component {
         Helper.http
             .jsonGet("purchaseInvoiceNextNumber")
             .then(response => {
-                // let data = response.data;
-                // for (let i = 0; i < data.length; i++) {
-                //     const _data = {
-                //         productId: data[i].productId,
-                //         productName: data[i].productName,
-                //     };
-                //     productList.push(_data);
-                // }
                 this.setState({ purchaseInvoiceNextNumber: response.data });
                 this.removeListInReload();
                 this.getPurchaseDetails();
