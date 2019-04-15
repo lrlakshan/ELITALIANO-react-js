@@ -193,6 +193,10 @@ class Cashier extends React.Component {
             sellingPrice: '0.00',
             amountPurchases: 0,
 
+            //delete alert states
+            deleteAlert: false,
+            deleteAlertSuccess: false,
+
             //states success false
             newCustomerNameState: '',
             newCustomerMobileState: '',
@@ -540,6 +544,7 @@ class Cashier extends React.Component {
             .jsonGet("salesInvoiceNextNumber")
             .then(response => {
                 this.setState({ salesInvoiceNextNumber: response.data });
+                this.removeListInReload();
                 this.getSalesDetails();
             })
             .catch(exception => {
@@ -598,6 +603,79 @@ class Cashier extends React.Component {
                 console.log(exception);
             });
     }
+
+    //removing previous puchase list after reloading
+    removeListInReload = () => {
+        Helper.http
+            .jsonPost("salesClearList", {
+                invoiceNum: this.state.salesInvoiceNextNumber
+            })
+            .then(response => {
+                this.setState({
+                    alertOpen: true,
+                    alertDiscription: "Your previous list has been cleared. Re-Enter your list you wish to buy"
+                });
+                this.getSalesDetails();
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    }
+
+    //delete items from the list
+    listItemDelete = (id) => {
+        Helper.http
+            .jsonPost("deleteSales", {
+                Id: id
+            })
+            .then(response => {
+                this.getSalesDetails();
+            })
+            .catch(exception => {
+                console.log(exception);
+                this.setState({
+                    alertOpen: true,
+                    alertDiscription: "Error occured when removing this item"
+                });
+            });
+    }
+
+    //remove all button click function
+    removeAllButtonClick = () => {
+        Helper.http
+            .jsonPost("salesClearList", {
+                invoiceNum: this.state.salesInvoiceNextNumber
+            })
+            .then(response => {
+                this.setState({
+                    deleteAlertSuccess: true,
+                    deleteAlert: false
+                });
+                this.getSalesDetails();
+            })
+            .catch(exception => {
+                console.log(exception);
+                this.setState({
+                    alertOpen: true,
+                    deleteAlert: false,
+                    alertDiscription: "Error occured when clearing the List"
+                });
+            });
+    }
+
+    //are you sure to delete sweet alert cancel button function
+    hideAlert_delete = () => {
+        this.setState({
+            deleteAlert: false,
+        });
+    };
+
+    //item delete success message hide function
+    Alert_delete_success_close = () => {
+        this.setState({
+            deleteAlertSuccess: false
+        });
+    };
 
     // function that verifies if a string has a given length or not
     verifyLength(value, length) {
@@ -934,6 +1012,40 @@ class Cashier extends React.Component {
                     }
                 >
                     {this.state.succesAlertMsg}
+                </SweetAlert>
+
+                {/* delete sale item alert */}
+                <SweetAlert
+                    show={this.state.deleteAlert}
+                    warning
+                    style={{ display: "block", marginTop: "-150px" }}
+                    title="Are you sure?"
+                    onConfirm={() => this.removeAllButtonClick()}
+                    onCancel={() => this.hideAlert_delete()}
+                    confirmBtnCssClass={
+                        this.props.classes.button + " " + this.props.classes.success
+                    }
+                    cancelBtnCssClass={
+                        this.props.classes.button + " " + this.props.classes.danger
+                    }
+                    confirmBtnText="Yes, delete all!"
+                    cancelBtnText="Cancel"
+                    showCancel
+                >
+                    You will not be able to recover this purchase list again!
+                </SweetAlert>
+                <SweetAlert
+                    show={this.state.deleteAlertSuccess}
+                    success
+                    style={{ display: "block", marginTop: "-150px" }}
+                    title="Deleted!"
+                    onConfirm={() => this.Alert_delete_success_close()}
+                    onCancel={() => this.Alert_delete_success_close()}
+                    confirmBtnCssClass={
+                        this.props.classes.button + " " + this.props.classes.success
+                    }
+                >
+                    Purchase list has been deleted.
                 </SweetAlert>
 
                 <GridContainer>
