@@ -58,6 +58,7 @@ import sweetAlertStyle from "../assets/jss/material-dashboard-pro-react/views/sw
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import elitaliano_logo from '../assets/img/elitaliano_logo.png';
+import "../assets/scss/purchaseInvoice.css"
 
 const styles = {
     dialogPaper: {
@@ -88,18 +89,17 @@ const styles = {
     Right: {
         position: "absolute",
         marginTop: "30px",
-        marginRight: "70px",
         marginBottom: "0px",
         textAlign: "right",
         // display: "inline",
-        paddingLeft: "80%",
+        paddingLeft: "84%",
     },
     Left: {
         position: "absolute",
         marginTop: "30px",
         marginBottom: "0px",
         textAlign: 'left',
-        paddingLeft: "110px",
+        paddingLeft: "50px",
         // display:"inline"
     },
     ProceedButtonStyle: {
@@ -167,9 +167,16 @@ class Cashier extends React.Component {
             customerTableLoading: false,
             AddNewCustomerForm: false,
             tableLoading: false,
-            salesInvoiceNextNumber: null,
+            checkoutOpen: false,
+            proceedOpen: false,
+            nextButtonDisabled: true,
+            pdfPrinted: false,
             totalBill: "0.00",
+            totalBillRegular: "0.00",
+            cashPaid: "0.00",
+            balance: "0.00",
             purchasePrice: "0.00",
+            salesInvoiceNextNumber: null,
             numberOfRows: 1,
             customerIdNextNumber: '',
             customerNames: [],
@@ -564,7 +571,8 @@ class Cashier extends React.Component {
                 let data = response.data;
                 this.setState({
                     numberOfRows: data.length,
-                    totalBill: (response.sum.totalBill != null) ? response.sum.totalBill : "0.00"
+                    totalBill: (response.sum.totalBill != null) ? response.sum.totalBill : "0.00",
+                    totalBillRegular: (response.sum.totalBillRegular != null) ? response.sum.totalBillRegular : "0.00"
                 });
                 for (let i = 0; i < data.length; i++) {
                     const _data = {
@@ -572,7 +580,9 @@ class Cashier extends React.Component {
                         productName: data[i].productName,
                         amountPurchases: data[i].amountPurchases,
                         sellingPrice: data[i].sellingPrice,
+                        marketPrice: data[i].marketPrice,
                         amount: data[i].amount,
+                        regAmount: data[i].regAmount,
                         actions: (
                             // we've added some custom button actions
                             <div className="actions-right">
@@ -677,6 +687,62 @@ class Cashier extends React.Component {
         });
     };
 
+    //checkout button function
+    checkOutOpen = () => {
+        this.setState({
+            checkoutOpen: true
+        });
+    };
+
+    //checkout dialog box close
+    checkoutClose = () => {
+        this.setState({ checkoutOpen: false });
+    };
+
+    //proceed button function
+    proceedOpen = () => {
+        this.setState({
+            proceedOpen: true,
+            checkoutOpen: false,
+            balance: this.state.totalBill,
+            cashPaid: "0.00"
+        });
+    };
+
+    //payment dialog box close and checkout dialog box open again
+    proceedClose = () => {
+        this.setState({
+            proceedOpen: false,
+            checkoutOpen: true,
+            nextButtonDisabled: true
+        });
+    };
+
+    //Next button function
+    nextButton = () => {
+        if (this.state.details == "") {
+            this.setState({
+                alertOpen: true,
+                alertDiscription: "You have to add a small note on the purchase"
+            });
+        } else {
+            this.setState({
+                invoiceOpen: true,
+                proceedOpen: false,
+            });
+        }
+    };
+
+    //invocie dialog box close and payment dialog box open again
+    invoiceClose = () => {
+        this.setState({
+            invoiceOpen: false,
+            proceedOpen: true,
+            nextButtonDisabled: true,
+            pdfPrinted: false
+        });
+    };
+
     // function that verifies if a string has a given length or not
     verifyLength(value, length) {
         if (value.length >= length) {
@@ -746,6 +812,235 @@ class Cashier extends React.Component {
         const { classes } = this.props;
         return (
             <div>
+
+                {/* checkout dialog box */}
+                <Dialog
+                    open={this.state.checkoutOpen}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                    maxWidth="lg"
+                    scroll="body"
+                >
+                    <Button
+                        justIcon
+                        round
+                        simple
+                        onClick={this.checkoutClose}
+                        color="danger"
+                        className={classes.closeIcon}
+                    >
+                        <Close />
+                    </Button>
+                    <br />
+                    <Card className={classes.cardSize}>
+                        <CardHeader color="primary" icon>
+                            <CardIcon color="primary">
+                                <LibraryBooks />
+                            </CardIcon>
+                            <h4 className={classes.cardIconTitle}>Checkout</h4>
+                        </CardHeader>
+                        <br />
+                        <Button
+                            size='sm'
+                            color="info"
+                            className={classes.ProceedButtonStyle}
+                            onClick={this.proceedOpen}>
+                            <Bill className={classes.icons} /> Proceed
+                            </Button>
+                        <br />
+                        <CardBody>
+                            <ReactTable
+                                loading={this.state.tableLoading}
+                                data={this.state.saleDetailsList}
+                                noDataText=""
+                                defaultFilterMethod={filterCaseInsensitive}
+                                defaultSorted={[
+                                    {
+                                        id: "id",
+                                        desc: true
+                                    }
+                                ]}
+                                columns={[
+                                    {
+                                        Header: () => (
+                                            <strong>Product Name</strong>),
+                                        accessor: "productName",
+                                        filterable: false,
+                                        sortable: false,
+                                        width: 150
+                                    },
+                                    {
+                                        Header: () => (
+                                            <strong>Qty</strong>),
+                                        accessor: "amountPurchases",
+                                        filterable: false,
+                                        sortable: false,
+                                        width: 50,
+                                        Cell: row => <div className="actions-right">{row.value}</div>
+                                    },
+                                    {
+                                        Header: () => (
+                                            <div className="actions-right">
+                                                <strong>Regular Price</strong></div>),
+                                        accessor: "marketPrice",
+                                        filterable: false,
+                                        sortable: false,
+                                        width: 150,
+                                        Cell: row => <div className="actions-right">{row.value}</div>
+                                    },
+                                    {
+                                        Header: () => (
+                                            <div className="actions-right">
+                                                <strong>Total</strong></div>),
+                                        accessor: "regAmount",
+                                        filterable: false,
+                                        sortable: false,
+                                        width: 100,
+                                        Cell: row => <div className="actions-right">{row.value}</div>
+                                    },
+                                    {
+                                        Header: () => (
+                                            <div className="actions-right">
+                                                <strong>Sale Price</strong></div>),
+                                        accessor: "sellingPrice",
+                                        filterable: false,
+                                        sortable: false,
+                                        width: 150,
+                                        Cell: row => <div className="actions-right">{row.value}</div>
+                                    },
+                                    {
+                                        Header: () => (
+                                            <div className="actions-right">
+                                                <strong>Total</strong></div>),
+                                        accessor: "amount",
+                                        filterable: false,
+                                        sortable: false,
+                                        width: 100,
+                                        Cell: row => <div className="actions-right">{row.value}</div>
+                                    }
+                                ]}
+                                pageSize={this.state.numberOfRows}
+                                showPaginationBottom={false}
+                                className="-striped -highlight"
+                            />
+                            <br />
+                            <div className="inv-footer">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <th>Sub Total</th>
+                                            <td>{parseInt(this.state.totalBillRegular, 10).toLocaleString() + ".00"}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Discount</th>
+                                            <td>{parseInt(this.state.totalBillRegular - this.state.totalBill, 10).toLocaleString() + ".00"}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Total</th>
+                                            <td>{parseInt(this.state.totalBill, 10).toLocaleString() + ".00"}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </CardBody>
+                    </Card>
+                </Dialog>
+
+                {/* payment dialog box */}
+                <Dialog
+                    open={this.state.proceedOpen}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                // maxWidth="sm"
+                // scroll="body"
+                >
+                    <Button
+                        justIcon
+                        round
+                        simple
+                        onClick={this.proceedClose}
+                        color="danger"
+                        className={classes.paymentCloseIcon}
+                    >
+                        <Close />
+                    </Button>
+                    <br />
+                    <Card className={classes.paymentCardSize}>
+                        <CardHeader color="primary" icon>
+                            <CardIcon color="primary">
+                                <Bill />
+                            </CardIcon>
+                            <h4 className={classes.cardIconTitle}>Payment</h4>
+                        </CardHeader>
+                        <br />
+                        <CardBody>
+                            <form>
+                                <CustomInput
+                                    labelText="Details"
+                                    id="details"
+                                    formControlProps={{
+                                        fullWidth: true
+                                    }}
+                                    inputProps={{
+                                        type: "text"
+                                    }}
+                                    onChange={(event) => this.setState({ details: event.target.value })}
+                                    defaultValue={this.state.details}
+                                />
+                                <CustomInput
+                                    labelText="Total Bill"
+                                    id="totalBill"
+                                    formControlProps={{
+                                        fullWidth: true
+                                    }}
+                                    defaultValue={parseInt(this.state.totalBill, 10).toLocaleString() + ".00"}
+                                />
+                                <CustomInput
+                                    labelText="Cash Paid"
+                                    id="cashPaid"
+                                    formControlProps={{
+                                        fullWidth: true
+                                    }}
+                                    inputProps={{
+                                        type: "number"
+                                    }}
+                                    onChange={(event) => this.setState({ cashPaid: event.target.value })}
+                                    defaultValue={this.state.cashPaid}
+                                />
+                                <div>
+                                    <Button
+                                        size='sm'
+                                        color="info"
+                                        onClick={this.calBalance}
+                                        className={classes.addButton}
+                                    >
+                                        Calculate
+                                    </Button>
+                                </div>
+                                <CustomInput
+                                    disabled={true}
+                                    labelText="Balance"
+                                    id="balance"
+                                    formControlProps={{
+                                        fullWidth: true
+                                    }}
+                                    value={parseInt(this.state.balance, 10).toLocaleString() + ".00"}
+                                />
+                                <div>
+                                    <Button
+                                        disabled={this.state.nextButtonDisabled}
+                                        size='sm'
+                                        color="info"
+                                        onClick={this.nextButton}
+                                        className={classes.addButton}
+                                    >
+                                        Next>>
+                                    </Button>
+                                </div>
+                            </form>
+                        </CardBody>
+                    </Card>
+                </Dialog>
 
                 {/* customer select dialog box */}
                 <Dialog
@@ -1093,6 +1388,7 @@ class Cashier extends React.Component {
                                         simple 
                                         round 
                                         color="success" 
+                                        disabled={this.state.saleDetailsList.length != 0}
                                         className={classes.CustomerSelectFormOpenButton} 
                                             onClick={this.CustomerSelectFormOpenButtonClick}>
                                             <AddCircle className={classes.icons} />

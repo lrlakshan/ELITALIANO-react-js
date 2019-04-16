@@ -100,7 +100,7 @@ const styles = {
     },
     paymentCloseIcon: {
         position: "absolute",
-        marginLeft: "89%",
+        marginLeft: "88%",
         marginBottom: "0px",
     },
     invoiceCloseIcon: {

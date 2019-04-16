@@ -52,7 +52,11 @@
         .inv-header table th, .inv-header table td, .inv-header table{
             border: 1px solid silver;
         }
-        .inv-header table th, .inv-header table td{
+        .inv-header table th{
+            text-align: left;
+            padding: 8px;
+        }
+        .inv-header table td{
             text-align: right;
             padding: 8px;
         }
@@ -90,7 +94,12 @@
             border: 1px solid silver;
             border-collapse: collapse;
         }
-        .inv-footer table th, .inv-footer table td{
+        .inv-footer table th{
+            padding: 8px;
+            text-align: left;
+            border: 1px solid silver;
+        }
+        .inv-footer table td{
             padding: 8px;
             text-align: right;
             border: 1px solid silver;
