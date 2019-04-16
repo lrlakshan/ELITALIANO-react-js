@@ -62,16 +62,21 @@ class saleController extends Controller
                                 'sales.productId',
                                 'products.productName', 
                                 'products.sellingPrice', 
+                                'products.marketPrice',
                                 'sales.amountPurchases',
                                  DB::raw(
-                                    'products.sellingPrice*sales.amountPurchases as amount')
-                            )
+                                    'products.sellingPrice*sales.amountPurchases as amount'),
+	                            DB::raw(
+	                                    'products.marketPrice*sales.amountPurchases as regAmount')
+	                            )
                             ->where('invoiceNum','=',$request->all())
                             ->get();
 
         $totalBill = DB::table('sales')
                             ->join('products', 'products.productId', '=', 'sales.productId')
-                            ->select(DB::raw('sum(products.sellingPrice*sales.amountPurchases) AS totalBill'))
+                            ->select(
+                            	DB::raw('sum(products.sellingPrice*sales.amountPurchases) AS totalBill'),
+                             	DB::raw('sum(products.marketPrice*sales.amountPurchases) AS totalBillRegular'))
                             ->where('invoiceNum','=',$request->all())
                             ->first();
 
