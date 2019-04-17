@@ -194,7 +194,9 @@ class Purchases extends React.Component {
     //print PDF button click
     printPDF = () => {
         const input = document.getElementById('divToPrint');
-        html2canvas(input)
+        html2canvas(input, {
+            scale: "1.2"
+        })
             .then((canvas) => {
                 const imgData = canvas.toDataURL('image/png');
                 var imgWidth = 210;
@@ -905,7 +907,6 @@ class Purchases extends React.Component {
                             </CardIcon>
                             <h4 className={classes.cardIconTitle}>Payment</h4>
                         </CardHeader>
-                        <br />
                         <CardBody>
                             <form>
                                 <CustomInput
@@ -921,6 +922,7 @@ class Purchases extends React.Component {
                                     defaultValue={this.state.details}
                                 />
                                 <CustomInput
+                                    disabled= {true}
                                     labelText="Total Bill"
                                     id="totalBill"
                                     formControlProps={{
@@ -1096,7 +1098,7 @@ class Purchases extends React.Component {
                                                 <td>{parseInt(this.state.cashPaid, 10).toLocaleString() + ".00"}</td>
                                             </tr>
                                             <tr>
-                                                <th>Balance</th>
+                                                <th>Payment Due</th>
                                                 <td>{parseInt(this.state.balance, 10).toLocaleString() + ".00"}</td>
                                             </tr>
                                         </tbody>
@@ -1155,6 +1157,8 @@ class Purchases extends React.Component {
                 >
                     Purchase list has been deleted.
                 </SweetAlert>
+
+                {/* purchase complete sweet alert */}
                 <SweetAlert
                     show={this.state.purchaseCompleted}
                     success

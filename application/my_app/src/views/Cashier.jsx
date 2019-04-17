@@ -128,6 +128,11 @@ const styles = {
         marginLeft: "92%",
         marginBottom: "0px",
     },
+    invoiceCloseIcon: {
+        position: "absolute",
+        marginLeft: "94%",
+        marginBottom: "0px",
+    },
     cardSize: {
         width: "100%"
     },
@@ -171,9 +176,11 @@ class Cashier extends React.Component {
             proceedOpen: false,
             nextButtonDisabled: true,
             pdfPrinted: false,
+            invoiceOpen: false,
             totalBill: "0.00",
             totalBillRegular: "0.00",
             cashPaid: "0.00",
+            discount: "0.00",
             balance: "0.00",
             purchasePrice: "0.00",
             salesInvoiceNextNumber: null,
@@ -190,8 +197,10 @@ class Cashier extends React.Component {
             typingMobile: '',
             addNewCustomerloading: false,
             successAlert: false,
+            saleCompleted: false,
             succesAlertMsg: "",
             simpleSelectProduct: "",
+            details: "",
             selectedDate: Moment(Date()).format("YYYY-MM-DD"),
 
             //cashier product details states
@@ -226,6 +235,40 @@ class Cashier extends React.Component {
         var momentObj = Moment(dateObj);
         var momentString = momentObj.format('YYYY-MM-DD');
         this.setState({ selectedDate: momentString });
+    }
+
+    //print PDF button click
+    printPDF = () => {
+        const input = document.getElementById('divToPrint');
+        html2canvas(input, {
+            scale: "1.2"
+        })
+            .then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                var imgWidth = 210;
+                var pageHeight = 295;
+                var imgHeight = canvas.height * imgWidth / canvas.width;
+                var heightLeft = imgHeight;
+                const pdf = new jsPDF();
+                var position = 0;
+
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                pdf.save(this.state.salesInvoiceNextNumber + "-" + this.state.selectedCustomerName + "-" + this.state.details + ".pdf");
+
+                //un comment this to enable print feature
+                // pdf.autoPrint();
+                // window.open(pdf.output('bloburl'), '_blank');
+
+                this.setState({ pdfPrinted: true });
+            });
     }
 
     //select the customer from search bar
@@ -522,7 +565,8 @@ class Cashier extends React.Component {
                         customerId: this.state.selectedCustomerId,
                         purchasePrice: this.state.purchasePrice,
                         sellingPrice: this.state.sellingPrice,
-                        amountPurchases: this.state.amountPurchases
+                        amountPurchases: this.state.amountPurchases,
+                        marketPrice: this.state.marketPrice
                     })
                     .then(response => {
                         this.setState({
@@ -531,6 +575,7 @@ class Cashier extends React.Component {
                             amountAvailable: "0",
                             purchasePrice: "0.00",
                             sellingPrice: "0.00",
+                            marketPrice: "0.00",
                             amountPurchasesState: "",
                             amountPurchases: 0,
                             simpleSelectProduct: ""
@@ -705,7 +750,9 @@ class Cashier extends React.Component {
             proceedOpen: true,
             checkoutOpen: false,
             balance: this.state.totalBill,
-            cashPaid: "0.00"
+            cashPaid: "0.00",
+            discount: "0.00",
+            details: ""
         });
     };
 
@@ -716,6 +763,24 @@ class Cashier extends React.Component {
             checkoutOpen: true,
             nextButtonDisabled: true
         });
+    };
+
+    //calculate remaining cash to be paid to the customer
+    calBalance = () => {
+        let x = this.state.totalBill - this.state.cashPaid - this.state.discount;
+        if (x < 0) {
+            this.setState({
+                alertOpen: true,
+                alertDiscription: "You are entering a cash paid amount which is greater than the total bill"
+            });
+        } else {
+            this.setState({
+                balance: x,
+                nextButtonDisabled: false
+            });
+            const element = document.getElementById("nextBtn");
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
     };
 
     //Next button function
@@ -741,6 +806,54 @@ class Cashier extends React.Component {
             nextButtonDisabled: true,
             pdfPrinted: false
         });
+    };
+
+    //final purchase doen button click. This will call purchase invoice API
+    purchaseDoneButtonClick = () => {
+        Helper.http
+            .jsonPost("addSalesInvoice", {
+                invoiceNum: this.state.salesInvoiceNextNumber,
+                customerId: this.state.selectedCustomerId,
+                date: this.state.selectedDate,
+                details: this.state.details,
+                totalBill: this.state.totalBill,
+                discount: this.state.discount,
+                cashPaid: this.state.cashPaid,
+                balance: this.state.balance,
+            })
+            .then(response => {
+                this.setState({
+                    saleCompleted: true,
+                    invoiceOpen: false
+                });
+                // this.getMenuList();
+                // this.getSupplierList();
+                // this.getPurchaseInvoiceNextNumber();
+                // this.getPurchaseDetails();
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    //purchase complete sweet alert close function
+    sale_complete_alert_close = () => {
+        this.setState({
+            saleCompleted: false,
+        });
+        window.location.reload();
+
+        ////-------use this code if reload takes too much time. check it after live deployment------
+
+        // this.setState({
+        //     saleCompleted: false,
+        //     selectedDate: Moment(Date()).format("YYYY-MM-DD"),
+        //     simpleSelectSupplier:""
+        // });
+        // this.getPurchaseInvoiceNextNumber();
+        // this.getPurchaseDetails();
+
+        //------------------------------------------------------------------------------------
     };
 
     // function that verifies if a string has a given length or not
@@ -881,7 +994,7 @@ class Cashier extends React.Component {
                                     {
                                         Header: () => (
                                             <div className="actions-right">
-                                                <strong>Regular Price</strong></div>),
+                                                <strong>Regular Price *1</strong></div>),
                                         accessor: "marketPrice",
                                         filterable: false,
                                         sortable: false,
@@ -901,7 +1014,7 @@ class Cashier extends React.Component {
                                     {
                                         Header: () => (
                                             <div className="actions-right">
-                                                <strong>Sale Price</strong></div>),
+                                                <strong>Sale Price *1</strong></div>),
                                         accessor: "sellingPrice",
                                         filterable: false,
                                         sortable: false,
@@ -932,7 +1045,7 @@ class Cashier extends React.Component {
                                             <td>{parseInt(this.state.totalBillRegular, 10).toLocaleString() + ".00"}</td>
                                         </tr>
                                         <tr>
-                                            <th>Discount</th>
+                                            <th>Discount (-)</th>
                                             <td>{parseInt(this.state.totalBillRegular - this.state.totalBill, 10).toLocaleString() + ".00"}</td>
                                         </tr>
                                         <tr>
@@ -972,7 +1085,6 @@ class Cashier extends React.Component {
                             </CardIcon>
                             <h4 className={classes.cardIconTitle}>Payment</h4>
                         </CardHeader>
-                        <br />
                         <CardBody>
                             <form>
                                 <CustomInput
@@ -988,12 +1100,25 @@ class Cashier extends React.Component {
                                     defaultValue={this.state.details}
                                 />
                                 <CustomInput
+                                    disabled= {true}
                                     labelText="Total Bill"
                                     id="totalBill"
                                     formControlProps={{
                                         fullWidth: true
                                     }}
                                     defaultValue={parseInt(this.state.totalBill, 10).toLocaleString() + ".00"}
+                                />
+                                <CustomInput
+                                    labelText="Discount"
+                                    id="discount"
+                                    formControlProps={{
+                                        fullWidth: true
+                                    }}
+                                    inputProps={{
+                                        type: "number"
+                                    }}
+                                    onChange={(event) => this.setState({ discount: event.target.value })}
+                                    defaultValue={this.state.discount}
                                 />
                                 <CustomInput
                                     labelText="Cash Paid"
@@ -1028,6 +1153,7 @@ class Cashier extends React.Component {
                                 />
                                 <div>
                                     <Button
+                                        id="nextBtn"
                                         disabled={this.state.nextButtonDisabled}
                                         size='sm'
                                         color="info"
@@ -1038,6 +1164,152 @@ class Cashier extends React.Component {
                                     </Button>
                                 </div>
                             </form>
+                        </CardBody>
+                    </Card>
+                </Dialog>
+
+                {/* Invoice dialog box */}
+                <Dialog
+                    open={this.state.invoiceOpen}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                    maxWidth="md"
+                    scroll="body"
+                    classes={{ paper: classes.dialogPaper }}
+                >
+                    <Button
+                        justIcon
+                        round
+                        simple
+                        onClick={this.invoiceClose}
+                        color="danger"
+                        className={classes.invoiceCloseIcon}
+                    >
+                        <Close />
+                    </Button>
+                    <br />
+                    <Card className={classes.printInvoiceSize}>
+                        <CardHeader color="primary" icon>
+                            <CardIcon color="primary">
+                                <Bill />
+                            </CardIcon>
+                            <h4 className={classes.cardIconTitle}>Invoice</h4>
+                        </CardHeader>
+                        <br />
+                        <CardBody>
+                            <div >
+                                <Button
+                                    disabled={!this.state.pdfPrinted}
+                                    size='sm'
+                                    color="info"
+                                    onClick={this.purchaseDoneButtonClick}
+                                    className={classes.invoiceButton}
+                                > Purchase
+                            </Button>
+                                <Button
+                                    size='sm'
+                                    color="info"
+                                    onClick={this.printPDF}
+                                    className={classes.invoiceButton}
+                                > Print PDF
+                            </Button>
+                            </div>
+                            <div id="divToPrint" className="container">
+                                <div >
+                                    <h1 className="no-margin">Sales Invoice</h1>
+                                </div>
+                                <div className="inv-header">
+                                    <div>
+                                        <img src={elitaliano_logo} className="inv-logo" />
+                                        <h2>ELITALIANO</h2>
+                                        <ul>
+                                            <li>Liyanage Distributors</li>
+                                            <li>1394/7, Hokandara road,Pannipitiya</li>
+                                            <li>Lakshan : +94 71 303 2396</li>
+                                            <li>Janith : +94 71 329 9627</li>
+                                            <li>Email : elitaliano.lanka@gmail.com</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th>Invoice Number</th>
+                                                    <td>{this.state.salesInvoiceNextNumber}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Issue Date</th>
+                                                    <td>{this.state.selectedDate}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Total</th>
+                                                    <td>{parseInt(this.state.totalBill - this.state.discount, 10).toLocaleString() + ".00"}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div className="inv-body">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name</th>
+                                                <th>Qty</th>
+                                                <th>Regular Price *1</th>
+                                                <th>Total</th>
+                                                <th>Sale Price *1</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                this.state.saleDetailsList.map((item, index) =>
+                                                    <tr key={item.id}>
+                                                        <td>
+                                                            <p>{item.productName}</p>
+                                                        </td>
+                                                        <td>{item.amountPurchases}</td>
+                                                        <td>{item.marketPrice}</td>
+                                                        <td>{item.regAmount}</td>
+                                                        <td>{item.sellingPrice}</td>
+                                                        <td>{item.amount}</td>
+                                                    </tr>
+                                                )
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="inv-footer">
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <th>Sub Total</th>
+                                                <td>{parseInt(this.state.totalBillRegular, 10).toLocaleString() + ".00"}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Discount (-)</th>
+                                                <td>{parseInt(this.state.totalBillRegular - this.state.totalBill, 10).toLocaleString() + ".00"}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Promo Discount (-)</th>
+                                                <td>{parseInt(this.state.discount, 10).toLocaleString() + ".00"}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Total</th>
+                                                <td>{parseInt(this.state.totalBill - this.state.discount, 10).toLocaleString() + ".00"}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Cash Paid</th>
+                                                <td>{parseInt(this.state.cashPaid, 10).toLocaleString() + ".00"}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Payment Due</th>
+                                                <td>{parseInt(this.state.balance, 10).toLocaleString() + ".00"}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </CardBody>
                     </Card>
                 </Dialog>
@@ -1327,7 +1599,7 @@ class Cashier extends React.Component {
                     cancelBtnText="Cancel"
                     showCancel
                 >
-                    You will not be able to recover this purchase list again!
+                    You will not be able to recover this sales list again!
                 </SweetAlert>
                 <SweetAlert
                     show={this.state.deleteAlertSuccess}
@@ -1340,7 +1612,22 @@ class Cashier extends React.Component {
                         this.props.classes.button + " " + this.props.classes.success
                     }
                 >
-                    Purchase list has been deleted.
+                    Sales list has been deleted.
+                </SweetAlert>
+
+                {/* sale complete sweet alert */}
+                <SweetAlert
+                    show={this.state.saleCompleted}
+                    success
+                    style={{ display: "block", marginTop: "-150px" }}
+                    title="Successful"
+                    onConfirm={() => this.sale_complete_alert_close()}
+                    onCancel={() => this.sale_complete_alert_close()}
+                    confirmBtnCssClass={
+                        this.props.classes.button + " " + this.props.classes.success
+                    }
+                >
+                    Your purchase has been completed
                 </SweetAlert>
 
                 <GridContainer>
