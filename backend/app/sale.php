@@ -13,6 +13,6 @@ class sale extends Model
      * @var array
      */
     protected $fillable = [
-        'invoiceNum', 'date', 'productId', 'customerId', 'purchasePrice', 'sellingPrice', 'amountPurchases',
+        'invoiceNum', 'date', 'productId', 'customerId', 'purchasePrice', 'sellingPrice', 'marketPrice', 'amountPurchases',
     ];
 }

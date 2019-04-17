@@ -22,6 +22,7 @@ class saleController extends Controller
             'purchasePrice'=> 'required',
 	    	'sellingPrice'=> 'required',
 	    	'amountPurchases'=> 'required',
+	    	'marketPrice'=> 'required',
     	]);
 
     	if($validator->fails()){
