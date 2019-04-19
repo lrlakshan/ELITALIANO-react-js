@@ -24,10 +24,10 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import InputAdornment from "@material-ui/core/InputAdornment";
 // @material-ui/icons
-import MailOutline from "@material-ui/icons/MailOutline";
+import Search from "@material-ui/icons/Search";
 import Assignment from "@material-ui/icons/Assignment";
 import Dvr from "@material-ui/icons/Dvr";
-import Favorite from "@material-ui/icons/Favorite";
+import Done from "@material-ui/icons/Done";
 import Close from "@material-ui/icons/Close";
 import AddCircle from "@material-ui/icons/AddCircle";
 import LocalMall from "@material-ui/icons/LocalMall";
@@ -58,6 +58,18 @@ const styles = {
         marginBottom: "0px",
         width: "150px"
     },
+    alignright: {
+        marginTop: "10px",
+        marginBottom: "0px",
+        textAlign: "Right"
+    },
+    searchButton: {
+        paddingRight: "8%",
+    },
+    viewSalesButtons: {
+        marginLeft: "20%",
+        width: "150px"
+    },
     cardSize: {
         width: "350px"
     },
@@ -68,32 +80,48 @@ const styles = {
     ...extendedFormsStyle,
 };
 
+function filterCaseInsensitive(filter, row) {
+    const id = filter.pivotId || filter.id;
+    return (
+        row[id] !== undefined ?
+            String(row[id].toLowerCase()).startsWith(filter.value.toLowerCase())
+            :
+            true
+    );
+}
 
 class SalesHistory extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             salesInvoices: [],
+            customerNames: [],
             loading: false,
             open: false,
+            customerTableLoading: false,
             numberOfRows: 1,
+            selectedCustomerId: '',
+            selectedCustomerName: '',
+            typingName: '',
             formTitle: "",
             invoiceNum: "",
+            selectedRadioBtn: "radio1",
+            salesBtn: 'todaySales',
             simpleSelectItem: "",
         };
     }
 
     componentDidMount() {
-        this.getSalesInvoicesDetails();
+        this.getTodaySalesInvoiceDetails();
     }
 
-    //get purhcase invoice details
-    getSalesInvoicesDetails = () => {
+    //get all sales invoice details
+    getAllSalesInvoiceDetails = () => {
         const salesInvoices = [];
         this.setState({ loading: true });
 
         Helper.http
-            .jsonGet("getSalesInvoiceDetails")
+            .jsonGet("getAllSalesInvoiceDetails")
             .then(response => {
                 let data = response.data;
                 for (let i = 0; i < data.length; i++) {
@@ -145,6 +173,154 @@ class SalesHistory extends React.Component {
             });
     };
 
+    //get today sales invoice details
+    getTodaySalesInvoiceDetails = () => {
+        const salesInvoices = [];
+        this.setState({ loading: true });
+
+        Helper.http
+            .jsonGet("getTodaySalesInvoiceDetails")
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        invoiceNum: data[i].invoiceNum,
+                        customerName: data[i].customerName,
+                        date: data[i].date,
+                        details: data[i].details,
+                        totalBill: data[i].totalBill,
+                        discount: data[i].discount,
+                        cashPaid: data[i].cashPaid,
+                        balance: data[i].balance,
+
+                        actions: (
+                            // we've added some custom button actions
+                            <div className="actions-right">
+                                {/* use this button to add a edit kind of action */}
+                                <Button
+                                    justIcon
+                                    round
+                                    simple
+                                    onClick={() => {
+                                        //let obj = this.state.data.find(o => o.id === key);
+                                        this.setState({
+                                            open: true,
+                                            formTitle: "Return Items",
+                                            formButtonText: "Save",
+                                        })
+                                        this.loadItemsOfSelectedInvoice(data[i].invoiceNum);
+                                    }}
+                                    color="warning"
+                                    className="edit"
+                                >
+                                    <Dvr />
+                                </Button>{" "}
+                            </div>
+                        )
+                    };
+                    salesInvoices.push(_data);
+                }
+                this.setState({ salesInvoices });
+                this.setState({
+                    loading: false,
+                    numberOfRows: data.length,
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    //select the customer from search bar
+    selectByCustomerName = (value) => {
+        const customerNames = [];
+        this.setState({
+            customerTableLoading: true,
+            typingName: value
+        });
+        Helper.http
+            .jsonPost("getSelectedCustomerByName", {
+                customerName: value
+            })
+            .then(response => {
+                let data = response.data.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        id: data[i].id,
+                        searchResult: data[i].customerName,
+                        actions: (
+                            // we've added some custom button actions
+                            <div className="actions-right">
+                                {/* use this button to add customer */}
+                                <Button
+                                    justIcon
+                                    round
+                                    simple
+                                    onClick={() => {
+                                        this.selectCustomer(data[i].id, data[i].customerName);
+                                    }}
+                                    color="success"
+                                    className="remove"
+                                >
+                                    <Done />
+                                </Button>{" "}
+                            </div>
+                        )
+                    };
+                    customerNames.push(_data);
+                }
+                this.setState({ customerNames });
+                this.setState({ customerTableLoading: false });
+            })
+            .catch(exception => {
+                console.log(exception);
+                this.setState({
+                    customerTableLoading: false,
+                    customerNames: []
+                });
+            });
+    }
+
+    //save the selected customer ID and customer name in a state
+    selectCustomer = (customerId, customerName) => {
+        this.setState({
+            selectedCustomerId: customerId,
+            selectedCustomerName: customerName,
+        });
+    }
+
+    //clear the selected customer ID and customer name from the state
+    clearSelectedCustomer = () => {
+        this.setState({
+            selectedCustomerId: '',
+            selectedCustomerName: '',
+        });
+    }
+
+    //radio button change handling function
+    handleRadioBtnChange = (event) => {
+        console.log(event.target.value);
+        this.setState({
+            selectedRadioBtn: event.target.value
+        });
+    };
+
+    //today sales button click function
+    todaySalesBtnClick = () => {
+        this.setState({
+            salesBtn: 'todaySales',
+        });
+        this.getTodaySalesInvoiceDetails();
+    }
+
+    //all sales button click function
+    allSalesBtnClick = () => {
+        this.setState({
+            salesBtn: 'allSales',
+        });
+        this.getAllSalesInvoiceDetails();
+    }
+
     render() {
         const { classes } = this.props;
         return (
@@ -162,61 +338,78 @@ class SalesHistory extends React.Component {
                             <GridContainer>
                                 <GridItem xs={12} sm={12} md={6}>
                                     <CardBody>
-                                        <p>wow1</p>
+                                        <div className="k-form-field" >
+                                            <input type="radio" name="radio" value="radio1" className="k-radio" onChange={this.handleRadioBtnChange} defaultChecked={true} />
+                                            <label className="k-radio-label">Search within all sales</label>
+                                            <br />
+                                            <br />
+                                            <input type="radio" name="radio" value="radio2" className="k-radio" onChange={this.handleRadioBtnChange} />
+                                            <label className="k-radio-label">Search within a time period</label>
+                                        </div>
                                     </CardBody>
                                 </GridItem>
-                                <GridItem xs={12} sm={12} md={6}>
-                                    <GridContainer>
-                                        <GridItem xs={12} sm={12} md={6}>
-                                            <CardBody>
-                                                <InputLabel className={classes.label}>From</InputLabel>
-                                                <br />
-                                                <FormControl >
-                                                    <Datetime
-                                                        timeFormat={false}
-                                                        dateFormat="YYYY-MM-DD"
-                                                        defaultValue={Moment(Date()).format("YYYY-MM-DD")}
-                                                        onChange={this.updateState}
-                                                    />
-                                                </FormControl>
-                                            </CardBody>
-                                        </GridItem>
-                                        <GridItem xs={12} sm={12} md={6}>
-                                            <CardBody>
-                                                <InputLabel className={classes.label}>To</InputLabel>
-                                                <br />
-                                                <FormControl >
-                                                    <Datetime
-                                                        timeFormat={false}
-                                                        dateFormat="YYYY-MM-DD"
-                                                        defaultValue={Moment(Date()).format("YYYY-MM-DD")}
-                                                        onChange={this.updateState}
-                                                    />
-                                                </FormControl>
-                                            </CardBody>
-                                        </GridItem>
-                                    </GridContainer>
-                                </GridItem>
+                                {this.state.selectedRadioBtn == 'radio1' 
+                                    ? <GridItem xs={12} sm={12} md={6}>
+                                        <GridContainer>
+                                            <Button
+                                                simple={this.state.salesBtn == 'allSales' || this.state.salesBtn == ''}
+                                                size='sm'
+                                                round
+                                                color="twitter"
+                                                className={classes.viewSalesButtons}
+                                                onClick={this.todaySalesBtnClick}> View today Sales
+                                            </Button>
+                                            <Button
+                                                simple={this.state.salesBtn == 'todaySales' || this.state.salesBtn == ''}
+                                                size='sm'
+                                                round
+                                                color="twitter"
+                                                className={classes.viewSalesButtons}
+                                                onClick={this.allSalesBtnClick}> View all Sales
+                                            </Button>
+                                        </GridContainer>
+                                    </GridItem> 
+                                    : <GridItem xs={12} sm={12} md={6}>
+                                        <GridContainer>
+                                            <GridItem xs={12} sm={12} md={6}>
+                                                <CardBody>
+                                                    <InputLabel className={classes.label}>From</InputLabel>
+                                                    <br />
+                                                    <FormControl >
+                                                        <Datetime
+                                                            timeFormat={false}
+                                                            dateFormat="YYYY-MM-DD"
+                                                            defaultValue={Moment(Date()).format("YYYY-MM-DD")}
+                                                            onChange={this.updateState}
+                                                        />
+                                                    </FormControl>
+                                                </CardBody>
+                                            </GridItem>
+                                            <GridItem xs={12} sm={12} md={6}>
+                                                <CardBody>
+                                                    <InputLabel className={classes.label}>To</InputLabel>
+                                                    <br />
+                                                    <FormControl >
+                                                        <Datetime
+                                                            timeFormat={false}
+                                                            dateFormat="YYYY-MM-DD"
+                                                            defaultValue={Moment(Date()).format("YYYY-MM-DD")}
+                                                            onChange={this.updateState}
+                                                        />
+                                                    </FormControl>
+                                                </CardBody>
+                                            </GridItem>
+                                        </GridContainer>
+                                    </GridItem>
+                                }
+                                
                                 <GridItem xs={12} sm={12} md={6}>
                                     <CardBody>
                                         <NavPills
                                             color="info"
                                             tabs={[
                                                 {
-                                                    tabButton: "Customer Name",
-                                                    tabContent: (
-                                                        <span>
-                                                            <ReactSearchBox
-                                                                placeholder="Insert Customer Name"
-                                                                value={this.state.typingName}
-                                                                callback={record => console.log(record)}
-                                                                onChange={this.selectByCustomerName}
-                                                            />
-                                                        </span>
-                                                    )
-                                                },
-                                                {
-                                                    tabButton: "Invoice Number",
+                                                    tabButton: "Invoice",
                                                     tabContent: (
                                                         <span>
                                                             <ReactSearchBox
@@ -225,6 +418,49 @@ class SalesHistory extends React.Component {
                                                                 callback={record => console.log(record)}
                                                                 onChange={this.selectByCustomerName}
                                                             />
+                                                            <Button
+                                                                size='sm'
+                                                                color="success"
+                                                                className={classes.searchButton}
+                                                                onClick={this.proceedOpen}>
+                                                                <Search className={classes.icons} /> Search
+                                                            </Button>
+                                                        </span>
+                                                    )
+                                                },
+                                                {
+                                                    tabButton: "Customer",
+                                                    tabContent: (
+                                                        <span>
+                                                            <CustomInput
+                                                                labelText="Selected Customer"
+                                                                id="selectedCustomerName"
+                                                                disabled
+                                                                formControlProps={{
+                                                                    fullWidth: true
+                                                                }}
+                                                                value={this.state.selectedCustomerName}
+                                                            />
+                                                            <ReactSearchBox
+                                                                placeholder="Insert Customer Name"
+                                                                value={this.state.typingName}
+                                                                callback={record => console.log(record)}
+                                                                onChange={this.selectByCustomerName}
+                                                            />
+                                                            <Button
+                                                                disabled={this.state.selectedCustomerId == ''}
+                                                                size='sm'
+                                                                color="success"
+                                                                className={classes.searchButton}
+                                                                onClick={this.proceedOpen}> Search
+                                                            </Button>
+                                                            <Button
+                                                                disabled={this.state.selectedCustomerId == ''}
+                                                                size='sm'
+                                                                color="danger"
+                                                                className={classes.searchButton}
+                                                                onClick={this.clearSelectedCustomer}> Clear
+                                                            </Button>
                                                         </span>
                                                     )
                                                 },
@@ -234,7 +470,40 @@ class SalesHistory extends React.Component {
                                 </GridItem>
                                 <GridItem xs={12} sm={12} md={6}>
                                     <CardBody>
-                                        <p>wow2</p>
+                                        <ReactTable
+                                            loading={this.state.customerTableLoading}
+                                            data={this.state.customerNames}
+                                            noDataText=""
+                                            defaultFilterMethod={filterCaseInsensitive}
+                                            defaultSorted={[
+                                                {
+                                                    id: "id",
+                                                    asc: true
+                                                }
+                                            ]}
+                                            columns={[
+                                                {
+                                                    Header: () => (
+                                                        <div className="actions-left">
+                                                            <strong>Search Result</strong></div>),
+                                                    accessor: "searchResult",
+                                                    filterable: false,
+                                                    sortable: false,
+                                                    width: 140,
+                                                    Cell: row => <div className="actions-left">{row.value}</div>
+                                                },
+                                                {
+                                                    Header: "",
+                                                    accessor: "actions",
+                                                    width: 50,
+                                                    sortable: false,
+                                                    filterable: false
+                                                }
+                                            ]}
+                                            pageSize="3"
+                                            showPaginationBottom={false}
+                                            className="-striped -highlight"
+                                        />
                                     </CardBody>
                                 </GridItem>
                             </GridContainer>
@@ -242,9 +511,32 @@ class SalesHistory extends React.Component {
                     </GridItem>
                     <GridItem xs={12} sm={12} md={6}>
                         <Card>
-                            <CardBody>
-                                <p>wow3</p>
-                            </CardBody>
+                            <CardHeader color="primary" icon>
+                                <CardIcon color="primary">
+                                    <Assignment />
+                                </CardIcon>
+                                <h4 className={classes.cardIconTitle}>Summary</h4>
+                            </CardHeader>
+                            <GridContainer>
+                                <GridItem xs={12} sm={12} md={6}>
+                                    <CardBody>
+                                        <h4>Revenue</h4>
+                                        <h4>Cost of Sales (-)</h4>
+                                        <h4>Discounts given (-)</h4>
+                                        <br />
+                                        <h4>Gross Profit</h4>
+                                    </CardBody>
+                                </GridItem>
+                                <GridItem xs={12} sm={12} md={6}>
+                                    <CardBody>
+                                        <h4 className={classes.alignright}><small>Rs.10000</small></h4>
+                                        <h4 className={classes.alignright}><small>Rs.1000</small></h4>
+                                        <h4 className={classes.alignright}><small>Rs.100</small></h4>
+                                        <br />
+                                        <h4 className={classes.alignright}><small>Rs.100</small></h4>
+                                    </CardBody>
+                                </GridItem>
+                            </GridContainer>
                         </Card>
                     </GridItem>
                 </GridContainer>
