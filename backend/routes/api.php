@@ -52,6 +52,8 @@ Route::post('salesClearList','saleController@salesClearList');
 //api from sale_invoice table
 Route::get('salesInvoiceNextNumber','saleInvoiceController@salesInvoiceNextNumber');
 Route::post('addSalesInvoice','saleInvoiceController@addSalesInvoice');
+Route::get('getSalesInvoiceDetails','saleInvoiceController@getSalesInvoiceDetails');
+Route::get('getTradeReceivableDetails','saleInvoiceController@getTradeReceivableDetails');
 
 //api's from supplier_details table
 Route::get('supplierDetails','supplierDetailController@supplierDetails');

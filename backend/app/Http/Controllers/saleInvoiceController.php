@@ -63,4 +63,72 @@ class saleInvoiceController extends Controller
     		], 500);
     	}
     }
+
+    //get all invoices list
+    public function getSalesInvoiceDetails(){
+        try {
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('sale_invoices')
+                            ->join('customer_details', 'sale_invoices.customerId', '=', 'customer_details.id')
+                            ->select(
+                                'sale_invoices.invoiceNum',
+                                'customer_details.customerName', 
+                                'sale_invoices.date', 
+                                'sale_invoices.details',
+                                'sale_invoices.totalBill',
+                                'sale_invoices.discount',
+                                'sale_invoices.cashPaid',
+                                'sale_invoices.balance'
+                            )
+                            ->get();
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get remaining trade receivable details
+    public function getTradeReceivableDetails(){
+        try {
+        $receivableDetials = array();
+        $receivableDetials = DB::table('sale_invoices')
+                            ->join('customer_details', 'sale_invoices.customerId', '=', 'customer_details.id')
+                            ->select(
+                                'sale_invoices.invoiceNum',
+                                'customer_details.customerName', 
+                                'sale_invoices.date', 
+                                'sale_invoices.details',
+                                'sale_invoices.balance'
+                            )
+                            ->where('balance','!=',"0.00")
+                            ->orderBy('sale_invoices.invoiceNum', 'ASC')
+                            ->get();
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($receivableDetials),
+                'data'=>$receivableDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
 }
