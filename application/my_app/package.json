@@ -25,6 +25,7 @@
     "react-search-field": "^1.0.0",
     "react-spinner": "^0.2.7",
     "react-spinners": "^0.5.1",
+    "react-swipeable-views": "^0.13.1",
     "react-table": "^6.8.6",
     "redux": "^4.0.1",
     "redux-saga": "^0.16.2",

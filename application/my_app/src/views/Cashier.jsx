@@ -808,7 +808,7 @@ class Cashier extends React.Component {
         });
     };
 
-    //final purchase doen button click. This will call purchase invoice API
+    //final purchase done button click. This will call sales invoice API
     purchaseDoneButtonClick = () => {
         Helper.http
             .jsonPost("addSalesInvoice", {
@@ -836,7 +836,7 @@ class Cashier extends React.Component {
             });
     };
 
-    //purchase complete sweet alert close function
+    //sale complete sweet alert close function
     sale_complete_alert_close = () => {
         this.setState({
             saleCompleted: false,
