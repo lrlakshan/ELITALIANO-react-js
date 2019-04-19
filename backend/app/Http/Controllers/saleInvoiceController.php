@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\sale_invoice;
 use Validator;
 use Exception;
+use Carbon\Carbon;
 
 class saleInvoiceController extends Controller
 {
@@ -65,7 +66,7 @@ class saleInvoiceController extends Controller
     }
 
     //get all invoices list
-    public function getSalesInvoiceDetails(){
+    public function getAllSalesInvoiceDetails(){
         try {
         $invoiceDetials = array();
         $invoiceDetials = DB::table('sale_invoices')
@@ -80,6 +81,105 @@ class saleInvoiceController extends Controller
                                 'sale_invoices.cashPaid',
                                 'sale_invoices.balance'
                             )
+                            ->get();
+
+        $revenue = DB::table('sale_invoices')->sum('totalBill');
+        $costOfSales = DB::table('sales')
+                            ->join('products', 'products.productId', '=', 'sales.productId')
+                            ->select(DB::raw('sum(products.purchasePrice*sales.amountPurchases) AS totalBill'))
+                            ->where('invoiceNum','=',$request->all())
+                            ->first();
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'revenue'=>$revenue,
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get today invoices list
+    public function getTodaySalesInvoiceDetails(){
+        $myDate = Carbon::now();
+        $todayDate =  $myDate->toDateString(); 
+
+        try {
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('sale_invoices')
+                            ->join('customer_details', 'sale_invoices.customerId', '=', 'customer_details.id')
+                            ->select(
+                                'sale_invoices.invoiceNum',
+                                'customer_details.customerName', 
+                                'sale_invoices.date', 
+                                'sale_invoices.details',
+                                'sale_invoices.totalBill',
+                                'sale_invoices.discount',
+                                'sale_invoices.cashPaid',
+                                'sale_invoices.balance'
+                            )
+                            ->where('date','=',$todayDate)
+                            ->get();
+
+        $revenue = DB::table('sale_invoices')->where('date','=',$todayDate)->sum('totalBill');
+        $costOfSales = DB::table('sales')
+                            ->join('products', 'products.productId', '=', 'sales.productId')
+                            ->select(DB::raw('sum(products.purchasePrice*sales.amountPurchases) AS costOfSales'))
+                            ->where('date','=',$todayDate)
+                            ->first();
+        $discount = DB::table('sale_invoices')->where('date','=',$todayDate)->sum('discount');
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'revenue'=>$revenue,
+                'costOfSales'=>$costOfSales->costOfSales,
+                'discount'=>$discount,
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get the invoice details of a paticular invoice number
+    public function getDetailsOfThisInvoice(Request $request){
+
+        try {
+            $validator = Validator::make($request->all(), [
+            'invoiceNum'=> 'required'
+        ]);
+
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('sale_invoices')
+                            ->join('customer_details', 'sale_invoices.customerId', '=', 'customer_details.id')
+                            ->select(
+                                'sale_invoices.invoiceNum',
+                                'customer_details.customerName', 
+                                'sale_invoices.date', 
+                                'sale_invoices.details',
+                                'sale_invoices.totalBill',
+                                'sale_invoices.discount',
+                                'sale_invoices.cashPaid',
+                                'sale_invoices.balance'
+                            )
+                            ->where('invoiceNum','=',$request->all())
                             ->get();
 
             return response()->json([
