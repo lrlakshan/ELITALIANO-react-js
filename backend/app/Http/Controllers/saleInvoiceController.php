@@ -86,16 +86,17 @@ class saleInvoiceController extends Controller
         $revenue = DB::table('sale_invoices')->sum('totalBill');
         $costOfSales = DB::table('sales')
                             ->join('products', 'products.productId', '=', 'sales.productId')
-                            ->select(DB::raw('sum(products.purchasePrice*sales.amountPurchases) AS totalBill'))
-                            ->where('invoiceNum','=',$request->all())
+                            ->select(DB::raw('sum(products.purchasePrice*sales.amountPurchases) AS costOfSales'))
                             ->first();
-
+        $discount = DB::table('sale_invoices')->sum('discount');                    
             return response()->json([
                 'success'=>true,
                 'error'=>null,
                 'code'=>200,
                 'total'=>count($invoiceDetials),
-                'revenue'=>$revenue,
+                'cumRevenue'=>$revenue,
+                'cumCostOfSales'=>$costOfSales->costOfSales,
+                'cumDiscount'=>$discount,
                 'data'=>$invoiceDetials
             ], 200);
             
@@ -143,9 +144,9 @@ class saleInvoiceController extends Controller
                 'error'=>null,
                 'code'=>200,
                 'total'=>count($invoiceDetials),
-                'revenue'=>$revenue,
-                'costOfSales'=>$costOfSales->costOfSales,
-                'discount'=>$discount,
+                'cumRevenue'=>$revenue,
+                'cumCostOfSales'=>$costOfSales->costOfSales,
+                'cumDiscount'=>$discount,
                 'data'=>$invoiceDetials
             ], 200);
             
@@ -159,7 +160,7 @@ class saleInvoiceController extends Controller
     }
 
     //get the invoice details of a paticular invoice number
-    public function getDetailsOfThisInvoice(Request $request){
+    public function searchByInvoiceNumber(Request $request){
 
         try {
             $validator = Validator::make($request->all(), [
@@ -182,11 +183,22 @@ class saleInvoiceController extends Controller
                             ->where('invoiceNum','=',$request->all())
                             ->get();
 
+        $revenue = DB::table('sale_invoices')->where('invoiceNum','=',$request->all())->sum('totalBill');
+        $costOfSales = DB::table('sales')
+                            ->join('products', 'products.productId', '=', 'sales.productId')
+                            ->select(DB::raw('sum(products.purchasePrice*sales.amountPurchases) AS costOfSales'))
+                            ->where('invoiceNum','=',$request->all())
+                            ->first();
+        $discount = DB::table('sale_invoices')->where('invoiceNum','=',$request->all())->sum('discount');
+
             return response()->json([
                 'success'=>true,
                 'error'=>null,
                 'code'=>200,
                 'total'=>count($invoiceDetials),
+                'cumRevenue'=>$revenue,
+                'cumCostOfSales'=>$costOfSales->costOfSales,
+                'cumDiscount'=>$discount,
                 'data'=>$invoiceDetials
             ], 200);
             

@@ -48,13 +48,14 @@ Route::post('addSales','saleController@addSales');
 Route::post('getsaleListDetails','saleController@getsaleListDetails');
 Route::post('deleteSales','saleController@deleteSales');
 Route::post('salesClearList','saleController@salesClearList');
+Route::post('salesHistoryMoreDetails','saleController@salesHistoryMoreDetails');
 
 //api from sale_invoice table
 Route::get('salesInvoiceNextNumber','saleInvoiceController@salesInvoiceNextNumber');
 Route::post('addSalesInvoice','saleInvoiceController@addSalesInvoice');
 Route::get('getAllSalesInvoiceDetails','saleInvoiceController@getAllSalesInvoiceDetails');
 Route::get('getTodaySalesInvoiceDetails','saleInvoiceController@getTodaySalesInvoiceDetails');
-Route::post('getDetailsOfThisInvoice','saleInvoiceController@getDetailsOfThisInvoice');
+Route::post('searchByInvoiceNumber','saleInvoiceController@searchByInvoiceNumber');
 Route::get('getTradeReceivableDetails','saleInvoiceController@getTradeReceivableDetails');
 
 //api's from supplier_details table

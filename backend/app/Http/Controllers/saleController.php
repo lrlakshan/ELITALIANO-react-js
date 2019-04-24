@@ -188,4 +188,61 @@ class saleController extends Controller
             ], 500);
         }
     }
+
+    //get the details of the selected invoice in sales history section
+    public function salesHistoryMoreDetails(Request $request){
+
+        try {
+
+            $validator = Validator::make($request->all(), [
+            'invoiceNum'=> 'required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['success'=>false,'error'=>$validator->errors(),'code'=>401]);
+        }
+
+        $saleDetails = array();
+        $saleDetails = DB::table('sales')
+                            ->join('products', 'products.productId', '=', 'sales.productId')
+                            ->select(
+                                'sales.id',
+                                'sales.productId',
+                                'products.productName', 
+                                'products.sellingPrice', 
+                                'products.marketPrice',
+                                'sales.amountPurchases',
+                                 DB::raw(
+                                    'products.sellingPrice*sales.amountPurchases as amount'),
+	                            DB::raw(
+	                                    'products.marketPrice*sales.amountPurchases as regAmount')
+	                            )
+                            ->where('invoiceNum','=',$request->all())
+                            ->get();
+
+        $totalBill = DB::table('sales')
+                            ->join('products', 'products.productId', '=', 'sales.productId')
+                            ->select(
+                            	DB::raw('sum(products.sellingPrice*sales.amountPurchases) AS totalBill'),
+                             	DB::raw('sum(products.marketPrice*sales.amountPurchases) AS totalBillRegular'))
+                            ->where('invoiceNum','=',$request->all())
+                            ->first();
+
+        return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($saleDetails),
+                'sum'=>$totalBill,
+                'data'=>$saleDetails
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
 }
