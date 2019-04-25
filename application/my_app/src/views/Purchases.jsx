@@ -25,6 +25,9 @@ import Remove from "@material-ui/icons/RemoveFromQueue";
 import Bill from "@material-ui/icons/ShoppingCart";
 import Close from "@material-ui/icons/Close";
 import Check from "@material-ui/icons/Check";
+import Checkout from "@material-ui/icons/FindInPage";
+import Payment from "@material-ui/icons/AssignmentTurnedIn";
+import Invoice from "@material-ui/icons/Description";
 // import Dashboard from "@material-ui/icons/Dashboard";
 // import Schedule from "@material-ui/icons/Schedule";
 // import Info from "@material-ui/icons/Info";
@@ -807,7 +810,7 @@ class Purchases extends React.Component {
                     <Card className={classes.cardSize}>
                         <CardHeader color="primary" icon>
                             <CardIcon color="primary">
-                                <LibraryBooks />
+                                <Checkout />
                             </CardIcon>
                             <h4 className={classes.cardIconTitle}>Checkout</h4>
                         </CardHeader>
@@ -903,7 +906,7 @@ class Purchases extends React.Component {
                     <Card className={classes.paymentCardSize}>
                         <CardHeader color="primary" icon>
                             <CardIcon color="primary">
-                                <Bill />
+                                <Payment />
                             </CardIcon>
                             <h4 className={classes.cardIconTitle}>Payment</h4>
                         </CardHeader>
@@ -1000,7 +1003,7 @@ class Purchases extends React.Component {
                     <Card className={classes.printInvoiceSize}>
                         <CardHeader color="primary" icon>
                             <CardIcon color="primary">
-                                <Bill />
+                                <Invoice />
                             </CardIcon>
                             <h4 className={classes.cardIconTitle}>Invoice</h4>
                         </CardHeader>

@@ -25,6 +25,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import InputAdornment from "@material-ui/core/InputAdornment";
 // @material-ui/icons
 import Search from "@material-ui/icons/Search";
+import Airplay from "@material-ui/icons/TabletMac";
 import Bill from "@material-ui/icons/ShoppingCart";
 import Assignment from "@material-ui/icons/Assignment";
 import Dvr from "@material-ui/icons/Dvr";
@@ -68,6 +69,10 @@ const styles = {
     },
     searchButton: {
         paddingRight: "8%",
+    },
+    searchByDateButton: {
+        paddingRight: "8%",
+        marginLeft: "50%"
     },
     viewSalesButtons: {
         marginLeft: "20%",
@@ -141,12 +146,34 @@ class SalesHistory extends React.Component {
             invoiceInvoiceNumber: '',
             selectedRadioBtn: "radio1",
             salesBtn: 'todaySales',
+            selectedToDate: Moment(Date()).format("YYYY-MM-DD"),
+            selectedFromDate: Moment(Date()).format("YYYY-MM-DD"),
             simpleSelectItem: "",
         };
+        this.updateToDate = this.updateToDate.bind(this);
+        this.updateFromDate = this.updateFromDate.bind(this);
     }
 
     componentDidMount() {
         this.getTodaySalesInvoiceDetails();
+    }
+
+    //get the selected 'TO' date from the calender and convert it to YYYY-MM-DD format
+    updateToDate(date) {
+        var dateStringTo = date._d;
+        var dateObjTo = new Date(dateStringTo);
+        var momentObjTo = Moment(dateObjTo);
+        var momentStringTo = momentObjTo.format('YYYY-MM-DD');
+        this.setState({ selectedToDate: momentStringTo });
+    }
+
+    //get the selected 'FROM' date from the calender and convert it to YYYY-MM-DD format
+    updateFromDate(date) {
+        var dateString = date._d;
+        var dateObj = new Date(dateString);
+        var momentObj = Moment(dateObj);
+        var momentString = momentObj.format('YYYY-MM-DD');
+        this.setState({ selectedFromDate: momentString });
     }
 
     //get all sales invoice details
@@ -348,6 +375,214 @@ class SalesHistory extends React.Component {
             .catch(exception => {
                 console.log(exception);
             });
+    };
+
+    //search details of a paticular customer name from all sales history or between two dates
+    searchByCustomerName = () => {
+        if(this.state.selectedRadioBtn == 'radio1'){
+            const salesInvoices = [];
+            this.setState({
+                loading: true,
+                salesBtn: ''
+            });
+            Helper.http
+                .jsonPost("searchBycustomerFromAllData", {
+                    customerId: this.state.selectedCustomerId
+                })
+                .then(response => {
+                    let data = response.data;
+                    for (let i = 0; i < data.length; i++) {
+                        const _data = {
+                            invoiceNum: data[i].invoiceNum,
+                            customerName: data[i].customerName,
+                            date: data[i].date,
+                            details: data[i].details,
+                            totalBill: data[i].totalBill,
+                            discount: data[i].discount,
+                            cashPaid: data[i].cashPaid,
+                            balance: data[i].balance,
+
+                            actions: (
+                                // we've added some custom button actions
+                                <div className="actions-right">
+                                    {/* use this button to add a edit kind of action */}
+                                    <Button
+                                        justIcon
+                                        round
+                                        simple
+                                        onClick={() => {
+                                            //let obj = this.state.data.find(o => o.id === key);
+                                            this.setState({
+                                                open: true,
+                                                formTitle: "Invoice Details",
+                                                formButtonText: "Save",
+                                            })
+                                            this.loadItemsOfSelectedInvoice(data[i].invoiceNum, data[i].date, data[i].totalBill, data[i].discount, data[i].cashPaid, data[i].balance);
+                                        }}
+                                        color="warning"
+                                        className="edit"
+                                    >
+                                        <Dvr />
+                                    </Button>{" "}
+                                </div>
+                            )
+                        };
+                        salesInvoices.push(_data);
+                    }
+                    this.setState({ salesInvoices });
+                    this.setState({
+                        loading: false,
+                        numberOfRows: data.length,
+                        cumRevenue: response.cumRevenue,
+                        cumCostOfSales: response.cumCostOfSales,
+                        cumDiscount: response.cumDiscount,
+                        customerNames: [],
+                        selectedCustomerId: '',
+                        selectedCustomerName: '',
+                    });
+                })
+                .catch(exception => {
+                    console.log(exception);
+                });
+        }else {
+            const salesInvoices = [];
+            this.setState({
+                loading: true,
+                salesBtn: ''
+            });
+            Helper.http
+                .jsonPost("searchBycustomerBetweenTimePeriod", {
+                    customerId: this.state.selectedCustomerId,
+                    from: this.state.selectedFromDate,
+                    to: this.state.selectedToDate
+                })
+                .then(response => {
+                    let data = response.data;
+                    for (let i = 0; i < data.length; i++) {
+                        const _data = {
+                            invoiceNum: data[i].invoiceNum,
+                            customerName: data[i].customerName,
+                            date: data[i].date,
+                            details: data[i].details,
+                            totalBill: data[i].totalBill,
+                            discount: data[i].discount,
+                            cashPaid: data[i].cashPaid,
+                            balance: data[i].balance,
+
+                            actions: (
+                                // we've added some custom button actions
+                                <div className="actions-right">
+                                    {/* use this button to add a edit kind of action */}
+                                    <Button
+                                        justIcon
+                                        round
+                                        simple
+                                        onClick={() => {
+                                            //let obj = this.state.data.find(o => o.id === key);
+                                            this.setState({
+                                                open: true,
+                                                formTitle: "Invoice Details",
+                                                formButtonText: "Save",
+                                            })
+                                            this.loadItemsOfSelectedInvoice(data[i].invoiceNum, data[i].date, data[i].totalBill, data[i].discount, data[i].cashPaid, data[i].balance);
+                                        }}
+                                        color="warning"
+                                        className="edit"
+                                    >
+                                        <Dvr />
+                                    </Button>{" "}
+                                </div>
+                            )
+                        };
+                        salesInvoices.push(_data);
+                    }
+                    this.setState({ salesInvoices });
+                    this.setState({
+                        loading: false,
+                        numberOfRows: data.length,
+                        cumRevenue: response.cumRevenue,
+                        cumCostOfSales: response.cumCostOfSales,
+                        cumDiscount: response.cumDiscount,
+                        customerNames: [],
+                        selectedCustomerId: '',
+                        selectedCustomerName: '',
+                    });
+                })
+                .catch(exception => {
+                    console.log(exception);
+                });
+        }
+        
+    };
+
+    //search details between two dates from all sales data
+    searchBetweenTimePeriod = () => {
+        const salesInvoices = [];
+        this.setState({
+            loading: true,
+            salesBtn: ''
+        });
+        Helper.http
+            .jsonPost("searchBetweenTimePeriod", {
+                from: this.state.selectedFromDate,
+                to: this.state.selectedToDate
+            })
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        invoiceNum: data[i].invoiceNum,
+                        customerName: data[i].customerName,
+                        date: data[i].date,
+                        details: data[i].details,
+                        totalBill: data[i].totalBill,
+                        discount: data[i].discount,
+                        cashPaid: data[i].cashPaid,
+                        balance: data[i].balance,
+
+                        actions: (
+                            // we've added some custom button actions
+                            <div className="actions-right">
+                                {/* use this button to add a edit kind of action */}
+                                <Button
+                                    justIcon
+                                    round
+                                    simple
+                                    onClick={() => {
+                                        //let obj = this.state.data.find(o => o.id === key);
+                                        this.setState({
+                                            open: true,
+                                            formTitle: "Invoice Details",
+                                            formButtonText: "Save",
+                                        })
+                                        this.loadItemsOfSelectedInvoice(data[i].invoiceNum, data[i].date, data[i].totalBill, data[i].discount, data[i].cashPaid, data[i].balance);
+                                    }}
+                                    color="warning"
+                                    className="edit"
+                                >
+                                    <Dvr />
+                                </Button>{" "}
+                            </div>
+                        )
+                    };
+                    salesInvoices.push(_data);
+                }
+                this.setState({ salesInvoices });
+                this.setState({
+                    loading: false,
+                    numberOfRows: data.length,
+                    cumRevenue: response.cumRevenue,
+                    cumCostOfSales: response.cumCostOfSales,
+                    cumDiscount: response.cumDiscount,
+                    customerNames: [],
+                    selectedCustomerId: '',
+                    selectedCustomerName: '',
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+
     };
 
     //select the customer from search bar
@@ -726,7 +961,7 @@ class SalesHistory extends React.Component {
                         <Card>
                             <CardHeader color="primary" icon>
                                 <CardIcon color="primary">
-                                    <Assignment />
+                                    <Search />
                                 </CardIcon>
                                 <h4 className={classes.cardIconTitle}>Filter By</h4>
                             </CardHeader>
@@ -776,7 +1011,7 @@ class SalesHistory extends React.Component {
                                                             timeFormat={false}
                                                             dateFormat="YYYY-MM-DD"
                                                             defaultValue={Moment(Date()).format("YYYY-MM-DD")}
-                                                            onChange={this.updateState}
+                                                            onChange={this.updateFromDate}
                                                         />
                                                     </FormControl>
                                                 </CardBody>
@@ -790,11 +1025,19 @@ class SalesHistory extends React.Component {
                                                             timeFormat={false}
                                                             dateFormat="YYYY-MM-DD"
                                                             defaultValue={Moment(Date()).format("YYYY-MM-DD")}
-                                                            onChange={this.updateState}
+                                                            onChange={this.updateToDate}
                                                         />
                                                     </FormControl>
                                                 </CardBody>
                                             </GridItem>
+                                            <Button
+                                                disabled={this.state.selectedCustomerId != '' || this.state.typingInvoice != ''}
+                                                size='sm'
+                                                color="success"
+                                                className={classes.searchByDateButton}
+                                                onClick={this.searchBetweenTimePeriod}> 
+                                                <Search className={classes.icons} />Search
+                                            </Button>
                                         </GridContainer>
                                     </GridItem>
                                 }
@@ -815,6 +1058,7 @@ class SalesHistory extends React.Component {
                                                                 onChange={this.invoiceNumberCatch}
                                                             />
                                                             <Button
+                                                                disabled={this.state.typingInvoice == ''}
                                                                 size='sm'
                                                                 color="success"
                                                                 className={classes.searchButton}
@@ -848,7 +1092,7 @@ class SalesHistory extends React.Component {
                                                                 size='sm'
                                                                 color="success"
                                                                 className={classes.searchButton}
-                                                                onClick={this.proceedOpen}> Search
+                                                                onClick={this.searchByCustomerName}> Search
                                                             </Button>
                                                             <Button
                                                                 disabled={this.state.selectedCustomerId == ''}
@@ -909,7 +1153,7 @@ class SalesHistory extends React.Component {
                         <Card>
                             <CardHeader color="primary" icon>
                                 <CardIcon color="primary">
-                                    <Assignment />
+                                    <Airplay />
                                 </CardIcon>
                                 <h4 className={classes.cardIconTitle}>Sales Summary</h4>
                             </CardHeader>
