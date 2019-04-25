@@ -56,6 +56,9 @@ Route::post('addSalesInvoice','saleInvoiceController@addSalesInvoice');
 Route::get('getAllSalesInvoiceDetails','saleInvoiceController@getAllSalesInvoiceDetails');
 Route::get('getTodaySalesInvoiceDetails','saleInvoiceController@getTodaySalesInvoiceDetails');
 Route::post('searchByInvoiceNumber','saleInvoiceController@searchByInvoiceNumber');
+Route::post('searchBycustomerFromAllData','saleInvoiceController@searchBycustomerFromAllData');
+Route::post('searchBycustomerBetweenTimePeriod','saleInvoiceController@searchBycustomerBetweenTimePeriod');
+Route::post('searchBetweenTimePeriod','saleInvoiceController@searchBetweenTimePeriod');
 Route::get('getTradeReceivableDetails','saleInvoiceController@getTradeReceivableDetails');
 
 //api's from supplier_details table
