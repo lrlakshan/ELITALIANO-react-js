@@ -65,7 +65,7 @@ class saleInvoiceController extends Controller
     	}
     }
 
-    //get all invoices list
+    //get all sales invoices list
     public function getAllSalesInvoiceDetails(){
         try {
         $invoiceDetials = array();
@@ -88,7 +88,9 @@ class saleInvoiceController extends Controller
                             ->join('products', 'products.productId', '=', 'sales.productId')
                             ->select(DB::raw('sum(products.purchasePrice*sales.amountPurchases) AS costOfSales'))
                             ->first();
-        $discount = DB::table('sale_invoices')->sum('discount');                    
+        $discount = DB::table('sale_invoices')->sum('discount');
+        $cashPaid = DB::table('sale_invoices')->sum('cashPaid');   
+        $balance = DB::table('sale_invoices')->sum('balance');                   
             return response()->json([
                 'success'=>true,
                 'error'=>null,
@@ -97,6 +99,8 @@ class saleInvoiceController extends Controller
                 'cumRevenue'=>$revenue,
                 'cumCostOfSales'=>$costOfSales->costOfSales,
                 'cumDiscount'=>$discount,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
                 'data'=>$invoiceDetials
             ], 200);
             
@@ -109,7 +113,7 @@ class saleInvoiceController extends Controller
         }
     }
 
-    //get today invoices list
+    //get today sales invoices list
     public function getTodaySalesInvoiceDetails(){
         $myDate = Carbon::now();
         $todayDate =  $myDate->toDateString(); 
@@ -138,6 +142,8 @@ class saleInvoiceController extends Controller
                             ->where('date','=',$todayDate)
                             ->first();
         $discount = DB::table('sale_invoices')->where('date','=',$todayDate)->sum('discount');
+        $cashPaid = DB::table('sale_invoices')->where('date','=',$todayDate)->sum('cashPaid');   
+        $balance = DB::table('sale_invoices')->where('date','=',$todayDate)->sum('balance');  
 
             return response()->json([
                 'success'=>true,
@@ -147,6 +153,8 @@ class saleInvoiceController extends Controller
                 'cumRevenue'=>$revenue,
                 'cumCostOfSales'=>$costOfSales->costOfSales,
                 'cumDiscount'=>$discount,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
                 'data'=>$invoiceDetials
             ], 200);
             
@@ -159,7 +167,7 @@ class saleInvoiceController extends Controller
         }
     }
 
-    //get the invoice details of a paticular invoice number
+    //get the sales invoice details of a paticular invoice number
     public function searchByInvoiceNumber(Request $request){
 
         try {
@@ -190,6 +198,8 @@ class saleInvoiceController extends Controller
                             ->where('invoiceNum','=',$request->all())
                             ->first();
         $discount = DB::table('sale_invoices')->where('invoiceNum','=',$request->all())->sum('discount');
+        $cashPaid = DB::table('sale_invoices')->where('invoiceNum','=',$request->all())->sum('cashPaid');   
+        $balance = DB::table('sale_invoices')->where('invoiceNum','=',$request->all())->sum('balance');  
 
             return response()->json([
                 'success'=>true,
@@ -199,6 +209,8 @@ class saleInvoiceController extends Controller
                 'cumRevenue'=>$revenue,
                 'cumCostOfSales'=>$costOfSales->costOfSales,
                 'cumDiscount'=>$discount,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
                 'data'=>$invoiceDetials
             ], 200);
             
@@ -211,7 +223,7 @@ class saleInvoiceController extends Controller
         }
     }
 
-     //get the invoice details of a paticular customer name from all sales details
+     //get the sales invoice details of a paticular customer name from all sales details
     public function searchBycustomerFromAllData(Request $request){
 
         try {
@@ -242,6 +254,8 @@ class saleInvoiceController extends Controller
                             ->where('customerId','=',$request->all())
                             ->first();
         $discount = DB::table('sale_invoices')->where('customerId','=',$request->all())->sum('discount');
+        $cashPaid = DB::table('sale_invoices')->where('customerId','=',$request->all())->sum('cashPaid');   
+        $balance = DB::table('sale_invoices')->where('customerId','=',$request->all())->sum('balance');  
 
             return response()->json([
                 'success'=>true,
@@ -251,6 +265,8 @@ class saleInvoiceController extends Controller
                 'cumRevenue'=>$revenue,
                 'cumCostOfSales'=>$costOfSales->costOfSales,
                 'cumDiscount'=>$discount,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
                 'data'=>$invoiceDetials
             ], 200);
             
@@ -263,7 +279,7 @@ class saleInvoiceController extends Controller
         }
     }
 
-    //get the invoice details of a paticular customer name from sales between two dates
+    //get the sales invoice details of a paticular customer name from sales between two dates
     public function searchBycustomerBetweenTimePeriod(Request $request){
 
         try {
@@ -300,6 +316,10 @@ class saleInvoiceController extends Controller
                             ->first();
         $discount = DB::table('sale_invoices')->where('customerId','=',$request->customerId)
                             ->whereBetween('date', [$request->from, $request->to])->sum('discount');
+        $cashPaid = DB::table('sale_invoices')->where('customerId','=',$request->customerId)
+                            ->whereBetween('date', [$request->from, $request->to])->sum('cashPaid');   
+        $balance = DB::table('sale_invoices')->where('customerId','=',$request->customerId)
+                            ->whereBetween('date', [$request->from, $request->to])->sum('balance');  
 
             return response()->json([
                 'success'=>true,
@@ -309,6 +329,8 @@ class saleInvoiceController extends Controller
                 'cumRevenue'=>$revenue,
                 'cumCostOfSales'=>$costOfSales->costOfSales,
                 'cumDiscount'=>$discount,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
                 'data'=>$invoiceDetials
             ], 200);
             
@@ -321,7 +343,7 @@ class saleInvoiceController extends Controller
         }
     }
 
-    //get the invoice details  from sales between two dates
+    //get the sales invoice details  from sales between two dates
     public function searchBetweenTimePeriod(Request $request){
 
         try {
@@ -353,6 +375,8 @@ class saleInvoiceController extends Controller
                             ->whereBetween('date', [$request->from, $request->to])
                             ->first();
         $discount = DB::table('sale_invoices')->whereBetween('date', [$request->from, $request->to])->sum('discount');
+        $cashPaid = DB::table('sale_invoices')->whereBetween('date', [$request->from, $request->to])->sum('cashPaid');   
+        $balance = DB::table('sale_invoices')->whereBetween('date', [$request->from, $request->to])->sum('balance');  
 
             return response()->json([
                 'success'=>true,
@@ -362,6 +386,138 @@ class saleInvoiceController extends Controller
                 'cumRevenue'=>$revenue,
                 'cumCostOfSales'=>$costOfSales->costOfSales,
                 'cumDiscount'=>$discount,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get sales history data from searching in the details column
+    public function getSalesDataFromDetails(Request $request){
+
+        try {
+
+            $validator = Validator::make($request->all(), [
+            'details'=> 'required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['success'=>false,'error'=>$validator->errors(),'code'=>401]);
+        }
+
+        $foundRowsInvoiceNums = sale_invoice::select('invoiceNum')->where('details', 'LIKE', '%' . $request->details . '%')->get();
+
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('sale_invoices')
+                            ->join('customer_details', 'sale_invoices.customerId', '=', 'customer_details.id')
+                            ->select(
+                                'sale_invoices.invoiceNum',
+                                'customer_details.customerName', 
+                                'sale_invoices.date', 
+                                'sale_invoices.details',
+                                'sale_invoices.totalBill',
+                                'sale_invoices.discount',
+                                'sale_invoices.cashPaid',
+                                'sale_invoices.balance'
+                            )
+                            ->where('details', 'LIKE', '%' . $request->details . '%')
+                            ->get();
+
+        $revenue = DB::table('sale_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->sum('totalBill');
+        $costOfSales = DB::table('sales')
+                            ->join('products', 'products.productId', '=', 'sales.productId')
+                            ->select(DB::raw('sum(products.purchasePrice*sales.amountPurchases) AS costOfSales'))
+                            ->whereIn('invoiceNum',$foundRowsInvoiceNums )
+                            ->get();
+        $discount = DB::table('sale_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->sum('discount');
+        $cashPaid = DB::table('sale_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->sum('cashPaid');   
+        $balance = DB::table('sale_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->sum('balance');  
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'cumRevenue'=>$revenue,
+                'cumCostOfSales'=>$costOfSales[0]->costOfSales,
+                'cumDiscount'=>$discount,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get sales history data from searching in the details column between two dates
+    public function getSalesDataFromDetailsBetweenTimePeriod(Request $request){
+
+        try {
+
+            $validator = Validator::make($request->all(), [
+            'details'=> 'required',
+            'from'=> 'required',
+            'to'=> 'required',
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['success'=>false,'error'=>$validator->errors(),'code'=>401]);
+        }
+
+       $foundRowsInvoiceNums = sale_invoice::select('invoiceNum')->where('details', 'LIKE', '%' . $request->details . '%')->whereBetween('date', [$request->from, $request->to])->get();
+
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('sale_invoices')
+                            ->join('customer_details', 'sale_invoices.customerId', '=', 'customer_details.id')
+                            ->select(
+                                'sale_invoices.invoiceNum',
+                                'customer_details.customerName', 
+                                'sale_invoices.date', 
+                                'sale_invoices.details',
+                                'sale_invoices.totalBill',
+                                'sale_invoices.discount',
+                                'sale_invoices.cashPaid',
+                                'sale_invoices.balance'
+                            )
+                            ->where('details', 'LIKE', '%' . $request->details . '%')
+                            ->whereBetween('date', [$request->from, $request->to])
+                            ->get();
+
+        $revenue = DB::table('sale_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->whereBetween('date', [$request->from, $request->to])->sum('totalBill');
+        $costOfSales = DB::table('sales')
+                            ->join('products', 'products.productId', '=', 'sales.productId')
+                            ->select(DB::raw('sum(products.purchasePrice*sales.amountPurchases) AS costOfSales'))
+                            ->whereIn('invoiceNum',$foundRowsInvoiceNums )
+                            ->whereBetween('date', [$request->from, $request->to])
+                            ->get();
+        $discount = DB::table('sale_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->whereBetween('date', [$request->from, $request->to])->sum('discount');
+        $cashPaid = DB::table('sale_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->whereBetween('date', [$request->from, $request->to])->sum('cashPaid');   
+        $balance = DB::table('sale_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->whereBetween('date', [$request->from, $request->to])->sum('balance');  
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'cumRevenue'=>$revenue,
+                'cumCostOfSales'=>$costOfSales[0]->costOfSales,
+                'cumDiscount'=>$discount,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
                 'data'=>$invoiceDetials
             ], 200);
             

@@ -37,11 +37,15 @@ Route::post('addPurchases','purchaseController@addPurchases');
 Route::post('getPurchaseListDetails','purchaseController@getPurchaseListDetails');
 Route::post('deletePurchases','purchaseController@deletePurchases');
 Route::post('clearList','purchaseController@clearList');
+Route::post('purchasesHistoryMoreDetails','purchaseController@purchasesHistoryMoreDetails');
 
 //api's from purchase_invoices table
 Route::get('purchaseInvoiceNextNumber','purchaseInvoiceController@purchaseInvoiceNextNumber');
-Route::get('getInvoiceDetails','purchaseInvoiceController@getInvoiceDetails');
 Route::post('addPurchaseInvoice','purchaseInvoiceController@addPurchaseInvoice');
+Route::get('getAllPurchasesInvoiceDetails','purchaseInvoiceController@getAllPurchasesInvoiceDetails');
+Route::get('getTodayPurchasesInvoiceDetails','purchaseInvoiceController@getTodayPurchasesInvoiceDetails');
+Route::post('searchByPurchasesInvoiceNumber','purchaseInvoiceController@searchByPurchasesInvoiceNumber');
+Route::post('searchBySupplierFromAllData','purchaseInvoiceController@searchBySupplierFromAllData');
 
 //api from sales table
 Route::post('addSales','saleController@addSales');
@@ -59,19 +63,25 @@ Route::post('searchByInvoiceNumber','saleInvoiceController@searchByInvoiceNumber
 Route::post('searchBycustomerFromAllData','saleInvoiceController@searchBycustomerFromAllData');
 Route::post('searchBycustomerBetweenTimePeriod','saleInvoiceController@searchBycustomerBetweenTimePeriod');
 Route::post('searchBetweenTimePeriod','saleInvoiceController@searchBetweenTimePeriod');
+Route::post('getSalesDataFromDetails','saleInvoiceController@getSalesDataFromDetails');
+Route::post('getSalesDataFromDetailsBetweenTimePeriod','saleInvoiceController@getSalesDataFromDetailsBetweenTimePeriod');
 Route::get('getTradeReceivableDetails','saleInvoiceController@getTradeReceivableDetails');
 
 //api's from supplier_details table
 Route::get('supplierDetails','supplierDetailController@supplierDetails');
 Route::post('getSelectedSupplierName','supplierDetailController@getSelectedSupplierName');
+Route::post('getSelectedSupplierByName','supplierDetailController@getSelectedSupplierByName');
 
 //api from customer_details table
 Route::post('getSelectedCustomerByMobile','customerDetailController@getSelectedCustomerByMobile');
 Route::post('getSelectedCustomerByName','customerDetailController@getSelectedCustomerByName');
-Route::post('getSelectedCustomerByMobile','customerDetailController@getSelectedCustomerByMobile');
 Route::get('customerIdNextNumber','customerDetailController@customerIdNextNumber');
 Route::post('addNewCustomer','customerDetailController@addNewCustomer');
 
+//api from cash_received_from_sales table
+Route::post('addCashReceived','cashReceivedFromSalesController@addCashReceived');
 
+//api from cash_paid_to_suppliers table
+Route::post('addCashPaid','cashPaidToSuppliersController@addCashPaid');
 
 

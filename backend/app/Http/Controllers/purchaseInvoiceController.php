@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\purchase_invoice;
 use Validator;
 use Exception;
+use Carbon\Carbon;
 
 class purchaseInvoiceController extends Controller
 {
@@ -62,8 +63,8 @@ class purchaseInvoiceController extends Controller
     	}
     }
 
-    //get all invoices list
-    public function getInvoiceDetails(){
+    //get all purchases invoices list
+    public function getAllPurchasesInvoiceDetails(){
         try {
         $invoiceDetials = array();
         $invoiceDetials = DB::table('purchase_invoices')
@@ -73,14 +74,160 @@ class purchaseInvoiceController extends Controller
                                 'supplier_details.supplierName', 
                                 'purchase_invoices.date', 
                                 'purchase_invoices.details',
-                                'purchase_invoices.totalBill'
+                                'purchase_invoices.totalBill',
+                                'purchase_invoices.cashPaid',
+                                'purchase_invoices.balance'
                             )
-                            ->paginate(5);
+                            ->get();
+        $totalCost = DB::table('purchase_invoices')->sum('totalBill');
+        $cashPaid = DB::table('purchase_invoices')->sum('cashPaid');   
+        $balance = DB::table('purchase_invoices')->sum('balance');
+
             return response()->json([
                 'success'=>true,
                 'error'=>null,
                 'code'=>200,
                 'total'=>count($invoiceDetials),
+                'totalCost'=>$totalCost,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get today's purchases invoices list
+    public function getTodayPurchasesInvoiceDetails(){
+
+        $myDate = Carbon::now();
+        $todayDate =  $myDate->toDateString();
+
+        try {
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('purchase_invoices')
+                            ->join('supplier_details', 'purchase_invoices.supplierId', '=', 'supplier_details.id')
+                            ->select(
+                                'purchase_invoices.invoiceNum',
+                                'supplier_details.supplierName', 
+                                'purchase_invoices.date', 
+                                'purchase_invoices.details',
+                                'purchase_invoices.totalBill',
+                                'purchase_invoices.cashPaid',
+                                'purchase_invoices.balance'
+                            )
+                            ->where('date','=',$todayDate)
+                            ->get();
+        $totalCost = DB::table('purchase_invoices')->where('date','=',$todayDate)->sum('totalBill');
+        $cashPaid = DB::table('purchase_invoices')->where('date','=',$todayDate)->sum('cashPaid');   
+        $balance = DB::table('purchase_invoices')->where('date','=',$todayDate)->sum('balance');
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'totalCost'=>$totalCost,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get the purchases invoice details of a paticular invoice number
+    public function searchByPurchasesInvoiceNumber(Request $request){
+
+        try {
+            $validator = Validator::make($request->all(), [
+            'invoiceNum'=> 'required'
+        ]);
+
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('purchase_invoices')
+                            ->join('supplier_details', 'purchase_invoices.supplierId', '=', 'supplier_details.id')
+                            ->select(
+                                'purchase_invoices.invoiceNum',
+                                'supplier_details.supplierName', 
+                                'purchase_invoices.date', 
+                                'purchase_invoices.details',
+                                'purchase_invoices.totalBill',
+                                'purchase_invoices.cashPaid',
+                                'purchase_invoices.balance'
+                            )
+                            ->where('invoiceNum','=',$request->all())
+                            ->get();
+        $totalCost = DB::table('purchase_invoices')->where('invoiceNum','=',$request->all())->sum('totalBill');
+        $cashPaid = DB::table('purchase_invoices')->where('invoiceNum','=',$request->all())->sum('cashPaid');   
+        $balance = DB::table('purchase_invoices')->where('invoiceNum','=',$request->all())->sum('balance');
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'totalCost'=>$totalCost,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get the purchases invoice details of a paticular invoice number
+    public function searchBySupplierFromAllData(Request $request){
+
+        try {
+            $validator = Validator::make($request->all(), [
+            'invoiceNum'=> 'required'
+        ]);
+
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('purchase_invoices')
+                            ->join('supplier_details', 'purchase_invoices.supplierId', '=', 'supplier_details.id')
+                            ->select(
+                                'purchase_invoices.invoiceNum',
+                                'supplier_details.supplierName', 
+                                'purchase_invoices.date', 
+                                'purchase_invoices.details',
+                                'purchase_invoices.totalBill',
+                                'purchase_invoices.cashPaid',
+                                'purchase_invoices.balance'
+                            )
+                            ->where('supplierId','=',$request->all())
+                            ->get();
+        $totalCost = DB::table('purchase_invoices')->where('supplierId','=',$request->all())->sum('totalBill');
+        $cashPaid = DB::table('purchase_invoices')->where('supplierId','=',$request->all())->sum('cashPaid');   
+        $balance = DB::table('purchase_invoices')->where('supplierId','=',$request->all())->sum('balance');
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'totalCost'=>$totalCost,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
                 'data'=>$invoiceDetials
             ], 200);
             

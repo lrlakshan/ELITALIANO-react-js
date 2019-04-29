@@ -181,4 +181,58 @@ class purchaseController extends Controller
             ], 500);
         }
     }
+
+    //get the details of the selected invoice in purchases history section
+    public function purchasesHistoryMoreDetails(Request $request){
+
+        try {
+
+            $validator = Validator::make($request->all(), [
+            'invoiceNum'=> 'required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['success'=>false,'error'=>$validator->errors(),'code'=>401]);
+        }
+
+        $purchaseDetails = array();
+        $purchaseDetails = DB::table('purchases')
+                            ->join('products', 'products.productId', '=', 'purchases.productId')
+                            ->select(
+                                'purchases.id',
+                                'purchases.productId',
+                                'products.productName', 
+                                'purchases.purchasePrice', 
+                                'purchases.amountPurchases',
+                                 DB::raw(
+                                    'purchases.purchasePrice*purchases.amountPurchases as amount')
+                             )
+                            ->where('invoiceNum','=',$request->all())
+                            ->get();
+
+        $totalBill = DB::table('purchases')
+                            ->join('products', 'products.productId', '=', 'purchases.productId')
+                            ->select(
+                                DB::raw('sum(purchases.purchasePrice*purchases.amountPurchases) AS totalBill')
+                            )
+                            ->where('invoiceNum','=',$request->all())
+                            ->first();
+
+        return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($purchaseDetails),
+                'sum'=>$totalBill,
+                'data'=>$purchaseDetails
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
 }
