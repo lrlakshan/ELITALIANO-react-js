@@ -15,7 +15,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import Checkbox from "@material-ui/core/Checkbox";
 import Moment from "moment";
 
 // @material-ui/icons
@@ -24,16 +23,9 @@ import Add from "@material-ui/icons/AddToQueue";
 import Remove from "@material-ui/icons/RemoveFromQueue";
 import Bill from "@material-ui/icons/ShoppingCart";
 import Close from "@material-ui/icons/Close";
-import Check from "@material-ui/icons/Check";
 import Checkout from "@material-ui/icons/FindInPage";
 import Payment from "@material-ui/icons/AssignmentTurnedIn";
 import Invoice from "@material-ui/icons/Description";
-// import Dashboard from "@material-ui/icons/Dashboard";
-// import Schedule from "@material-ui/icons/Schedule";
-// import Info from "@material-ui/icons/Info";
-// import LocationOn from "@material-ui/icons/LocationOn";
-// import Gavel from "@material-ui/icons/Gavel";
-// import HelpOutline from "@material-ui/icons/HelpOutline";
 
 // core components
 import GridContainer from "../components/Grid/GridContainer.jsx";
@@ -46,7 +38,6 @@ import CardBody from "../components/Card/CardBody.jsx";
 import CardIcon from "../components/Card/CardIcon.jsx";
 import CustomInput from "../components/CustomInput/CustomInput.jsx";
 import Button from "../components/CustomButtons/Button.jsx";
-import Table from "../components/Table/Table.jsx";
 
 import { cardTitle } from "../assets/jss/material-dashboard-pro-react.jsx";
 import extendedFormsStyle from "../assets/jss/material-dashboard-pro-react/views/extendedFormsStyle.jsx";
@@ -302,7 +293,7 @@ class Purchases extends React.Component {
                 let data = response.data;
                 this.setState({
                     numberOfRows: data.length,
-                    totalBill: (response.sum.totalBill != null) ? response.sum.totalBill : "0.00"
+                    totalBill: (response.sum.totalBill !== null) ? response.sum.totalBill : "0.00"
                 });
                 for (let i = 0; i < data.length; i++) {
                     const _data = {
@@ -403,7 +394,8 @@ class Purchases extends React.Component {
             proceedOpen: true,
             checkoutOpen: false,
             balance: this.state.totalBill,
-            cashPaid: "0.00"
+            cashPaid: "0.00",
+            details: ''
         });
     };
 
@@ -418,7 +410,7 @@ class Purchases extends React.Component {
 
     //Next button function
     nextButton = () => {
-        if(this.state.details == ""){
+        if(this.state.details === ""){
             this.setState({
                 alertOpen: true,
                 alertDiscription: "You have to add a small note on the purchase"
@@ -518,6 +510,21 @@ class Purchases extends React.Component {
             .catch(exception => {
                 console.log(exception);
             });
+
+        if (this.state.cashPaid !== "0.00") {
+            Helper.http
+                .jsonPost("addCashPaid", {
+                    invoiceNum: this.state.purchaseInvoiceNextNumber,
+                    date: this.state.selectedDate,
+                    cashPaid: this.state.cashPaid,
+                })
+                .then(response => {
+                    console.log('added cash paid to suppliers');
+                })
+                .catch(exception => {
+                    console.log(exception);
+                });
+        }
     };
 
     //removing previous puchase list after reloading
@@ -1032,7 +1039,7 @@ class Purchases extends React.Component {
                                 </div>
                                 <div className="inv-header">
                                     <div>
-                                        <img src={elitaliano_logo} className="inv-logo" />
+                                        <img src={elitaliano_logo} alt= 'elitaliano logo' className="inv-logo" />
                                         <h2>ELITALIANO</h2>
                                         <ul>
                                             <li>Liyanage Distributors</li>
@@ -1192,7 +1199,7 @@ class Purchases extends React.Component {
                                         <FormControl
                                             fullWidth
                                             className={classes.selectFormControl}
-                                            disabled={this.state.PurchaseDetailsList.length != 0}
+                                            disabled={this.state.PurchaseDetailsList.length !== 0}
                                         >
                                             <InputLabel
                                                 htmlFor="simple-selectSupplier"
@@ -1245,7 +1252,7 @@ class Purchases extends React.Component {
                                                 defaultValue={Moment(Date()).format("YYYY-MM-DD")}
                                                 onChange={this.updateState}
                                                 inputProps={
-                                                    { disabled: this.state.PurchaseDetailsList.length != 0}
+                                                    { disabled: this.state.PurchaseDetailsList.length !== 0}
                                            }
                                             />
                                         </FormControl>
@@ -1361,7 +1368,7 @@ class Purchases extends React.Component {
                                                     deleteAlert: true,
                                                 });
                                             }}
-                                            disabled={this.state.PurchaseDetailsList.length == 0}
+                                            disabled={this.state.PurchaseDetailsList.length === 0}
                                         >
                                             <Remove className={classes.icons} /> Remove All
                                         </Button>
@@ -1369,7 +1376,7 @@ class Purchases extends React.Component {
                                             color="github"
                                             className={classes.marginCenter}
                                             onClick={this.checkOutOpen}
-                                            disabled={this.state.PurchaseDetailsList.length == 0}
+                                            disabled={this.state.PurchaseDetailsList.length === 0}
                                         >
                                             <Bill className={classes.icons} /> Checkout
                                         </Button>

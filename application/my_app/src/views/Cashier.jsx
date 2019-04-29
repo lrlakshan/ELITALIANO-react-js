@@ -17,7 +17,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import Checkbox from "@material-ui/core/Checkbox";
 import Moment from "moment";
 
 // @material-ui/icons
@@ -28,27 +27,21 @@ import Remove from "@material-ui/icons/RemoveFromQueue";
 import Bill from "@material-ui/icons/ShoppingCart";
 import Close from "@material-ui/icons/Close";
 import Done from "@material-ui/icons/Done";
-import Check from "@material-ui/icons/Check";
 import AddCircle from "@material-ui/icons/AddCircle";
 import Customer from "@material-ui/icons/PermIdentity";
 import Checkout from "@material-ui/icons/FindInPage";
 import Payment from "@material-ui/icons/AssignmentTurnedIn";
 import Invoice from "@material-ui/icons/Description";
-// import Gavel from "@material-ui/icons/Gavel";
-// import HelpOutline from "@material-ui/icons/HelpOutline";
 
 // core components
 import GridContainer from "../components/Grid/GridContainer.jsx";
 import GridItem from "../components/Grid/GridItem.jsx";
-//import NavPills from "../components/NavPills/NavPills.jsx";
-//import Accordion from "components/Accordion/Accordion.jsx";
 import Card from "../components/Card/Card.jsx";
 import CardHeader from "../components/Card/CardHeader.jsx";
 import CardBody from "../components/Card/CardBody.jsx";
 import CardIcon from "../components/Card/CardIcon.jsx";
 import CustomInput from "../components/CustomInput/CustomInput.jsx";
 import Button from "../components/CustomButtons/Button.jsx";
-import Table from "../components/Table/Table.jsx";
 
 import { cardTitle } from "../assets/jss/material-dashboard-pro-react.jsx";
 import extendedFormsStyle from "../assets/jss/material-dashboard-pro-react/views/extendedFormsStyle.jsx";
@@ -85,22 +78,6 @@ const styles = {
         marginLeft: "25px",
         marginBottom: "0px",
         width: "150px"
-    },
-    Right: {
-        position: "absolute",
-        marginTop: "30px",
-        marginBottom: "0px",
-        textAlign: "right",
-        // display: "inline",
-        paddingLeft: "84%",
-    },
-    Left: {
-        position: "absolute",
-        marginTop: "30px",
-        marginBottom: "0px",
-        textAlign: 'left',
-        paddingLeft: "50px",
-        // display:"inline"
     },
     ProceedButtonStyle: {
         position: "absolute",
@@ -785,7 +762,7 @@ class Cashier extends React.Component {
 
     //Next button function
     nextButton = () => {
-        if (this.state.details == "") {
+        if (this.state.details === "") {
             this.setState({
                 alertOpen: true,
                 alertDiscription: "You have to add a small note on the purchase"
@@ -834,6 +811,22 @@ class Cashier extends React.Component {
             .catch(exception => {
                 console.log(exception);
             });
+
+            if(this.state.cashPaid !== "0.00"){
+                Helper.http
+                    .jsonPost("addCashReceived", {
+                        invoiceNum: this.state.salesInvoiceNextNumber,
+                        date: this.state.selectedDate,
+                        cashPaid: this.state.cashPaid,
+                    })
+                    .then(response => {
+                        console.log('added cash received from sales');
+                    })
+                    .catch(exception => {
+                        console.log(exception);
+                    });
+            }
+
     };
 
     //sale complete sweet alert close function
@@ -1220,7 +1213,7 @@ class Cashier extends React.Component {
                                 </div>
                                 <div className="inv-header">
                                     <div>
-                                        <img src={elitaliano_logo} className="inv-logo" />
+                                        <img src={elitaliano_logo} alt = "elitaliano logo" className="inv-logo" />
                                         <h2>ELITALIANO</h2>
                                         <ul>
                                             <li>Liyanage Distributors</li>
@@ -1290,10 +1283,13 @@ class Cashier extends React.Component {
                                                 <th>Discount (-)</th>
                                                 <td>{parseInt(this.state.totalBillRegular - this.state.totalBill, 10).toLocaleString() + ".00"}</td>
                                             </tr>
-                                            <tr>
-                                                <th>Promo Discount (-)</th>
-                                                <td>{parseInt(this.state.discount, 10).toLocaleString() + ".00"}</td>
-                                            </tr>
+                                            {this.state.discount !== "0.00"
+                                                ? <tr>
+                                                    <th>Promo Discount (-)</th>
+                                                    <td>{parseInt(this.state.discount, 10).toLocaleString() + ".00"}</td>
+                                                </tr> :
+                                                null
+                                            }
                                             <tr>
                                                 <th>Total</th>
                                                 <td>{parseInt(this.state.totalBill - this.state.discount, 10).toLocaleString() + ".00"}</td>
@@ -1390,7 +1386,7 @@ class Cashier extends React.Component {
                                         <br />
                                         <br />
                                         <Button
-                                            disabled={this.state.selectedCustomerId == ''}
+                                            disabled={this.state.selectedCustomerId === ''}
                                             size='sm'
                                             color="danger"
                                             onClick={this.clearSelectedCustomer}
@@ -1398,7 +1394,7 @@ class Cashier extends React.Component {
                                         > Clear
                                         </Button>
                                         <Button
-                                            disabled={this.state.selectedCustomerId == ''}
+                                            disabled={this.state.selectedCustomerId === ''}
                                             size='sm'
                                             color="success"
                                             onClick={this.customerSelectClose}
@@ -1652,7 +1648,7 @@ class Cashier extends React.Component {
                                                 defaultValue={Moment(Date()).format("YYYY-MM-DD")}
                                                 onChange={this.updateState}
                                             inputProps={
-                                                { disabled: this.state.saleDetailsList.length != 0 }
+                                                { disabled: this.state.saleDetailsList.length !== 0 }
                                             }
                                             />
                                         </FormControl>
@@ -1675,7 +1671,7 @@ class Cashier extends React.Component {
                                         simple 
                                         round 
                                         color="success" 
-                                        disabled={this.state.saleDetailsList.length != 0}
+                                        disabled={this.state.saleDetailsList.length !== 0}
                                         className={classes.CustomerSelectFormOpenButton} 
                                             onClick={this.CustomerSelectFormOpenButtonClick}>
                                             <AddCircle className={classes.icons} />
@@ -1810,7 +1806,7 @@ class Cashier extends React.Component {
                                                     deleteAlert: true,
                                                 });
                                             }}
-                                            disabled={this.state.saleDetailsList.length == 0}
+                                            disabled={this.state.saleDetailsList.length === 0}
                                         >
                                             <Remove className={classes.icons} /> Remove All
                                         </Button>
@@ -1818,7 +1814,7 @@ class Cashier extends React.Component {
                                             color="github"
                                             className={classes.marginCenter}
                                             onClick={this.checkOutOpen}
-                                            disabled={this.state.saleDetailsList.length == 0}
+                                            disabled={this.state.saleDetailsList.length === 0}
                                         >
                                             <Bill className={classes.icons} /> Checkout
                                         </Button>

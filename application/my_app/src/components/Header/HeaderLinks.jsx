@@ -6,19 +6,10 @@ import { withRouter } from 'react-router-dom';
 
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
-import MenuItem from "@material-ui/core/MenuItem";
-import MenuList from "@material-ui/core/MenuList";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import Paper from "@material-ui/core/Paper";
-import Grow from "@material-ui/core/Grow";
 import Hidden from "@material-ui/core/Hidden";
-import Popper from "@material-ui/core/Popper";
 
 // @material-ui/icons
 import Person from "@material-ui/icons/Person";
-import Notifications from "@material-ui/icons/Notifications";
-import Dashboard from "@material-ui/icons/Dashboard";
-import elitaliano from "../../assets/img/elitaliano.png";
 
 
 // core components
@@ -50,11 +41,6 @@ class HeaderLinks extends React.Component {
   render() {
     const { classes, rtlActive } = this.props;
     const { open } = this.state;
-    const dropdownItem = classNames(
-      classes.dropdownItem,
-      classes.primaryHover,
-      { [classes.dropdownItemRTL]: rtlActive }
-    );
     const wrapper = classNames({
       [classes.wrapperRTL]: rtlActive
     });

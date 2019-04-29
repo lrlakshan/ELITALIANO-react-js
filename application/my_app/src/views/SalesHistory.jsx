@@ -7,22 +7,13 @@ import LoadingOverlay from 'react-loading-overlay';
 import ReactSearchBox from 'react-search-box'
 import Datetime from "react-datetime";
 import Moment from "moment";
-import SweetAlert from "react-bootstrap-sweetalert";
 
 
 // @material-ui/core components
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
 import withStyles from "@material-ui/core/styles/withStyles";
-import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import InputAdornment from "@material-ui/core/InputAdornment";
 // @material-ui/icons
 import Search from "@material-ui/icons/Search";
 import Airplay from "@material-ui/icons/TabletMac";
@@ -31,7 +22,6 @@ import Assignment from "@material-ui/icons/Assignment";
 import Dvr from "@material-ui/icons/Dvr";
 import Done from "@material-ui/icons/Done";
 import Close from "@material-ui/icons/Close";
-import AddCircle from "@material-ui/icons/AddCircle";
 import LocalMall from "@material-ui/icons/LocalMall";
 // core components
 import NavPills from "../components/NavPills/NavPills.jsx";
@@ -56,12 +46,6 @@ const styles = {
         marginTop: "15px",
         marginBottom: "0px"
     },
-    marginLeft: {
-        marginTop: "15px",
-        marginLeft: "25px",
-        marginBottom: "0px",
-        width: "150px"
-    },
     alignright: {
         marginTop: "10px",
         marginBottom: "0px",
@@ -71,8 +55,8 @@ const styles = {
         paddingRight: "8%",
     },
     searchByDateButton: {
-        paddingRight: "8%",
-        marginLeft: "50%"
+        paddingLeft: "10%",
+        paddingRight: "10%",
     },
     viewSalesButtons: {
         marginLeft: "20%",
@@ -83,9 +67,6 @@ const styles = {
     },
     cardSize: {
         width: "350px"
-    },
-    addButton: {
-        float: "right"
     },
     invoiceCloseIcon: {
         position: "absolute",
@@ -107,16 +88,6 @@ const styles = {
     ...extendedFormsStyle,
 };
 
-function filterCaseInsensitive(filter, row) {
-    const id = filter.pivotId || filter.id;
-    return (
-        row[id] !== undefined ?
-            String(row[id].toLowerCase()).startsWith(filter.value.toLowerCase())
-            :
-            true
-    );
-}
-
 class SalesHistory extends React.Component {
     constructor(props) {
         super(props);
@@ -132,12 +103,15 @@ class SalesHistory extends React.Component {
             selectedCustomerId: '',
             selectedCustomerName: '',
             typingName: '',
+            typingDetail: '',
             typingInvoice: '',
             formTitle: "",
             invoiceNum: "",
             cumRevenue: '0',
             cumCostOfSales: '0',
             cumDiscount: '0',
+            cashPaid: "0",
+            balance: "0",
             invoiceTotalBill: '',
             invoiceDate: '',
             invoiceDiscount: '',
@@ -145,10 +119,11 @@ class SalesHistory extends React.Component {
             invoiceBalance: '',
             invoiceInvoiceNumber: '',
             selectedRadioBtn: "radio1",
-            salesBtn: 'todaySales',
+            salesBtn: '',
             selectedToDate: Moment(Date()).format("YYYY-MM-DD"),
             selectedFromDate: Moment(Date()).format("YYYY-MM-DD"),
-            simpleSelectItem: "",
+            salesHistoryCaption: '',
+            salesSummaryCaption: ''
         };
         this.updateToDate = this.updateToDate.bind(this);
         this.updateFromDate = this.updateFromDate.bind(this);
@@ -179,7 +154,11 @@ class SalesHistory extends React.Component {
     //get all sales invoice details
     getAllSalesInvoiceDetails = () => {
         const salesInvoices = [];
-        this.setState({ loading: true });
+        this.setState({ 
+            loading: true,
+            salesHistoryCaption: 'From all sales history details',
+            salesSummaryCaption: 'From all sales history details'
+         });
 
         Helper.http
             .jsonGet("getAllSalesInvoiceDetails")
@@ -209,7 +188,6 @@ class SalesHistory extends React.Component {
                                         this.setState({
                                             open: true,
                                             formTitle: "Invoice Details",
-                                            formButtonText: "Save",
                                         })
                                         this.loadItemsOfSelectedInvoice(data[i].invoiceNum, data[i].date, data[i].totalBill, data[i].discount, data[i].cashPaid, data[i].balance);
                                     }}
@@ -230,6 +208,8 @@ class SalesHistory extends React.Component {
                     cumRevenue: response.cumRevenue,
                     cumCostOfSales: response.cumCostOfSales,
                     cumDiscount: response.cumDiscount,
+                    cashPaid: response.cashPaid,
+                    balance: response.balance,
                     customerNames: [],
                     selectedCustomerId: '',
                     selectedCustomerName: '', 
@@ -243,7 +223,12 @@ class SalesHistory extends React.Component {
     //get today sales invoice details
     getTodaySalesInvoiceDetails = () => {
         const salesInvoices = [];
-        this.setState({ loading: true });
+        this.setState({ 
+            loading: true,
+            salesBtn: 'todaySales',
+            salesHistoryCaption: "From today's (" + Moment(Date()).format("YYYY-MM-DD") + ") sales history details",
+            salesSummaryCaption: "From today's (" + Moment(Date()).format("YYYY-MM-DD") + ") sales history details",
+         });
 
         Helper.http
             .jsonGet("getTodaySalesInvoiceDetails")
@@ -273,7 +258,6 @@ class SalesHistory extends React.Component {
                                         this.setState({
                                             open: true,
                                             formTitle: "Invoice Details",
-                                            formButtonText: "Save",
                                         })
                                         this.loadItemsOfSelectedInvoice(data[i].invoiceNum, data[i].date, data[i].totalBill, data[i].discount, data[i].cashPaid, data[i].balance);
                                     }}
@@ -294,6 +278,8 @@ class SalesHistory extends React.Component {
                     cumRevenue: response.cumRevenue,
                     cumCostOfSales: response.cumCostOfSales,
                     cumDiscount: response.cumDiscount,
+                    cashPaid: response.cashPaid,
+                    balance: response.balance,
                     customerNames: [],
                     selectedCustomerId: '',
                     selectedCustomerName: '', 
@@ -314,6 +300,8 @@ class SalesHistory extends React.Component {
         const salesInvoices = [];
         this.setState({ 
             loading: true,
+            salesHistoryCaption: "From sales invoice number " + this.state.typingInvoice,
+            salesSummaryCaption: "From sales invoice number " + this.state.typingInvoice,
             salesBtn: ''
          });
         Helper.http
@@ -346,7 +334,6 @@ class SalesHistory extends React.Component {
                                         this.setState({
                                             open: true,
                                             formTitle: "Invoice Details",
-                                            formButtonText: "Save",
                                         })
                                         this.loadItemsOfSelectedInvoice(data[i].invoiceNum, data[i].date, data[i].totalBill, data[i].discount, data[i].cashPaid, data[i].balance);
                                     }}
@@ -367,9 +354,12 @@ class SalesHistory extends React.Component {
                     cumRevenue: response.cumRevenue,
                     cumCostOfSales: response.cumCostOfSales,
                     cumDiscount: response.cumDiscount,
+                    cashPaid: response.cashPaid,
+                    balance: response.balance,
                     customerNames: [],
                     selectedCustomerId: '',
                     selectedCustomerName: '',
+                    typingInvoice: ''
                 });
             })
             .catch(exception => {
@@ -379,10 +369,12 @@ class SalesHistory extends React.Component {
 
     //search details of a paticular customer name from all sales history or between two dates
     searchByCustomerName = () => {
-        if(this.state.selectedRadioBtn == 'radio1'){
+        if(this.state.selectedRadioBtn === 'radio1'){
             const salesInvoices = [];
             this.setState({
                 loading: true,
+                salesHistoryCaption: "From all sales history of " + this.state.selectedCustomerName,
+                salesSummaryCaption: "From all sales history of " + this.state.selectedCustomerName,
                 salesBtn: ''
             });
             Helper.http
@@ -415,7 +407,6 @@ class SalesHistory extends React.Component {
                                             this.setState({
                                                 open: true,
                                                 formTitle: "Invoice Details",
-                                                formButtonText: "Save",
                                             })
                                             this.loadItemsOfSelectedInvoice(data[i].invoiceNum, data[i].date, data[i].totalBill, data[i].discount, data[i].cashPaid, data[i].balance);
                                         }}
@@ -436,6 +427,8 @@ class SalesHistory extends React.Component {
                         cumRevenue: response.cumRevenue,
                         cumCostOfSales: response.cumCostOfSales,
                         cumDiscount: response.cumDiscount,
+                        cashPaid: response.cashPaid,
+                        balance: response.balance,
                         customerNames: [],
                         selectedCustomerId: '',
                         selectedCustomerName: '',
@@ -448,6 +441,8 @@ class SalesHistory extends React.Component {
             const salesInvoices = [];
             this.setState({
                 loading: true,
+                salesHistoryCaption: "From sales history of " + this.state.selectedCustomerName + " between " + this.state.selectedFromDate + " and " + this.state.selectedToDate,
+                salesSummaryCaption: "From sales history of " + this.state.selectedCustomerName + " between " + this.state.selectedFromDate + " and " + this.state.selectedToDate,
                 salesBtn: ''
             });
             Helper.http
@@ -482,7 +477,6 @@ class SalesHistory extends React.Component {
                                             this.setState({
                                                 open: true,
                                                 formTitle: "Invoice Details",
-                                                formButtonText: "Save",
                                             })
                                             this.loadItemsOfSelectedInvoice(data[i].invoiceNum, data[i].date, data[i].totalBill, data[i].discount, data[i].cashPaid, data[i].balance);
                                         }}
@@ -503,6 +497,8 @@ class SalesHistory extends React.Component {
                         cumRevenue: response.cumRevenue,
                         cumCostOfSales: response.cumCostOfSales,
                         cumDiscount: response.cumDiscount,
+                        cashPaid: response.cashPaid,
+                        balance: response.balance,
                         customerNames: [],
                         selectedCustomerId: '',
                         selectedCustomerName: '',
@@ -520,6 +516,8 @@ class SalesHistory extends React.Component {
         const salesInvoices = [];
         this.setState({
             loading: true,
+            salesHistoryCaption: "From sales history between " + this.state.selectedFromDate + " and " + this.state.selectedToDate,
+            salesSummaryCaption: "From sales history between " + this.state.selectedFromDate + " and " + this.state.selectedToDate,
             salesBtn: ''
         });
         Helper.http
@@ -553,7 +551,6 @@ class SalesHistory extends React.Component {
                                         this.setState({
                                             open: true,
                                             formTitle: "Invoice Details",
-                                            formButtonText: "Save",
                                         })
                                         this.loadItemsOfSelectedInvoice(data[i].invoiceNum, data[i].date, data[i].totalBill, data[i].discount, data[i].cashPaid, data[i].balance);
                                     }}
@@ -574,6 +571,8 @@ class SalesHistory extends React.Component {
                     cumRevenue: response.cumRevenue,
                     cumCostOfSales: response.cumCostOfSales,
                     cumDiscount: response.cumDiscount,
+                    cashPaid: response.cashPaid,
+                    balance: response.balance,
                     customerNames: [],
                     selectedCustomerId: '',
                     selectedCustomerName: '',
@@ -635,6 +634,155 @@ class SalesHistory extends React.Component {
             });
     }
 
+    //search sales history by details
+    searchByDetails = (value) => {
+        if (this.state.selectedRadioBtn === 'radio1'){
+            const salesInvoices = [];
+            this.setState({
+                loading: true,
+                salesHistoryCaption: "From details captured as '" + value + "'",
+                salesSummaryCaption: "From details captured as '" + value + "'",
+                salesBtn: '',
+                typingDetail: value
+            });
+            Helper.http
+                .jsonPost("getSalesDataFromDetails", {
+                    details: value
+                })
+                .then(response => {
+                    let data = response.data;
+                    for (let i = 0; i < data.length; i++) {
+                        const _data = {
+                            invoiceNum: data[i].invoiceNum,
+                            customerName: data[i].customerName,
+                            date: data[i].date,
+                            details: data[i].details,
+                            totalBill: data[i].totalBill,
+                            discount: data[i].discount,
+                            cashPaid: data[i].cashPaid,
+                            balance: data[i].balance,
+
+                            actions: (
+                                // we've added some custom button actions
+                                <div className="actions-right">
+                                    {/* use this button to add a edit kind of action */}
+                                    <Button
+                                        justIcon
+                                        round
+                                        simple
+                                        onClick={() => {
+                                            //let obj = this.state.data.find(o => o.id === key);
+                                            this.setState({
+                                                open: true,
+                                                formTitle: "Invoice Details",
+                                            })
+                                            this.loadItemsOfSelectedInvoice(data[i].invoiceNum, data[i].date, data[i].totalBill, data[i].discount, data[i].cashPaid, data[i].balance);
+                                        }}
+                                        color="warning"
+                                        className="edit"
+                                    >
+                                        <Dvr />
+                                    </Button>{" "}
+                                </div>
+                            )
+                        };
+                        salesInvoices.push(_data);
+                    }
+                    this.setState({ salesInvoices });
+                    this.setState({
+                        loading: false,
+                        numberOfRows: data.length,
+                        cumRevenue: response.cumRevenue,
+                        cumCostOfSales: response.cumCostOfSales,
+                        cumDiscount: response.cumDiscount,
+                        cashPaid: response.cashPaid,
+                        balance: response.balance,
+                        customerNames: [],
+                        selectedCustomerId: '',
+                        selectedCustomerName: '',
+                    });
+                })
+                .catch(exception => {
+                    console.log(exception);
+                    this.getTodaySalesInvoiceDetails();
+                });
+        }else {
+            const salesInvoices = [];
+            this.setState({
+                loading: true,
+                salesHistoryCaption: "From details captured as '" + value + "' between " + this.state.selectedFromDate +" and " + this.state.selectedToDate,
+                salesSummaryCaption: "From details captured as '" + value + "' between " + this.state.selectedFromDate + " and " + this.state.selectedToDate,
+                salesBtn: '',
+                typingDetail: value
+            });
+            Helper.http
+                .jsonPost("getSalesDataFromDetailsBetweenTimePeriod", {
+                    details: value,
+                    from: this.state.selectedFromDate,
+                    to: this.state.selectedToDate
+                })
+                .then(response => {
+                    let data = response.data;
+                    for (let i = 0; i < data.length; i++) {
+                        const _data = {
+                            invoiceNum: data[i].invoiceNum,
+                            customerName: data[i].customerName,
+                            date: data[i].date,
+                            details: data[i].details,
+                            totalBill: data[i].totalBill,
+                            discount: data[i].discount,
+                            cashPaid: data[i].cashPaid,
+                            balance: data[i].balance,
+
+                            actions: (
+                                // we've added some custom button actions
+                                <div className="actions-right">
+                                    {/* use this button to add a edit kind of action */}
+                                    <Button
+                                        justIcon
+                                        round
+                                        simple
+                                        onClick={() => {
+                                            //let obj = this.state.data.find(o => o.id === key);
+                                            this.setState({
+                                                open: true,
+                                                formTitle: "Invoice Details",
+                                            })
+                                            this.loadItemsOfSelectedInvoice(data[i].invoiceNum, data[i].date, data[i].totalBill, data[i].discount, data[i].cashPaid, data[i].balance);
+                                        }}
+                                        color="warning"
+                                        className="edit"
+                                    >
+                                        <Dvr />
+                                    </Button>{" "}
+                                </div>
+                            )
+                        };
+                        salesInvoices.push(_data);
+                    }
+                    this.setState({ salesInvoices });
+                    this.setState({
+                        loading: false,
+                        numberOfRows: data.length,
+                        cumRevenue: response.cumRevenue,
+                        cumCostOfSales: response.cumCostOfSales,
+                        cumDiscount: response.cumDiscount,
+                        cashPaid: response.cashPaid,
+                        balance: response.balance,
+                        customerNames: [],
+                        selectedCustomerId: '',
+                        selectedCustomerName: '',
+                    });
+                })
+                .catch(exception => {
+                    console.log(exception);
+                    this.getTodaySalesInvoiceDetails();
+                });
+        }
+        
+
+    }
+
     //save the selected customer ID and customer name in a state
     selectCustomer = (customerId, customerName) => {
         this.setState({
@@ -657,6 +805,12 @@ class SalesHistory extends React.Component {
         this.setState({
             selectedRadioBtn: event.target.value
         });
+        if (event.target.value === 'radio1'){
+            this.setState({
+                selectedToDate: Moment(Date()).format("YYYY-MM-DD"),
+                selectedFromDate: Moment(Date()).format("YYYY-MM-DD"),
+            });
+        }
     };
 
     //today sales button click function
@@ -862,7 +1016,7 @@ class SalesHistory extends React.Component {
                                 </div>
                                 <div className="inv-header">
                                     <div>
-                                        <img src={elitaliano_logo} className="inv-logo" />
+                                        <img src={elitaliano_logo} alt="elitaliano logo" className="inv-logo" />
                                         <h2>ELITALIANO</h2>
                                         <ul>
                                             <li>Liyanage Distributors</li>
@@ -979,11 +1133,11 @@ class SalesHistory extends React.Component {
                                         </div>
                                     </CardBody>
                                 </GridItem>
-                                {this.state.selectedRadioBtn == 'radio1' 
+                                {this.state.selectedRadioBtn === 'radio1' 
                                     ? <GridItem xs={12} sm={12} md={6}>
                                         <GridContainer>
                                             <Button
-                                                simple={this.state.salesBtn == 'allSales' || this.state.salesBtn == ''}
+                                                simple={this.state.salesBtn === 'allSales' || this.state.salesBtn === ''}
                                                 size='sm'
                                                 round
                                                 color="twitter"
@@ -991,7 +1145,7 @@ class SalesHistory extends React.Component {
                                                 onClick={this.todaySalesBtnClick}> View today Sales
                                             </Button>
                                             <Button
-                                                simple={this.state.salesBtn == 'todaySales' || this.state.salesBtn == ''}
+                                                simple={this.state.salesBtn === 'todaySales' || this.state.salesBtn === ''}
                                                 size='sm'
                                                 round
                                                 color="twitter"
@@ -1028,16 +1182,16 @@ class SalesHistory extends React.Component {
                                                             onChange={this.updateToDate}
                                                         />
                                                     </FormControl>
+                                                    <Button
+                                                        disabled={this.state.selectedCustomerId !== '' || this.state.typingInvoice !== ''}
+                                                        size='sm'
+                                                        color="success"
+                                                        className={classes.searchByDateButton}
+                                                        onClick={this.searchBetweenTimePeriod}>
+                                                        Search
+                                                    </Button>
                                                 </CardBody>
                                             </GridItem>
-                                            <Button
-                                                disabled={this.state.selectedCustomerId != '' || this.state.typingInvoice != ''}
-                                                size='sm'
-                                                color="success"
-                                                className={classes.searchByDateButton}
-                                                onClick={this.searchBetweenTimePeriod}> 
-                                                <Search className={classes.icons} />Search
-                                            </Button>
                                         </GridContainer>
                                     </GridItem>
                                 }
@@ -1052,19 +1206,25 @@ class SalesHistory extends React.Component {
                                                     tabContent: (
                                                         <span>
                                                             <ReactSearchBox
-                                                                placeholder="Insert Invoice Number"
+                                                                placeholder="Insert Sales Invoice Number"
                                                                 value={this.state.typingName}
                                                                 callback={record => console.log(record)}
                                                                 onChange={this.invoiceNumberCatch}
                                                             />
                                                             <Button
-                                                                disabled={this.state.typingInvoice == ''}
+                                                                disabled={this.state.typingInvoice === ''}
                                                                 size='sm'
                                                                 color="success"
                                                                 className={classes.searchButton}
                                                                 onClick={this.searchByInvoiceNumber}>
                                                                 <Search className={classes.icons} /> Search
                                                             </Button>
+                                                            <ReactSearchBox
+                                                                placeholder="Search By Details"
+                                                                value={this.state.typingDetail}
+                                                                callback={record => console.log(record)}
+                                                                onChange={this.searchByDetails}
+                                                            />
                                                         </span>
                                                     )
                                                 },
@@ -1088,14 +1248,14 @@ class SalesHistory extends React.Component {
                                                                 onChange={this.selectByCustomerName}
                                                             />
                                                             <Button
-                                                                disabled={this.state.selectedCustomerId == ''}
+                                                                disabled={this.state.selectedCustomerId === ''}
                                                                 size='sm'
                                                                 color="success"
                                                                 className={classes.searchButton}
                                                                 onClick={this.searchByCustomerName}> Search
                                                             </Button>
                                                             <Button
-                                                                disabled={this.state.selectedCustomerId == ''}
+                                                                disabled={this.state.selectedCustomerId === ''}
                                                                 size='sm'
                                                                 color="danger"
                                                                 className={classes.searchButton}
@@ -1114,7 +1274,6 @@ class SalesHistory extends React.Component {
                                             loading={this.state.customerTableLoading}
                                             data={this.state.customerNames}
                                             noDataText=""
-                                            defaultFilterMethod={filterCaseInsensitive}
                                             defaultSorted={[
                                                 {
                                                     id: "id",
@@ -1155,7 +1314,7 @@ class SalesHistory extends React.Component {
                                 <CardIcon color="primary">
                                     <Airplay />
                                 </CardIcon>
-                                <h4 className={classes.cardIconTitle}>Sales Summary</h4>
+                                <h4 className={classes.cardIconTitle}>Sales Summary - <small>{this.state.salesSummaryCaption}</small></h4>
                             </CardHeader>
                             <LoadingOverlay
                                 active={this.state.loading}
@@ -1175,13 +1334,35 @@ class SalesHistory extends React.Component {
                                 <GridItem xs={12} sm={12} md={6}>
                                     <CardBody>
                                         <h4 className={classes.alignright}><small>{parseInt(this.state.cumRevenue,10).toLocaleString() + ".00"}</small></h4>
-                                            <h4 className={classes.alignright}><small>{(this.state.cumCostOfSales == null)  ? "0.00" : (parseInt(this.state.cumCostOfSales, 10).toLocaleString() + ".00")}</small></h4>
+                                            <h4 className={classes.alignright}><small>{(this.state.cumCostOfSales === null)  ? "0.00" : (parseInt(this.state.cumCostOfSales, 10).toLocaleString() + ".00")}</small></h4>
                                             <h4 className={classes.alignright}><small>{parseInt(this.state.cumDiscount, 10).toLocaleString() + ".00"}</small></h4>
                                         <br />
                                             <h4 className={classes.alignright}><small>{parseInt((this.state.cumRevenue - this.state.cumCostOfSales - this.state.cumDiscount), 10).toLocaleString() + ".00"}</small></h4>
                                     </CardBody>
                                 </GridItem>
                             </GridContainer>
+                            </LoadingOverlay>
+                        </Card>
+                        <Card>
+                            <LoadingOverlay
+                                active={this.state.loading}
+                                spinner
+                                text='Loading...'
+                            >
+                                <GridContainer>
+                                    <GridItem xs={12} sm={12} md={6}>
+                                        <CardBody>
+                                            <h4>Cash Received</h4>
+                                            <h4>Payment Due</h4>
+                                        </CardBody>
+                                    </GridItem>
+                                    <GridItem xs={12} sm={12} md={6}>
+                                        <CardBody>
+                                            <h4 className={classes.alignright}><small>{parseInt(this.state.cashPaid, 10).toLocaleString() + ".00"}</small></h4>
+                                            <h4 className={classes.alignright}><small>{parseInt(this.state.balance, 10).toLocaleString() + ".00"}</small></h4>
+                                       </CardBody>
+                                    </GridItem>
+                                </GridContainer>
                             </LoadingOverlay>
                         </Card>
                     </GridItem>
@@ -1198,7 +1379,7 @@ class SalesHistory extends React.Component {
                                 <CardIcon color="primary">
                                     <Assignment />
                                 </CardIcon>
-                                <h4 className={classes.cardIconTitle}>Sales History</h4>
+                                <h4 className={classes.cardIconTitle}>Sales History - <small>{this.state.salesHistoryCaption}</small></h4>
                             </CardHeader>
                             <CardBody>
                                     <ReactTable
@@ -1206,6 +1387,12 @@ class SalesHistory extends React.Component {
                                         filterable={false}
                                         sortable={false}
                                         showPagination={false}
+                                        defaultSorted={[
+                                            {
+                                                id: "invoiceNum",
+                                                desc: true
+                                            }
+                                        ]}
                                         columns={[
                                             {
                                                 Header: () => (

@@ -5,24 +5,20 @@ import Helper from '../utils/Helper';
 import LoadingOverlay from 'react-loading-overlay';
 import SweetAlert from "react-bootstrap-sweetalert";
 
-
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
-import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import InputAdornment from "@material-ui/core/InputAdornment";
+
 // @material-ui/icons
-import MailOutline from "@material-ui/icons/MailOutline";
 import Assignment from "@material-ui/icons/Assignment";
 import Dvr from "@material-ui/icons/Dvr";
-import Favorite from "@material-ui/icons/Favorite";
-import Close from "@material-ui/icons/Close";
 import AddCircle from "@material-ui/icons/AddCircle";
 import LocalMall from "@material-ui/icons/LocalMall";
+
 // core components
 import GridContainer from "../components/Grid/GridContainer.jsx";
 import GridItem from "../components/Grid/GridItem.jsx";

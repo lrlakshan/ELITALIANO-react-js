@@ -210,7 +210,7 @@ class login extends React.Component {
                                                 >
                                                     <h4 className={classes.cardTitle}>Log in</h4>
                                                     <div className={classes.socialLine}>
-                                                        <img src={logo} width="100px"></img>
+                                                        <img src={logo} alt = "logo" width="100px"></img>
                                                     </div>
                                                 </CardHeader>
                                                 <CardBody>

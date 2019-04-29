@@ -4,8 +4,6 @@ import React from 'react';
 import ReactTable from "react-table";
 import Helper from '../utils/Helper';
 import LoadingOverlay from 'react-loading-overlay';
-import SweetAlert from "react-bootstrap-sweetalert";
-
 
 // @material-ui/core components
 import FormControl from "@material-ui/core/FormControl";
@@ -13,21 +11,13 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import withStyles from "@material-ui/core/styles/withStyles";
-import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import InputAdornment from "@material-ui/core/InputAdornment";
+
 // @material-ui/icons
-import MailOutline from "@material-ui/icons/MailOutline";
 import Assignment from "@material-ui/icons/Assignment";
 import Dvr from "@material-ui/icons/Dvr";
-import Favorite from "@material-ui/icons/Favorite";
-import Close from "@material-ui/icons/Close";
-import AddCircle from "@material-ui/icons/AddCircle";
 import LocalMall from "@material-ui/icons/LocalMall";
+
 // core components
 import GridContainer from "../components/Grid/GridContainer.jsx";
 import GridItem from "../components/Grid/GridItem.jsx";
@@ -36,7 +26,6 @@ import Card from "../components/Card/Card.jsx";
 import CardBody from "../components/Card/CardBody.jsx";
 import CardIcon from "../components/Card/CardIcon.jsx";
 import CardHeader from "../components/Card/CardHeader.jsx";
-import CustomInput from "../components/CustomInput/CustomInput.jsx";
 
 import { cardTitle } from "../assets/jss/material-dashboard-pro-react.jsx";
 import sweetAlertStyle from "../assets/jss/material-dashboard-pro-react/views/sweetAlertStyle.jsx";
@@ -47,12 +36,6 @@ const styles = {
         ...cardTitle,
         marginTop: "15px",
         marginBottom: "0px"
-    },
-    marginLeft: {
-        marginTop: "15px",
-        marginLeft: "25px",
-        marginBottom: "0px",
-        width: "150px"
     },
     cardSize: {
         width: "350px"
@@ -95,9 +78,9 @@ class supplierReturn extends React.Component {
         this.setState({ loading: true });
 
         Helper.http
-            .jsonGet("getInvoiceDetails")
+            .jsonGet("getAllPurchasesInvoiceDetails")
             .then(response => {
-                let data = response.data.data;
+                let data = response.data;
                 for (let i = 0; i < data.length; i++) {
                     const _data = {
                         invoiceNum: data[i].invoiceNum,
