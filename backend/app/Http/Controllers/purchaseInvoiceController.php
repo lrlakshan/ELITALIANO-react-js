@@ -194,12 +194,12 @@ class purchaseInvoiceController extends Controller
         }
     }
 
-    //get the purchases invoice details of a paticular invoice number
+    //get the purchases invoice details of a paticular supplier name from all purchases data
     public function searchBySupplierFromAllData(Request $request){
 
         try {
             $validator = Validator::make($request->all(), [
-            'invoiceNum'=> 'required'
+            'supplierId'=> 'required'
         ]);
 
         $invoiceDetials = array();
@@ -219,6 +219,205 @@ class purchaseInvoiceController extends Controller
         $totalCost = DB::table('purchase_invoices')->where('supplierId','=',$request->all())->sum('totalBill');
         $cashPaid = DB::table('purchase_invoices')->where('supplierId','=',$request->all())->sum('cashPaid');   
         $balance = DB::table('purchase_invoices')->where('supplierId','=',$request->all())->sum('balance');
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'totalCost'=>$totalCost,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get the purchases invoice details of a paticular supplier name between two dates
+    public function searchBySupplierBetweenTimePeriod(Request $request){
+
+        try {
+            $validator = Validator::make($request->all(), [
+            'supplierId'=> 'required',
+            'from'=> 'required',
+            'to'=> 'required',
+        ]);
+
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('purchase_invoices')
+                            ->join('supplier_details', 'purchase_invoices.supplierId', '=', 'supplier_details.id')
+                            ->select(
+                                'purchase_invoices.invoiceNum',
+                                'supplier_details.supplierName', 
+                                'purchase_invoices.date', 
+                                'purchase_invoices.details',
+                                'purchase_invoices.totalBill',
+                                'purchase_invoices.cashPaid',
+                                'purchase_invoices.balance'
+                            )
+                            ->where('supplierId','=',$request->all())
+                            ->whereBetween('date', [$request->from, $request->to])
+                            ->get();
+        $totalCost = DB::table('purchase_invoices')->where('supplierId','=',$request->all())->whereBetween('date', [$request->from, $request->to])->sum('totalBill');
+        $cashPaid = DB::table('purchase_invoices')->where('supplierId','=',$request->all())->whereBetween('date', [$request->from, $request->to])->sum('cashPaid');   
+        $balance = DB::table('purchase_invoices')->where('supplierId','=',$request->all())->whereBetween('date', [$request->from, $request->to])->sum('balance');
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'totalCost'=>$totalCost,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get the purchases invoice details  from purchases between two dates
+    public function searchPurchasesBetweenTimePeriod(Request $request){
+
+        try {
+            $validator = Validator::make($request->all(), [
+            'from'=> 'required',
+            'to'=> 'required',
+        ]);
+
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('purchase_invoices')
+                            ->join('supplier_details', 'purchase_invoices.supplierId', '=', 'supplier_details.id')
+                            ->select(
+                                'purchase_invoices.invoiceNum',
+                                'supplier_details.supplierName', 
+                                'purchase_invoices.date', 
+                                'purchase_invoices.details',
+                                'purchase_invoices.totalBill',
+                                'purchase_invoices.cashPaid',
+                                'purchase_invoices.balance'
+                            )
+                            ->whereBetween('date', [$request->from, $request->to])
+                            ->get();
+        $totalCost = DB::table('purchase_invoices')->whereBetween('date', [$request->from, $request->to])->sum('totalBill');
+        $cashPaid = DB::table('purchase_invoices')->whereBetween('date', [$request->from, $request->to])->sum('cashPaid');   
+        $balance = DB::table('purchase_invoices')->whereBetween('date', [$request->from, $request->to])->sum('balance');
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'totalCost'=>$totalCost,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get purchases history data from searching in the details column
+    public function getPurchasesDataFromDetails(Request $request){
+
+        try {
+            $validator = Validator::make($request->all(), [
+            'details'=> 'required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['success'=>false,'error'=>$validator->errors(),'code'=>401]);
+        }
+
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('purchase_invoices')
+                            ->join('supplier_details', 'purchase_invoices.supplierId', '=', 'supplier_details.id')
+                            ->select(
+                                'purchase_invoices.invoiceNum',
+                                'supplier_details.supplierName', 
+                                'purchase_invoices.date', 
+                                'purchase_invoices.details',
+                                'purchase_invoices.totalBill',
+                                'purchase_invoices.cashPaid',
+                                'purchase_invoices.balance'
+                            )
+                            ->where('details', 'LIKE', '%' . $request->details . '%')
+                            ->get();
+        $totalCost = DB::table('purchase_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->sum('totalBill');
+        $cashPaid = DB::table('purchase_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->sum('cashPaid');   
+        $balance = DB::table('purchase_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->sum('balance');
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'totalCost'=>$totalCost,
+                'cashPaid'=>$cashPaid,
+                'balance'=>$balance,
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get purchases history data from searching in the details column between two dates
+    public function getPurchasesDataFromDetailsBetweenTimePeriod(Request $request){
+
+        try {
+            $validator = Validator::make($request->all(), [
+            'details'=> 'required',
+            'from'=> 'required',
+            'to'=> 'required',
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['success'=>false,'error'=>$validator->errors(),'code'=>401]);
+        }
+
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('purchase_invoices')
+                            ->join('supplier_details', 'purchase_invoices.supplierId', '=', 'supplier_details.id')
+                            ->select(
+                                'purchase_invoices.invoiceNum',
+                                'supplier_details.supplierName', 
+                                'purchase_invoices.date', 
+                                'purchase_invoices.details',
+                                'purchase_invoices.totalBill',
+                                'purchase_invoices.cashPaid',
+                                'purchase_invoices.balance'
+                            )
+                            ->where('details', 'LIKE', '%' . $request->details . '%')
+                            ->whereBetween('date', [$request->from, $request->to])
+                            ->get();
+        $totalCost = DB::table('purchase_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->whereBetween('date', [$request->from, $request->to])->sum('totalBill');
+        $cashPaid = DB::table('purchase_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->whereBetween('date', [$request->from, $request->to])->sum('cashPaid');   
+        $balance = DB::table('purchase_invoices')->where('details', 'LIKE', '%' . $request->details . '%')->whereBetween('date', [$request->from, $request->to])->sum('balance');
 
             return response()->json([
                 'success'=>true,

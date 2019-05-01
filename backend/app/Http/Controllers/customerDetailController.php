@@ -16,7 +16,6 @@ class customerDetailController extends Controller
 
     	try {
     		$validator = Validator::make($request->all(), [
-    		'mobileNumber'=> 'required',
     		'customerName'=> 'required',
     	]);
 

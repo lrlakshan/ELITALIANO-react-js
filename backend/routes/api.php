@@ -46,6 +46,10 @@ Route::get('getAllPurchasesInvoiceDetails','purchaseInvoiceController@getAllPurc
 Route::get('getTodayPurchasesInvoiceDetails','purchaseInvoiceController@getTodayPurchasesInvoiceDetails');
 Route::post('searchByPurchasesInvoiceNumber','purchaseInvoiceController@searchByPurchasesInvoiceNumber');
 Route::post('searchBySupplierFromAllData','purchaseInvoiceController@searchBySupplierFromAllData');
+Route::post('searchBySupplierBetweenTimePeriod','purchaseInvoiceController@searchBySupplierBetweenTimePeriod');
+Route::post('searchPurchasesBetweenTimePeriod','purchaseInvoiceController@searchPurchasesBetweenTimePeriod');
+Route::post('getPurchasesDataFromDetails','purchaseInvoiceController@getPurchasesDataFromDetails');
+Route::post('getPurchasesDataFromDetailsBetweenTimePeriod','purchaseInvoiceController@getPurchasesDataFromDetailsBetweenTimePeriod');
 
 //api from sales table
 Route::post('addSales','saleController@addSales');
@@ -80,6 +84,8 @@ Route::post('addNewCustomer','customerDetailController@addNewCustomer');
 
 //api from cash_received_from_sales table
 Route::post('addCashReceived','cashReceivedFromSalesController@addCashReceived');
+Route::get('getAllCashReceivedInvoiceDetails','cashReceivedFromSalesController@getAllCashReceivedInvoiceDetails');
+Route::get('getTodayCashReceivedInvoiceDetails','cashReceivedFromSalesController@getTodayCashReceivedInvoiceDetails');
 
 //api from cash_paid_to_suppliers table
 Route::post('addCashPaid','cashPaidToSuppliersController@addCashPaid');

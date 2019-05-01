@@ -20,7 +20,6 @@ class saleInvoiceController extends Controller
             'invoiceNum'=> 'required',
             'customerId'=> 'required',
             'date'=> 'required',
-            'details'=> 'required',
             'totalBill'=> 'required',
             'discount'=> 'required',
             'cashPaid'=> 'required',
