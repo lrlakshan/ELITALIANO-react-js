@@ -7,22 +7,13 @@ import LoadingOverlay from 'react-loading-overlay';
 import ReactSearchBox from 'react-search-box'
 import Datetime from "react-datetime";
 import Moment from "moment";
-import SweetAlert from "react-bootstrap-sweetalert";
-
 
 // @material-ui/core components
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
 import withStyles from "@material-ui/core/styles/withStyles";
-import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import InputAdornment from "@material-ui/core/InputAdornment";
+
 // @material-ui/icons
 import Search from "@material-ui/icons/Search";
 import Airplay from "@material-ui/icons/TabletMac";
@@ -31,7 +22,6 @@ import Assignment from "@material-ui/icons/Assignment";
 import Dvr from "@material-ui/icons/Dvr";
 import Done from "@material-ui/icons/Done";
 import Close from "@material-ui/icons/Close";
-import AddCircle from "@material-ui/icons/AddCircle";
 import LocalMall from "@material-ui/icons/LocalMall";
 // core components
 import NavPills from "../components/NavPills/NavPills.jsx";
@@ -434,9 +424,7 @@ class PurchaseHistory extends React.Component {
                     this.setState({
                         loading: false,
                         numberOfRows: data.length,
-                        cumRevenue: response.cumRevenue,
-                        cumCostOfPurchases: response.cumCostOfPurchases,
-                        cumDiscount: response.cumDiscount,
+                        totalCost: response.totalCost,
                         cashPaid: response.cashPaid,
                         balance: response.balance,
                         supplierNames: [],
@@ -456,7 +444,7 @@ class PurchaseHistory extends React.Component {
                 purchasesBtn: ''
             });
             Helper.http
-                .jsonPost("searchBysupplierBetweenTimePeriod", {
+                .jsonPost("searchBySupplierBetweenTimePeriod", {
                     supplierId: this.state.selectedSupplierId,
                     from: this.state.selectedFromDate,
                     to: this.state.selectedToDate
@@ -504,9 +492,7 @@ class PurchaseHistory extends React.Component {
                     this.setState({
                         loading: false,
                         numberOfRows: data.length,
-                        cumRevenue: response.cumRevenue,
-                        cumCostOfPurchases: response.cumCostOfPurchases,
-                        cumDiscount: response.cumDiscount,
+                        totalCost: response.totalCost,
                         cashPaid: response.cashPaid,
                         balance: response.balance,
                         supplierNames: [],
@@ -522,7 +508,7 @@ class PurchaseHistory extends React.Component {
     };
 
     //search details between two dates from all purchases data
-    searchBetweenTimePeriod = () => {
+    searchPurchasesBetweenTimePeriod = () => {
         const purchasesInvoices = [];
         this.setState({
             loading: true,
@@ -531,7 +517,7 @@ class PurchaseHistory extends React.Component {
             purchasesBtn: ''
         });
         Helper.http
-            .jsonPost("searchBetweenTimePeriod", {
+            .jsonPost("searchPurchasesBetweenTimePeriod", {
                 from: this.state.selectedFromDate,
                 to: this.state.selectedToDate
             })
@@ -578,9 +564,7 @@ class PurchaseHistory extends React.Component {
                 this.setState({
                     loading: false,
                     numberOfRows: data.length,
-                    cumRevenue: response.cumRevenue,
-                    cumCostOfPurchases: response.cumCostOfPurchases,
-                    cumDiscount: response.cumDiscount,
+                    totalCost: response.totalCost,
                     cashPaid: response.cashPaid,
                     balance: response.balance,
                     supplierNames: [],
@@ -702,9 +686,7 @@ class PurchaseHistory extends React.Component {
                     this.setState({
                         loading: false,
                         numberOfRows: data.length,
-                        cumRevenue: response.cumRevenue,
-                        cumCostOfPurchases: response.cumCostOfPurchases,
-                        cumDiscount: response.cumDiscount,
+                        totalCost: response.totalCost,
                         cashPaid: response.cashPaid,
                         balance: response.balance,
                         supplierNames: [],
@@ -774,9 +756,7 @@ class PurchaseHistory extends React.Component {
                     this.setState({
                         loading: false,
                         numberOfRows: data.length,
-                        cumRevenue: response.cumRevenue,
-                        cumCostOfPurchases: response.cumCostOfPurchases,
-                        cumDiscount: response.cumDiscount,
+                        totalCost: response.totalCost,
                         cashPaid: response.cashPaid,
                         balance: response.balance,
                         supplierNames: [],
@@ -789,8 +769,6 @@ class PurchaseHistory extends React.Component {
                     this.getTodayPurchasesInvoiceDetails();
                 });
         }
-
-
     }
 
     //save the selected supplier ID and supplier name in a state
@@ -1046,7 +1024,7 @@ class PurchaseHistory extends React.Component {
                                         <thead>
                                             <tr>
                                                 <th>Product Name</th>
-                                                <th>Quantityy</th>
+                                                <th>Quantity</th>
                                                 <th>Price</th>
                                                 <th>Amount</th>
                                             </tr>
@@ -1167,7 +1145,7 @@ class PurchaseHistory extends React.Component {
                                                         size='sm'
                                                         color="success"
                                                         className={classes.searchByDateButton}
-                                                        onClick={this.searchBetweenTimePeriod}>
+                                                        onClick={this.searchPurchasesBetweenTimePeriod}>
                                                         Search
                                                     </Button>
                                                 </CardBody>

@@ -1086,10 +1086,13 @@ class SalesHistory extends React.Component {
                                                 <th>Discount (-)</th>
                                                 <td>{parseInt(this.state.invoiceTotalBillRegular - this.state.invoiceTotalBill, 10).toLocaleString() + ".00"}</td>
                                             </tr>
-                                            <tr>
-                                                <th>Promo Discount (-)</th>
-                                                <td>{parseInt(this.state.invoiceDiscount, 10).toLocaleString() + ".00"}</td>
-                                            </tr>
+                                            {this.state.invoiceDiscount !== "0.00"
+                                                ? <tr>
+                                                    <th>Promo Discount (-)</th>
+                                                    <td>{parseInt(this.state.invoiceDiscount, 10).toLocaleString() + ".00"}</td>
+                                                </tr> :
+                                                null
+                                            }
                                             <tr>
                                                 <th>Total</th>
                                                 <td>{parseInt(this.state.invoiceTotalBill - this.state.invoiceDiscount, 10).toLocaleString() + ".00"}</td>

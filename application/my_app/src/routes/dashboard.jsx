@@ -4,7 +4,7 @@ import Purchases from "../views/Purchases";
 import supplierReturn from "../views/supplierReturn";
 import SalesHistory from "../views/SalesHistory";
 import PurchaseHistory from "../views/PurchaseHistory";
-import ExpenseHistory from "../views/ExpenseHistory";
+import CashFlow from "../views/CashFlow";
 import CashPaid from "../views/CashPaid";
 import CashRecieved from "../views/CashRecieved";
 import Summary from "../views/Summary";
@@ -79,10 +79,10 @@ var dashRoutes = [
         component: PurchaseHistory
       },
       {
-        path: "/main/expenseHistory",
-        name: "Expense History",
+        path: "/main/cashflow",
+        name: "Cash Flow",
         mini: "",
-        component: ExpenseHistory
+        component: CashFlow
       },
       {
         path: "/main/cashPaid",

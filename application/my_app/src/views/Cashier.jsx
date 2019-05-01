@@ -393,10 +393,7 @@ class Cashier extends React.Component {
         if (this.state.newCustomerName === "") {
             this.setState({ newCustomerNameState: "error" });
         }
-        if (this.state.newCustomerMobile === "") {
-            this.setState({ newCustomerMobileState: "error" });
-        } 
-        if (this.state.newCustomerName !== "" && this.state.newCustomerMobile !== ""){
+        if (this.state.newCustomerName !== ""){
             Helper.http
                 .jsonPost("addNewCustomer", {
                     customerName: this.state.newCustomerName,
@@ -414,13 +411,7 @@ class Cashier extends React.Component {
                     });
                 })
                 .catch(exception => {
-                    if(exception === '23000'){
-                        this.setState({
-                            alertOpen: true,
-                            alertDiscription: "The mobile number you entered is already in the system",
-                            addNewCustomerloading: false
-                        });
-                    } else if (exception === 2002){
+                    if (exception === 2002){
                         this.setState({
                             alertOpen: true,
                             alertDiscription: "Please Check your connection",
@@ -762,17 +753,24 @@ class Cashier extends React.Component {
 
     //Next button function
     nextButton = () => {
-        if (this.state.details === "") {
-            this.setState({
-                alertOpen: true,
-                alertDiscription: "You have to add a small note on the purchase"
-            });
-        } else {
-            this.setState({
-                invoiceOpen: true,
-                proceedOpen: false,
-            });
-        }
+
+        // --------------- USe this if you want to add a detail note is compulsory
+        // if (this.state.details === "") {
+        //     this.setState({
+        //         alertOpen: true,
+        //         alertDiscription: "You have to add a small note on the purchase"
+        //     });
+        // } else {
+        //     this.setState({
+        //         invoiceOpen: true,
+        //         proceedOpen: false,
+        //     });
+        // }
+
+        this.setState({
+            invoiceOpen: true,
+            proceedOpen: false,
+        });
     };
 
     //invocie dialog box close and payment dialog box open again
@@ -1515,14 +1513,12 @@ class Cashier extends React.Component {
                                 <CustomInput
                                     success={this.state.newCustomerMobileState === "success"}
                                     error={this.state.newCustomerMobileState === "error"}
-                                    labelText="MobileNumber *"
+                                    labelText="Mobile Number *"
                                     id="newCustomerMobile"
                                     formControlProps={{
                                         fullWidth: true
                                     }}
                                     inputProps={{
-                                        onChange: event =>
-                                            this.change(event, "newCustomerMobile", "newCustomerMobileLength", 1),
                                         type: "number"
                                     }}
                                     onChange={(event) => this.setState({ newCustomerMobile: event.target.value })}
