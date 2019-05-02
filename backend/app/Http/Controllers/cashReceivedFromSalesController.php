@@ -38,6 +38,9 @@ class cashReceivedFromSalesController extends Controller
         }
     }
 
+
+//-----------------------------------CASH RECEIVED THINGS API-----------------------------
+
     //get all cash received from sales details
     public function getAllCashReceivedInvoiceDetails(){
 
@@ -94,6 +97,49 @@ class cashReceivedFromSalesController extends Controller
                             ->get();
 
         $cashReceived = DB::table('cash_received_from_sales')->where('cash_received_from_sales.date','=',$todayDate)->sum('cashPaid');  
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'cumCashReceived'=>$cashReceived,
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get all cash received from sales details between two dates
+    public function searchCashReceivedBetweenTimePeriod(Request $request){
+
+        try {
+
+            $validator = Validator::make($request->all(), [
+            'from'=> 'required',
+            'to'=> 'required',
+        ]);
+
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('sale_invoices')
+                            ->join('cash_received_from_sales', 'sale_invoices.invoiceNum', '=', 'cash_received_from_sales.invoiceNum')
+                            ->join('customer_details', 'sale_invoices.customerId', '=', 'customer_details.id')
+                            ->select(
+                                'cash_received_from_sales.invoiceNum',
+                                'customer_details.customerName', 
+                                'cash_received_from_sales.date', 
+                                'cash_received_from_sales.cashPaid'
+                            )
+                            ->whereBetween('cash_received_from_sales.date', [$request->from, $request->to])
+                            ->get();
+
+        $cashReceived = DB::table('cash_received_from_sales')->whereBetween('cash_received_from_sales.date', [$request->from, $request->to])->sum('cashPaid');  
 
             return response()->json([
                 'success'=>true,
