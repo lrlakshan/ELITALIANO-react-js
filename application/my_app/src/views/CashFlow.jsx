@@ -92,8 +92,11 @@ class CashFlow extends React.Component {
         super(props);
         this.state = {
             cashReceivedDetails: [],
+            cashPaidDetails: [],
             loading: false,
             customerTableLoading: false,
+            CRnumberOfRows: 0,
+            CPnumberOfRows: 0,
             cumCashReceived: '0',
             cumCashPaid: '0',
             cumExpenses: '0',
@@ -109,7 +112,7 @@ class CashFlow extends React.Component {
     }
 
     componentDidMount() {
-        this.getTodayCashReceivedInvoiceDetails();
+        this.todayCfBtnClick();
     }
 
     //get the selected 'TO' date from the calender and convert it to YYYY-MM-DD format
@@ -130,13 +133,13 @@ class CashFlow extends React.Component {
         this.setState({ selectedFromDate: momentString });
     }
 
+//------------------------------CASH RECEIVED FUNCTIONS-------------------------------
+
     //get today cash received from sales details
     getAllCashReceivedInvoiceDetails = () => {
         const cashReceivedDetails = [];
         this.setState({
             loading: true,
-            CfHistoryCaption: "From all Cash Flow history details",
-            CfSummaryCaption: "From all Cash Flow history details",
         });
 
         Helper.http
@@ -155,7 +158,7 @@ class CashFlow extends React.Component {
                 this.setState({ cashReceivedDetails });
                 this.setState({
                     loading: false,
-                    numberOfRows: data.length,
+                    CRnumberOfRows: data.length,
                     cumCashReceived: response.cumCashReceived
                 });
             })
@@ -170,8 +173,6 @@ class CashFlow extends React.Component {
         const cashReceivedDetails = [];
         this.setState({
             loading: true,
-            CfHistoryCaption: "From today's (" + Moment(Date()).format("YYYY-MM-DD") + ") Cash Flow history details",
-            CfSummaryCaption: "From today's (" + Moment(Date()).format("YYYY-MM-DD") + ") Cash Flow history details",
         });
 
         Helper.http
@@ -190,7 +191,7 @@ class CashFlow extends React.Component {
                 this.setState({ cashReceivedDetails });
                 this.setState({
                     loading: false,
-                    numberOfRows: data.length,
+                    CRnumberOfRows: data.length,
                     cumCashReceived: response.cumCashReceived
                 });
             })
@@ -199,20 +200,174 @@ class CashFlow extends React.Component {
             });
     };
 
+    //get cash received from details between two dates
+    searchCashReceivedBetweenTimePeriod = () => {
+        const cashReceivedDetails = [];
+        this.setState({
+            loading: true,
+            CfBtn: ''
+        });
+
+        Helper.http
+            .jsonPost("searchCashReceivedBetweenTimePeriod", {
+                from: this.state.selectedFromDate,
+                to: this.state.selectedToDate
+            })
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        invoiceNum: data[i].invoiceNum,
+                        customerName: data[i].customerName,
+                        date: data[i].date,
+                        cashPaid: data[i].cashPaid
+                    };
+                    cashReceivedDetails.push(_data);
+                }
+                this.setState({ cashReceivedDetails });
+                this.setState({
+                    loading: false,
+                    CRnumberOfRows: data.length,
+                    cumCashReceived: response.cumCashReceived
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+//--------------------------------CASH PAID FUNCTIONS---------------------------------------
+
+    //get today cash received from sales details
+    getAllCashPaidInvoiceDetails = () => {
+        const cashPaidDetails = [];
+        this.setState({
+            loading: true,
+        });
+
+        Helper.http
+            .jsonGet("getAllCashPaidInvoiceDetails")
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        invoiceNum: data[i].invoiceNum,
+                        supplierName: data[i].supplierName,
+                        date: data[i].date,
+                        cashPaid: data[i].cashPaid
+                    };
+                    cashPaidDetails.push(_data);
+                }
+                this.setState({ cashPaidDetails });
+                this.setState({
+                    loading: false,
+                    CPnumberOfRows: data.length,
+                    cumCashPaid: response.cumCashPaid
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    //get today cash received from sales details
+    getTodayCashPaidInvoiceDetails = () => {
+        const cashPaidDetails = [];
+        this.setState({
+            loading: true,
+        });
+
+        Helper.http
+            .jsonGet("getTodayCashPaidInvoiceDetails")
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        invoiceNum: data[i].invoiceNum,
+                        supplierName: data[i].supplierName,
+                        date: data[i].date,
+                        cashPaid: data[i].cashPaid
+                    };
+                    cashPaidDetails.push(_data);
+                }
+                this.setState({ cashPaidDetails });
+                this.setState({
+                    loading: false,
+                    CPnumberOfRows: data.length,
+                    cumCashPaid: response.cumCashPaid
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    //get cash received from details between two dates
+    searchCashPaidBetweenTimePeriod = () => {
+        const cashPaidDetails = [];
+        this.setState({
+            loading: true,
+            CfBtn: ''
+        });
+
+        Helper.http
+            .jsonPost("searchCashPaidBetweenTimePeriod", {
+                from: this.state.selectedFromDate,
+                to: this.state.selectedToDate
+            })
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        invoiceNum: data[i].invoiceNum,
+                        supplierName: data[i].supplierName,
+                        date: data[i].date,
+                        cashPaid: data[i].cashPaid
+                    };
+                    cashPaidDetails.push(_data);
+                }
+                this.setState({ cashPaidDetails });
+                this.setState({
+                    loading: false,
+                    CPnumberOfRows: data.length,
+                    cumCashPaid: response.cumCashPaid
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+
     //today cash flow button click function
     todayCfBtnClick = () => {
         this.setState({
             CfBtn: 'todayCF',
+            CfHistoryCaption: "From today's (" + Moment(Date()).format("YYYY-MM-DD") + ") Cash Flow details",
+            CfSummaryCaption: "From today's (" + Moment(Date()).format("YYYY-MM-DD") + ") Cash Flow details",
         });
         this.getTodayCashReceivedInvoiceDetails();
+        this.getTodayCashPaidInvoiceDetails();
     }
 
     //all cash flow button click function
     allCfBtnClick = () => {
         this.setState({
             CfBtn: 'allCF',
+            CfHistoryCaption: "From all Cash Flow details",
+            CfSummaryCaption: "From all Cash Flow details",
         });
         this.getAllCashReceivedInvoiceDetails();
+        this.getAllCashPaidInvoiceDetails();
+    }
+
+    searchButtonClick = () =>{
+        this.setState({
+            CfHistoryCaption: "From Cash Flow between " + this.state.selectedFromDate + " and " + this.state.selectedToDate,
+            CfSummaryCaption: "From Cash Flow between " + this.state.selectedFromDate + " and " + this.state.selectedToDate,
+        })
+        this.searchCashPaidBetweenTimePeriod();
+        this.searchCashReceivedBetweenTimePeriod();
     }
 
     render() {
@@ -283,7 +438,7 @@ class CashFlow extends React.Component {
                                                     size='sm'
                                                     color="success"
                                                     className={classes.searchByDateButton}
-                                                    onClick={this.searchBetweenTimePeriod}>
+                                                    onClick={this.searchButtonClick}>
                                                     Search
                                                     </Button>
                                             </CardBody>
@@ -360,6 +515,7 @@ class CashFlow extends React.Component {
                                                     filterable={false}
                                                     sortable={false}
                                                     showPagination={false}
+                                                    noDataText=""
                                                     defaultSorted={[
                                                         {
                                                             id: "date",
@@ -398,7 +554,7 @@ class CashFlow extends React.Component {
                                                         }
                                                     ]}
                                                     className="-striped -highlight"
-                                                    pageSize={this.state.numberOfRows}
+                                                    pageSize={this.state.CRnumberOfRows}
                                                 />
                                             </CardBody>
                                             </LoadingOverlay>
@@ -410,23 +566,65 @@ class CashFlow extends React.Component {
                                     tabIcon: LocationOn,
                                     tabContent: (
                                         <Card>
-                                            <CardHeader>
-                                                <h4 className={classes.cardTitle}>
-                                                    Location of the product
-                        </h4>
-                                                <p className={classes.cardCategory}>
-                                                    More information here
-                        </p>
-                                            </CardHeader>
-                                            <CardBody>
-                                                Efficiently unleash cross-media information without
-                                                cross-media value. Quickly maximize timely deliverables
-                                                for real-time schemas.
-                        <br />
-                                                <br />
-                                                Dramatically maintain clicks-and-mortar solutions
-                                                without functional solutions.
-                      </CardBody>
+                                            <LoadingOverlay
+                                                active={this.state.loading}
+                                                spinner
+                                                text='Loading...'
+                                            >
+                                                <CardHeader>
+                                                    <h4 className={classes.cardTitle}>
+                                                        Cash Paid to Suppliers  - <small>{this.state.CfHistoryCaption}</small>
+                                                    </h4>
+                                                </CardHeader>
+                                                <CardBody>
+                                                    <ReactTable
+                                                        data={this.state.cashPaidDetails}
+                                                        filterable={false}
+                                                        sortable={false}
+                                                        showPagination={false}
+                                                        noDataText=""
+                                                        defaultSorted={[
+                                                            {
+                                                                id: "date",
+                                                                desc: true
+                                                            }
+                                                        ]}
+                                                        columns={[
+                                                            {
+                                                                Header: () => (
+                                                                    <div className="actions-center"><strong>Date</strong></div>),
+                                                                accessor: "date",
+                                                                width: 150,
+                                                                Cell: row => <div className="actions-center">{row.value}</div>
+                                                            },
+                                                            {
+                                                                Header: () => (
+                                                                    <div className="actions-center"><strong>Invoice</strong></div>),
+                                                                accessor: "invoiceNum",
+                                                                filterable: false,
+                                                                width: 100,
+                                                                Cell: row => <div className="actions-center">{row.value}</div>
+                                                            },
+                                                            {
+                                                                Header: () => (
+                                                                    <div className="actions-left"><strong>Suppleir Name</strong></div>),
+                                                                accessor: "supplierName",
+                                                                width: 250,
+                                                                Cell: row => <div className="actions-left">{row.value}</div>
+                                                            },
+                                                            {
+                                                                Header: () => (
+                                                                    <div className="actions-right"><strong>Amount</strong></div>),
+                                                                accessor: "cashPaid",
+                                                                width: 120,
+                                                                Cell: row => <div className="actions-right">{row.value}</div>
+                                                            }
+                                                        ]}
+                                                        className="-striped -highlight"
+                                                        pageSize={this.state.CPnumberOfRows}
+                                                    />
+                                                </CardBody>
+                                            </LoadingOverlay>
                                         </Card>
                                     )
                                 },
