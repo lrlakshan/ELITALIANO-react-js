@@ -94,3 +94,12 @@ Route::get('getAllCashPaidInvoiceDetails','cashPaidToSuppliersController@getAllC
 Route::get('getTodayCashPaidInvoiceDetails','cashPaidToSuppliersController@getTodayCashPaidInvoiceDetails');
 Route::post('searchCashPaidBetweenTimePeriod','cashPaidToSuppliersController@searchCashPaidBetweenTimePeriod');
 
+//api from expense_types table
+Route::post('addExpenseType','expenseTypesController@addExpenseType');
+Route::get('expenseTypeIdNextNumber','expenseTypesController@expenseTypeIdNextNumber');
+Route::get('getAllExpenseTypes','expenseTypesController@getAllExpenseTypes');
+
+//api from expenses table
+Route::post('addNewExpense','expenseController@addNewExpense');
+Route::get('getExpensesDetails','expenseController@getExpensesDetails');
+
