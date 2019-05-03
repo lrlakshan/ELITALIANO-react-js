@@ -5,7 +5,8 @@ import supplierReturn from "../views/supplierReturn";
 import SalesHistory from "../views/SalesHistory";
 import PurchaseHistory from "../views/PurchaseHistory";
 import CashFlow from "../views/CashFlow";
-import CashPaid from "../views/CashPaid";
+import Salary from "../views/Salary";
+import Expenses from "../views/Expenses";
 import CashRecieved from "../views/CashRecieved";
 import Summary from "../views/Summary";
 import Recievable from "../views/Recievable";
@@ -17,7 +18,8 @@ import Notes from "../views/Notes";
 
 // @material-ui/icons
 import InsertChart from "@material-ui/icons/InsertChart";
-import Image from "@material-ui/icons/EuroSymbol";
+import Cash from "@material-ui/icons/AttachMoney";
+import CashOut from "@material-ui/icons/MoneyOff";
 import StoreMallDirectory from "@material-ui/icons/StoreMallDirectory";
 // import ContentPaste from "@material-ui/icons/ContentPaste";
 import Accounts from "@material-ui/icons/ImportContacts";
@@ -85,12 +87,6 @@ var dashRoutes = [
         component: CashFlow
       },
       {
-        path: "/main/cashPaid",
-        name: "Cash Paid",
-        mini: "",
-        component: CashPaid
-      },
-      {
         path: "/main/cashRecieved",
         name: "Cash Recieved",
         mini: "",
@@ -109,7 +105,7 @@ var dashRoutes = [
     path: "/main/payable_recievable_payable",
     name: "Recievable/Payable",
     state: "openTables",
-    icon: Image,
+    icon: Cash,
     views: [
       {
         path: "/main/recievable",
@@ -122,6 +118,27 @@ var dashRoutes = [
         name: "Cash Payable",
         mini: "",
         component: Payable
+      },
+    ]
+  },
+  {
+    collapse: true,
+    path: "/main/cashout",
+    name: "Cash Out",
+    state: "cashOutComponents",
+    icon: CashOut,
+    views: [
+      {
+        path: "/main/expenses",
+        name: "Expenses",
+        mini: "",
+        component: Expenses
+      },
+      {
+        path: "/main/salary",
+        name: "Salary",
+        mini: "",
+        component: Salary
       },
     ]
   },

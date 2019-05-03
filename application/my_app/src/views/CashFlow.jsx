@@ -4,7 +4,6 @@ import React from 'react';
 import ReactTable from "react-table";
 import Helper from '../utils/Helper';
 import LoadingOverlay from 'react-loading-overlay';
-import ReactSearchBox from 'react-search-box'
 import Datetime from "react-datetime";
 import Moment from "moment";
 
@@ -13,7 +12,6 @@ import Moment from "moment";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import withStyles from "@material-ui/core/styles/withStyles";
-import Dialog from '@material-ui/core/Dialog';
 // @material-ui/icons
 import Search from "@material-ui/icons/Search";
 import Airplay from "@material-ui/icons/TabletMac";
@@ -31,12 +29,10 @@ import Card from "../components/Card/Card.jsx";
 import CardBody from "../components/Card/CardBody.jsx";
 import CardIcon from "../components/Card/CardIcon.jsx";
 import CardHeader from "../components/Card/CardHeader.jsx";
-import CustomInput from "../components/CustomInput/CustomInput.jsx";
 
 import { cardTitle } from "../assets/jss/material-dashboard-pro-react.jsx";
 import sweetAlertStyle from "../assets/jss/material-dashboard-pro-react/views/sweetAlertStyle.jsx";
 import extendedFormsStyle from "../assets/jss/material-dashboard-pro-react/views/extendedFormsStyle.jsx";
-import elitaliano_logo from '../assets/img/elitaliano_logo.png';
 import "../assets/scss/purchaseInvoice.css"
 
 const styles = {
