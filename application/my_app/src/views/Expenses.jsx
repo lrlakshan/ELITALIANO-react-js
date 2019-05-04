@@ -627,6 +627,11 @@ class Expenses extends React.Component {
                     </GridItem>
                     <GridItem xs={12} sm={12} md={6}>
                         <Card>
+                            <CardHeader>
+                                <h4 className={classes.cardTitle}>
+                                    Last 15 Records of Expenses
+                                </h4>
+                            </CardHeader>
                             <CardBody>
                                 <ReactTable
                                     loading={this.state.expenseTabeleLoading}

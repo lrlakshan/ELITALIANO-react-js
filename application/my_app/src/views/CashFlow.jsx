@@ -89,7 +89,10 @@ class CashFlow extends React.Component {
         this.state = {
             cashReceivedDetails: [],
             cashPaidDetails: [],
-            loading: false,
+            expenseDetails: [],
+            cashReceivedTableLoading: false,    //this loading state is common for all types of cash flow summary grid
+            cashPaidLoading: false,
+            expenseLoading: false,
             customerTableLoading: false,
             CRnumberOfRows: 0,
             CPnumberOfRows: 0,
@@ -135,7 +138,7 @@ class CashFlow extends React.Component {
     getAllCashReceivedInvoiceDetails = () => {
         const cashReceivedDetails = [];
         this.setState({
-            loading: true,
+            cashReceivedTableLoading: true,
         });
 
         Helper.http
@@ -153,7 +156,7 @@ class CashFlow extends React.Component {
                 }
                 this.setState({ cashReceivedDetails });
                 this.setState({
-                    loading: false,
+                    cashReceivedTableLoading: false,
                     CRnumberOfRows: data.length,
                     cumCashReceived: response.cumCashReceived
                 });
@@ -168,7 +171,7 @@ class CashFlow extends React.Component {
     getTodayCashReceivedInvoiceDetails = () => {
         const cashReceivedDetails = [];
         this.setState({
-            loading: true,
+            cashReceivedTableLoading: true,
         });
 
         Helper.http
@@ -186,7 +189,7 @@ class CashFlow extends React.Component {
                 }
                 this.setState({ cashReceivedDetails });
                 this.setState({
-                    loading: false,
+                    cashReceivedTableLoading: false,
                     CRnumberOfRows: data.length,
                     cumCashReceived: response.cumCashReceived
                 });
@@ -200,7 +203,7 @@ class CashFlow extends React.Component {
     searchCashReceivedBetweenTimePeriod = () => {
         const cashReceivedDetails = [];
         this.setState({
-            loading: true,
+            cashReceivedTableLoading: true,
             CfBtn: ''
         });
 
@@ -222,7 +225,7 @@ class CashFlow extends React.Component {
                 }
                 this.setState({ cashReceivedDetails });
                 this.setState({
-                    loading: false,
+                    cashReceivedTableLoading: false,
                     CRnumberOfRows: data.length,
                     cumCashReceived: response.cumCashReceived
                 });
@@ -238,7 +241,7 @@ class CashFlow extends React.Component {
     getAllCashPaidInvoiceDetails = () => {
         const cashPaidDetails = [];
         this.setState({
-            loading: true,
+            cashPaidLoading: true,
         });
 
         Helper.http
@@ -256,7 +259,7 @@ class CashFlow extends React.Component {
                 }
                 this.setState({ cashPaidDetails });
                 this.setState({
-                    loading: false,
+                    cashPaidLoading: false,
                     CPnumberOfRows: data.length,
                     cumCashPaid: response.cumCashPaid
                 });
@@ -270,7 +273,7 @@ class CashFlow extends React.Component {
     getTodayCashPaidInvoiceDetails = () => {
         const cashPaidDetails = [];
         this.setState({
-            loading: true,
+            cashPaidLoading: true,
         });
 
         Helper.http
@@ -288,7 +291,7 @@ class CashFlow extends React.Component {
                 }
                 this.setState({ cashPaidDetails });
                 this.setState({
-                    loading: false,
+                    cashPaidLoading: false,
                     CPnumberOfRows: data.length,
                     cumCashPaid: response.cumCashPaid
                 });
@@ -302,7 +305,7 @@ class CashFlow extends React.Component {
     searchCashPaidBetweenTimePeriod = () => {
         const cashPaidDetails = [];
         this.setState({
-            loading: true,
+            cashPaidLoading: true,
             CfBtn: ''
         });
 
@@ -324,7 +327,7 @@ class CashFlow extends React.Component {
                 }
                 this.setState({ cashPaidDetails });
                 this.setState({
-                    loading: false,
+                    cashPaidLoading: false,
                     CPnumberOfRows: data.length,
                     cumCashPaid: response.cumCashPaid
                 });
@@ -333,6 +336,102 @@ class CashFlow extends React.Component {
                 console.log(exception);
             });
     };
+
+
+//---------------------------------EXPENSES FUNCTIONS----------------------------------
+
+    //get all expense details
+    getAllExpensesDetails = () => {
+        const expenseDetails = [];
+        this.setState({ expenseLoading: true });
+        Helper.http
+            .jsonGet("getAllExpensesDetails")
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        id: data[i].id,
+                        expenseName: data[i].expenseName,
+                        date: data[i].date,
+                        details: data[i].details,
+                        cashPaid: data[i].cashPaid,
+                    };
+                    expenseDetails.push(_data);
+                }
+                this.setState({ expenseDetails });
+                this.setState({
+                    expenseLoading: false,
+                    numberOfRows: data.length,
+                    cumExpenses: response.cumExpensePaid
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    }
+
+    //get today expense details
+    getTodayExpensesDetails = () => {
+        const expenseDetails = [];
+        this.setState({ expenseLoading: true });
+        Helper.http
+            .jsonGet("getTodayExpensesDetails")
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        id: data[i].id,
+                        expenseName: data[i].expenseName,
+                        date: data[i].date,
+                        details: data[i].details,
+                        cashPaid: data[i].cashPaid,
+                    };
+                    expenseDetails.push(_data);
+                }
+                this.setState({ expenseDetails });
+                this.setState({
+                    expenseLoading: false,
+                    numberOfRows: data.length,
+                    cumExpenses: response.cumExpensePaid
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    }
+
+    //get expense details between two dates
+    searchExpenseBetweenTimePeriod = () => {
+        const expenseDetails = [];
+        this.setState({ expenseLoading: true });
+        Helper.http
+            .jsonPost("searchExpenseBetweenTimePeriod", {
+                from: this.state.selectedFromDate,
+                to: this.state.selectedToDate
+            })
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        id: data[i].id,
+                        expenseName: data[i].expenseName,
+                        date: data[i].date,
+                        details: data[i].details,
+                        cashPaid: data[i].cashPaid,
+                    };
+                    expenseDetails.push(_data);
+                }
+                this.setState({ expenseDetails });
+                this.setState({
+                    expenseLoading: false,
+                    numberOfRows: data.length,
+                    cumExpenses: response.cumExpensePaid
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    }
 
 
     //today cash flow button click function
@@ -344,6 +443,7 @@ class CashFlow extends React.Component {
         });
         this.getTodayCashReceivedInvoiceDetails();
         this.getTodayCashPaidInvoiceDetails();
+        this.getTodayExpensesDetails();
     }
 
     //all cash flow button click function
@@ -355,6 +455,7 @@ class CashFlow extends React.Component {
         });
         this.getAllCashReceivedInvoiceDetails();
         this.getAllCashPaidInvoiceDetails();
+        this.getAllExpensesDetails();
     }
 
     searchButtonClick = () =>{
@@ -364,6 +465,7 @@ class CashFlow extends React.Component {
         })
         this.searchCashPaidBetweenTimePeriod();
         this.searchCashReceivedBetweenTimePeriod();
+        this.searchExpenseBetweenTimePeriod();
     }
 
     render() {
@@ -452,16 +554,17 @@ class CashFlow extends React.Component {
                                 </CardIcon>
                                 <h4 className={classes.cardIconTitle}>Cash Flow Summary - <small>{this.state.CfSummaryCaption}</small></h4>
                             </CardHeader>
+                            {/* this loading state is common for all cash flows */}
                             <LoadingOverlay
-                                active={this.state.loading}
+                                active={this.state.cashReceivedTableLoading}
                                 spinner
                                 text='Loading...'
                             >
                                 <GridContainer>
                                     <GridItem xs={12} sm={12} md={6}>
                                         <CardBody>
-                                            <h4>Cash Received From Sales</h4>
-                                            <h4>Cash Paid to Suppliers (-)</h4>
+                                            <h4>Cash Received</h4>
+                                            <h4>Cash Paid (-)</h4>
                                             <h4>Expenses (-)</h4>
                                             <h4>Salary (-)</h4>
                                             <br />
@@ -495,11 +598,6 @@ class CashFlow extends React.Component {
                                     tabIcon: Info,
                                     tabContent: (
                                         <Card>
-                                            <LoadingOverlay
-                                                active={this.state.loading}
-                                                spinner
-                                                text='Loading...'
-                                            >
                                             <CardHeader>
                                                 <h4 className={classes.cardTitle}>
                                                         Cash Received from Sales - <small>{this.state.CfHistoryCaption}</small>
@@ -508,6 +606,7 @@ class CashFlow extends React.Component {
                                             <CardBody>
                                                 <ReactTable
                                                     data={this.state.cashReceivedDetails}
+                                                    loading={this.state.cashReceivedTableLoading}
                                                     filterable={false}
                                                     sortable={false}
                                                     showPagination={false}
@@ -553,7 +652,6 @@ class CashFlow extends React.Component {
                                                     pageSize={this.state.CRnumberOfRows}
                                                 />
                                             </CardBody>
-                                            </LoadingOverlay>
                                         </Card>
                                     )
                                 },
@@ -562,11 +660,6 @@ class CashFlow extends React.Component {
                                     tabIcon: LocationOn,
                                     tabContent: (
                                         <Card>
-                                            <LoadingOverlay
-                                                active={this.state.loading}
-                                                spinner
-                                                text='Loading...'
-                                            >
                                                 <CardHeader>
                                                     <h4 className={classes.cardTitle}>
                                                         Cash Paid to Suppliers  - <small>{this.state.CfHistoryCaption}</small>
@@ -575,6 +668,7 @@ class CashFlow extends React.Component {
                                                 <CardBody>
                                                     <ReactTable
                                                         data={this.state.cashPaidDetails}
+                                                        loading={this.state.cashPaidLoading}
                                                         filterable={false}
                                                         sortable={false}
                                                         showPagination={false}
@@ -620,7 +714,6 @@ class CashFlow extends React.Component {
                                                         pageSize={this.state.CPnumberOfRows}
                                                     />
                                                 </CardBody>
-                                            </LoadingOverlay>
                                         </Card>
                                     )
                                 },
@@ -631,21 +724,67 @@ class CashFlow extends React.Component {
                                         <Card>
                                             <CardHeader>
                                                 <h4 className={classes.cardTitle}>
-                                                    Legal info of the product
-                        </h4>
-                                                <p className={classes.cardCategory}>
-                                                    More information here
-                        </p>
+                                                    Expenses Details  - <small>{this.state.CfHistoryCaption}</small>
+                                                </h4>
                                             </CardHeader>
                                             <CardBody>
-                                                Completely synergize resource taxing relationships via
-                                                premier niche markets. Professionally cultivate
-                                                one-to-one customer service with robust ideas.
-                        <br />
-                                                <br />
-                                                Dynamically innovate resource-leveling customer service
-                                                for state of the art customer service.
-                      </CardBody>
+                                                <ReactTable
+                                                    data={this.state.expenseDetails}
+                                                    loading={this.state.expenseLoading}
+                                                    filterable={false}
+                                                    sortable={false}
+                                                    showPagination={false}
+                                                    noDataText=""
+                                                    defaultSorted={[
+                                                        {
+                                                            id: "date",
+                                                            desc: true
+                                                        }
+                                                    ]}
+                                                    columns={[
+                                                        {
+                                                            Header: () => (
+                                                                <strong>Date</strong>),
+                                                            accessor: "date",
+                                                            filterable: false,
+                                                            sortable: false,
+                                                            width: 100
+                                                        },
+                                                        {
+                                                            Header: () => (
+                                                                <strong>Expense</strong>),
+                                                            accessor: "expenseName",
+                                                            filterable: false,
+                                                            sortable: false,
+                                                            width: 100,
+                                                            Cell: row => <div className="actions-left">{row.value}</div>
+                                                        },
+                                                        {
+                                                            Header: () => (
+                                                                <div className="actions-left">
+                                                                    <strong>Details</strong></div>),
+                                                            accessor: "details",
+                                                            filterable: false,
+                                                            sortable: false,
+                                                            width: 150,
+                                                            Cell: row => <div className="actions-left">{row.value}</div>
+                                                        },
+                                                        {
+                                                            Header: () => (
+                                                                <div className="actions-right">
+                                                                    <strong>Amount</strong></div>),
+                                                            accessor: "cashPaid",
+                                                            filterable: false,
+                                                            sortable: false,
+                                                            width: 100,
+                                                            Cell: row => <div className="actions-right">{row.value}</div>
+                                                        }
+                                                    ]}
+                                                    pageSize={this.state.numberOfRows}
+                                                    showPaginationBottom={false}
+                                                    className="-striped -highlight"
+                                                />
+                                            </CardBody>
                                         </Card>
                                     )
                                 },
