@@ -38,8 +38,7 @@ class cashReceivedFromSalesController extends Controller
         }
     }
 
-
-//-----------------------------------CASH RECEIVED THINGS API-----------------------------
+//----------------------CASH RECEIVED API FOR CASH FLOW SUMMARY-------------------------------------
 
     //get all cash received from sales details
     public function getAllCashReceivedInvoiceDetails(){

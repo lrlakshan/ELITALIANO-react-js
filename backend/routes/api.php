@@ -102,4 +102,8 @@ Route::get('getAllExpenseTypes','expenseTypesController@getAllExpenseTypes');
 //api from expenses table
 Route::post('addNewExpense','expenseController@addNewExpense');
 Route::get('getExpensesDetails','expenseController@getExpensesDetails');
+Route::get('getAllExpensesDetails','expenseController@getAllExpensesDetails');
+Route::get('getTodayExpensesDetails','expenseController@getTodayExpensesDetails');
+Route::post('searchExpenseBetweenTimePeriod','expenseController@searchExpenseBetweenTimePeriod');
+
 

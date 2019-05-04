@@ -38,6 +38,9 @@ class cashPaidToSuppliersController extends Controller
         }
     }
 
+
+//----------------------CASH PAID API FOR CASH FLOW SUMMARY-------------------------------------
+
     //get all cash paid to suppliers details
     public function getAllCashPaidInvoiceDetails(){
 
