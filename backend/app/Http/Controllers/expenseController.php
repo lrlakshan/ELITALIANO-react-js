@@ -170,7 +170,7 @@ class expenseController extends Controller
                                 'expenses.details',
                                 'expenses.cashPaid'
                             )
-							->whereBetween('date', [$request->from, $request->to])                            
+							->whereBetween('date', [$request->from, $request->to])
 							->get();
 
 		$expensePaid = DB::table('expenses')->whereBetween('date', [$request->from, $request->to])->sum('cashPaid');

@@ -106,4 +106,26 @@ Route::get('getAllExpensesDetails','expenseController@getAllExpensesDetails');
 Route::get('getTodayExpensesDetails','expenseController@getTodayExpensesDetails');
 Route::post('searchExpenseBetweenTimePeriod','expenseController@searchExpenseBetweenTimePeriod');
 
+//api from employee_types table
+Route::post('addNewEmployee','employeeTypesController@addNewEmployee');
+Route::get('employeeIdNextNumber','employeeTypesController@employeeIdNextNumber');
+Route::post('getSelectedEmployeeByName','employeeTypesController@getSelectedEmployeeByName');
+Route::post('getSelectedEmployeeById','employeeTypesController@getSelectedEmployeeById');
+
+//api from wages table
+Route::get('getSalarysDetails','wagesController@getSalarysDetails');
+Route::post('addNewSalary','wagesController@addNewSalary');
+Route::get('getAllSalaryDetails','wagesController@getAllSalaryDetails');
+Route::get('getTodaySalaryDetails','wagesController@getTodaySalaryDetails');
+Route::post('searchSalaryBetweenTimePeriod','wagesController@searchSalaryBetweenTimePeriod');
+
+
+
+
+
+
+
+
+
+
 
