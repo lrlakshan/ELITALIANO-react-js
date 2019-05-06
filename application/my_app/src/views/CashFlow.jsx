@@ -33,7 +33,6 @@ import CardHeader from "../components/Card/CardHeader.jsx";
 import { cardTitle } from "../assets/jss/material-dashboard-pro-react.jsx";
 import sweetAlertStyle from "../assets/jss/material-dashboard-pro-react/views/sweetAlertStyle.jsx";
 import extendedFormsStyle from "../assets/jss/material-dashboard-pro-react/views/extendedFormsStyle.jsx";
-import "../assets/scss/purchaseInvoice.css"
 
 const styles = {
     cardIconTitle: {
@@ -46,9 +45,6 @@ const styles = {
         marginBottom: "0px",
         textAlign: "Right"
     },
-    searchButton: {
-        paddingRight: "8%",
-    },
     searchByDateButton: {
         paddingLeft: "10%",
         paddingRight: "10%",
@@ -56,28 +52,6 @@ const styles = {
     viewCfButtons: {
         marginLeft: "20%",
         width: "150px"
-    },
-    viewPurchaseDetailsButton: {
-        marginLeft: "20%",
-    },
-    cardSize: {
-        width: "350px"
-    },
-    invoiceCloseIcon: {
-        position: "absolute",
-        marginLeft: "94%",
-        marginBottom: "0px",
-    },
-    invoiceFormCloseIcon: {
-        position: "absolute",
-        marginLeft: "88%",
-        marginBottom: "0px",
-    },
-    invoiceSize: {
-        width: "842px"
-    },
-    dialogPaper: {
-        maxWidth: '850px',
     },
     ...sweetAlertStyle,
     ...extendedFormsStyle,
@@ -90,9 +64,11 @@ class CashFlow extends React.Component {
             cashReceivedDetails: [],
             cashPaidDetails: [],
             expenseDetails: [],
+            salaryDetails: [],
             cashReceivedTableLoading: false,    //this loading state is common for all types of cash flow summary grid
             cashPaidLoading: false,
             expenseLoading: false,
+            salaryLoading: false,
             customerTableLoading: false,
             CRnumberOfRows: 0,
             CPnumberOfRows: 0,
@@ -434,6 +410,102 @@ class CashFlow extends React.Component {
     }
 
 
+    //---------------------------------SALARY FUNCTIONS----------------------------------
+
+    //get all expense details
+    getAllSalaryDetails = () => {
+        const salaryDetails = [];
+        this.setState({ salaryLoading: true });
+        Helper.http
+            .jsonGet("getAllSalaryDetails")
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        id: data[i].id,
+                        empName: data[i].empName,
+                        date: data[i].date,
+                        details: data[i].details,
+                        cashPaid: data[i].cashPaid,
+                    };
+                    salaryDetails.push(_data);
+                }
+                this.setState({ salaryDetails });
+                this.setState({
+                    salaryLoading: false,
+                    numberOfRows: data.length,
+                    cumSalary: response.cumSalaryPaid
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    }
+
+    //get all expense details
+    getTodaySalaryDetails = () => {
+        const salaryDetails = [];
+        this.setState({ salaryLoading: true });
+        Helper.http
+            .jsonGet("getTodaySalaryDetails")
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        id: data[i].id,
+                        empName: data[i].empName,
+                        date: data[i].date,
+                        details: data[i].details,
+                        cashPaid: data[i].cashPaid,
+                    };
+                    salaryDetails.push(_data);
+                }
+                this.setState({ salaryDetails });
+                this.setState({
+                    salaryLoading: false,
+                    numberOfRows: data.length,
+                    cumSalary: response.cumSalaryPaid
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    }
+
+    //get all expense details
+    searchSalaryBetweenTimePeriod = () => {
+        const salaryDetails = [];
+        this.setState({ salaryLoading: true });
+        Helper.http
+            .jsonPost("searchSalaryBetweenTimePeriod", {
+                from: this.state.selectedFromDate,
+                to: this.state.selectedToDate
+            })
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        id: data[i].id,
+                        empName: data[i].empName,
+                        date: data[i].date,
+                        details: data[i].details,
+                        cashPaid: data[i].cashPaid,
+                    };
+                    salaryDetails.push(_data);
+                }
+                this.setState({ salaryDetails });
+                this.setState({
+                    salaryLoading: false,
+                    numberOfRows: data.length,
+                    cumSalary: response.cumSalaryPaid
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    }
+
+
     //today cash flow button click function
     todayCfBtnClick = () => {
         this.setState({
@@ -444,6 +516,7 @@ class CashFlow extends React.Component {
         this.getTodayCashReceivedInvoiceDetails();
         this.getTodayCashPaidInvoiceDetails();
         this.getTodayExpensesDetails();
+        this.getTodaySalaryDetails();
     }
 
     //all cash flow button click function
@@ -456,6 +529,7 @@ class CashFlow extends React.Component {
         this.getAllCashReceivedInvoiceDetails();
         this.getAllCashPaidInvoiceDetails();
         this.getAllExpensesDetails();
+        this.getAllSalaryDetails();
     }
 
     searchButtonClick = () =>{
@@ -466,6 +540,7 @@ class CashFlow extends React.Component {
         this.searchCashPaidBetweenTimePeriod();
         this.searchCashReceivedBetweenTimePeriod();
         this.searchExpenseBetweenTimePeriod();
+        this.searchSalaryBetweenTimePeriod();
     }
 
     render() {
@@ -794,23 +869,68 @@ class CashFlow extends React.Component {
                                     tabContent: (
                                         <Card>
                                             <CardHeader>
-                                                <h4 className={classes.cardTitle}>Help center</h4>
-                                                <p className={classes.cardCategory}>
-                                                    More information here
-                        </p>
+                                                <h4 className={classes.cardTitle}>
+                                                    Expenses Details  - <small>{this.state.CfHistoryCaption}</small>
+                                                </h4>
                                             </CardHeader>
                                             <CardBody>
-                                                From the seamless transition of glass and metal to the
-                                                streamlined profile, every detail was carefully
-                                                considered to enhance your experience. So while its
-                                                display is larger, the phone feels just right.
-                        <br />
-                                                <br />
-                                                Another Text. The first thing you notice when you hold
-                                                the phone is how great it feels in your hand. The cover
-                                                glass curves down around the sides to meet the anodized
-                                                aluminum enclosure in a remarkable, simplified design.
-                      </CardBody>
+                                                <ReactTable
+                                                    data={this.state.salaryDetails}
+                                                    loading={this.state.salaryLoading}
+                                                    filterable={false}
+                                                    sortable={false}
+                                                    showPagination={false}
+                                                    noDataText=""
+                                                    defaultSorted={[
+                                                        {
+                                                            id: "date",
+                                                            desc: true
+                                                        }
+                                                    ]}
+                                                    columns={[
+                                                        {
+                                                            Header: () => (
+                                                                <strong>Date</strong>),
+                                                            accessor: "date",
+                                                            filterable: false,
+                                                            sortable: false,
+                                                            width: 100
+                                                        },
+                                                        {
+                                                            Header: () => (
+                                                                <strong>Employee</strong>),
+                                                            accessor: "empName",
+                                                            filterable: false,
+                                                            sortable: false,
+                                                            width: 150,
+                                                            Cell: row => <div className="actions-left">{row.value}</div>
+                                                        },
+                                                        {
+                                                            Header: () => (
+                                                                <div className="actions-left">
+                                                                    <strong>Details</strong></div>),
+                                                            accessor: "details",
+                                                            filterable: false,
+                                                            sortable: false,
+                                                            width: 100,
+                                                            Cell: row => <div className="actions-left">{row.value}</div>
+                                                        },
+                                                        {
+                                                            Header: () => (
+                                                                <div className="actions-right">
+                                                                    <strong>Amount</strong></div>),
+                                                            accessor: "cashPaid",
+                                                            filterable: false,
+                                                            sortable: false,
+                                                            width: 100,
+                                                            Cell: row => <div className="actions-right">{row.value}</div>
+                                                        }
+                                                    ]}
+                                                    pageSize={this.state.numberOfRows}
+                                                    showPaginationBottom={false}
+                                                    className="-striped -highlight"
+                                                />
+                                            </CardBody>
                                         </Card>
                                     )
                                 }

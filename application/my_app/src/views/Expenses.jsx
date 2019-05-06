@@ -40,19 +40,10 @@ import extendedTablesStyle from "../assets/jss/material-dashboard-pro-react/view
 import sweetAlertStyle from "../assets/jss/material-dashboard-pro-react/views/sweetAlertStyle.jsx";
 
 const styles = {
-    dialogPaper: {
-        maxWidth: '850px',
-    },
     cardIconTitle: {
         ...cardTitle,
         marginTop: "15px",
         marginBottom: "0px"
-    },
-    AddNewCustomerButton: {
-        marginTop: "15px",
-        marginLeft: "25px",
-        marginBottom: "0px",
-        width: "150px"
     },
     addNewExpenseTypeButton: {
         position: "absolute",
@@ -60,50 +51,15 @@ const styles = {
         paddingLeft: "55%",
         paddingTop: "1px"
     },
-    marginCenter: {
-        marginTop: "15px",
-        marginLeft: "25px",
-        marginBottom: "0px",
-        width: "150px"
-    },
-    closeIcon: {
-        position: "absolute",
-        marginLeft: "96%",
-        marginBottom: "0px",
-    },
-    paymentCloseIcon: {
-        position: "absolute",
-        marginLeft: "89%",
-        marginBottom: "0px",
-    },
-    selectCustomerCloseIcon: {
+    addNewExpenseTypeCloseIcon: {
         position: "absolute",
         marginLeft: "88%",
-        marginBottom: "0px",
-    },
-    addNewCustomerCloseIcon: {
-        position: "absolute",
-        marginLeft: "92%",
-        marginBottom: "0px",
-    },
-    invoiceCloseIcon: {
-        position: "absolute",
-        marginLeft: "94%",
         marginBottom: "0px",
     },
     cardSize: {
         width: "100%"
     },
-    paymentCardSize: {
-        width: "400px"
-    },
-    printInvoiceSize: {
-        width: "842px"
-    },
-    addButton: {
-        float: "right"
-    },
-    invoiceButton: {
+    expenseTypeSaveButton: {
         float: "right"
     },
     ...extendedFormsStyle,
@@ -319,6 +275,7 @@ class Expenses extends React.Component {
         this.addNewExpenseTypeClose();
     };
 
+    //alert close
     alertClose = () => {
         this.setState({
             alertOpen: false
@@ -400,7 +357,7 @@ class Expenses extends React.Component {
                             simple
                             onClick={this.addNewExpenseTypeClose}
                             color="danger"
-                            className={classes.selectCustomerCloseIcon}
+                            className={classes.addNewExpenseTypeCloseIcon}
                         >
                             <Close />
                         </Button>
@@ -444,7 +401,7 @@ class Expenses extends React.Component {
                                             size='sm'
                                             color="info"
                                             onClick={this.expenseTypeSaveButtonClick}
-                                            className={classes.addButton}
+                                            className={classes.expenseTypeSaveButton}
                                         >
                                             Save
                                     </Button>
@@ -500,58 +457,6 @@ class Expenses extends React.Component {
                             </CardHeader>
                             <br />
                             <GridContainer>
-                                <GridItem xs={12} sm={12} md={6}>
-                                    <CardBody>
-                                        <InputLabel className={classes.label}>Date</InputLabel>
-                                        <br />
-                                        <FormControl >
-                                            <Datetime
-                                                timeFormat={false}
-                                                dateFormat="YYYY-MM-DD"
-                                                defaultValue={Moment(Date()).format("YYYY-MM-DD")}
-                                                onChange={this.updateState}
-                                            />
-                                        </FormControl>
-                                        <br /> 
-                                        <br /> 
-                                        <FormControl >
-                                            <CustomInput
-                                                success={this.state.detailsState === "success"}
-                                                error={this.state.detailsState === "error"}
-                                                labelText="Details *"
-                                                id="details"
-                                                formControlProps={{
-                                                    fullWidth: true
-                                                }}
-                                                inputProps={{
-                                                    onChange: event =>
-                                                        this.change(event, "details", "detailsLength", 1),
-                                                    type: "text"
-                                                }}
-                                                onChange={(event) => this.setState({ enteredDetail: event.target.value })}
-                                                value={this.state.enteredDetail}
-                                            />
-                                        </FormControl>
-                                        <FormControl >
-                                            <CustomInput
-                                                success={this.state.amountState === "success"}
-                                                error={this.state.amountState === "error"}
-                                                labelText="Amount *"
-                                                id="amount"
-                                                formControlProps={{
-                                                    fullWidth: true
-                                                }}
-                                                inputProps={{
-                                                    onChange: event =>
-                                                        this.change(event, "amount", "amountLength", 1),
-                                                    type: "number"
-                                                }}
-                                                onChange={(event) => this.setState({ enteredAmount: event.target.value })}
-                                                value={this.state.enteredAmount}
-                                            />
-                                        </FormControl>
-                                    </CardBody>
-                                </GridItem>
                                 <GridItem xs={12} sm={12} md={6}>
                                     <CardBody>
                                         <Button
@@ -611,15 +516,65 @@ class Expenses extends React.Component {
                                                 )}
                                             </Select>
                                         </FormControl>
+                                    </CardBody>
+                                </GridItem>
+                                <GridItem xs={12} sm={12} md={6}>
+                                    <CardBody>
+                                        <InputLabel className={classes.label}>Date</InputLabel>
+                                        <br />
+                                        <FormControl >
+                                            <Datetime
+                                                timeFormat={false}
+                                                dateFormat="YYYY-MM-DD"
+                                                defaultValue={Moment(Date()).format("YYYY-MM-DD")}
+                                                onChange={this.updateState}
+                                            />
+                                        </FormControl>
                                         <br />
                                         <br />
-                                        <br />
-                                        <Button
-                                            size='sm'
-                                            color="info"
-                                            onClick={this.addNewExpense}>
-                                            <AddCircle className={classes.icons} /> Add
+                                        <FormControl >
+                                            <CustomInput
+                                                success={this.state.detailsState === "success"}
+                                                error={this.state.detailsState === "error"}
+                                                labelText="Details *"
+                                                id="details"
+                                                formControlProps={{
+                                                    fullWidth: true
+                                                }}
+                                                inputProps={{
+                                                    onChange: event =>
+                                                        this.change(event, "details", "detailsLength", 1),
+                                                    type: "text"
+                                                }}
+                                                onChange={(event) => this.setState({ enteredDetail: event.target.value })}
+                                                value={this.state.enteredDetail}
+                                            />
+                                        </FormControl>
+                                        <FormControl >
+                                            <CustomInput
+                                                success={this.state.amountState === "success"}
+                                                error={this.state.amountState === "error"}
+                                                labelText="Amount *"
+                                                id="amount"
+                                                formControlProps={{
+                                                    fullWidth: true
+                                                }}
+                                                inputProps={{
+                                                    onChange: event =>
+                                                        this.change(event, "amount", "amountLength", 1),
+                                                    type: "number"
+                                                }}
+                                                onChange={(event) => this.setState({ enteredAmount: event.target.value })}
+                                                value={this.state.enteredAmount}
+                                            />
+                                            <br />
+                                            <Button
+                                                size='sm'
+                                                color="info"
+                                                onClick={this.addNewExpense}>
+                                                <AddCircle className={classes.icons} /> Add
                                         </Button>
+                                        </FormControl>
                                     </CardBody>
                                 </GridItem>
                             </GridContainer>
