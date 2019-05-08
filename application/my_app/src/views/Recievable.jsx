@@ -4,13 +4,19 @@ import React from 'react';
 import ReactTable from "react-table";
 import Helper from '../utils/Helper';
 import LoadingOverlay from 'react-loading-overlay';
+import SweetAlert from "react-bootstrap-sweetalert";
+import Datetime from "react-datetime";
 
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
+import CustomInput from "../components/CustomInput/CustomInput.jsx";
 
 // @material-ui/icons
+import Cash from "@material-ui/icons/MonetizationOn";
 import Assignment from "@material-ui/icons/Assignment";
 import Dvr from "@material-ui/icons/Dvr";
+import Close from "@material-ui/icons/Close";
+import AddCircle from "@material-ui/icons/AddCircle";
 
 // core components
 import GridContainer from "../components/Grid/GridContainer.jsx";
@@ -20,6 +26,14 @@ import Card from "../components/Card/Card.jsx";
 import CardBody from "../components/Card/CardBody.jsx";
 import CardIcon from "../components/Card/CardIcon.jsx";
 import CardHeader from "../components/Card/CardHeader.jsx";
+import InputLabel from "@material-ui/core/InputLabel";
+import FormControl from "@material-ui/core/FormControl";
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Moment from "moment";
 
 import { cardTitle } from "../assets/jss/material-dashboard-pro-react.jsx";
 import sweetAlertStyle from "../assets/jss/material-dashboard-pro-react/views/sweetAlertStyle.jsx";
@@ -31,14 +45,13 @@ const styles = {
         marginTop: "15px",
         marginBottom: "0px"
     },
-    marginLeft: {
-        marginTop: "15px",
-        marginLeft: "25px",
+    dialogBoxCloseIcon: {
+        position: "absolute",
+        marginLeft: "89%",
         marginBottom: "0px",
-        width: "150px"
     },
     cardSize: {
-        width: "350px"
+        width: "570px"
     },
     addButton: {
         float: "right"
@@ -54,11 +67,34 @@ class Recievable extends React.Component {
             tradeReceivables: [],
             loading: false,
             open: false,
+            alertOpen: false,
+            successAlert: false,
             numberOfRows: 1,
+            succesAlertMsg: "",
             formTitle: "",
             invoiceNum: "",
-            simpleSelectItem: ""
+            totalBill: 0,
+            discount: 0,
+            cashPaid: 0,
+            additionalDiscount: 0,
+            additionalPayment: 0,
+            selectedDate: Moment(Date()).format("YYYY-MM-DD"),
+
+            //states success false
+            additionalDiscountState: '',
+            additionalPaymentState: '',
         };
+        this.updateState = this.updateState.bind(this);
+    }
+
+    //get the selected date from the calender and convert it to YYYY-MM-DD format
+    updateState(date) {
+        // This function gives you the moment object of date selected. 
+        var dateString = date._d;
+        var dateObj = new Date(dateString);
+        var momentObj = Moment(dateObj);
+        var momentString = momentObj.format('YYYY-MM-DD');
+        this.setState({ selectedDate: momentString });
     }
 
     componentDidMount() {
@@ -80,6 +116,9 @@ class Recievable extends React.Component {
                         customerName: data[i].customerName,
                         date: data[i].date,
                         details: data[i].details,
+                        totalBill: data[i].totalBill,
+                        discount: data[i].discount,
+                        cashPaid: data[i].cashPaid,
                         balance: data[i].balance,
 
                         actions: (
@@ -94,10 +133,12 @@ class Recievable extends React.Component {
                                         //let obj = this.state.data.find(o => o.id === key);
                                         this.setState({
                                             open: true,
-                                            formTitle: "Return Items",
-                                            formButtonText: "Save",
+                                            invoiceNum: data[i].invoiceNum,
+                                            totalBill: data[i].totalBill,
+                                            discount: data[i].discount,
+                                            cashPaid: data[i].cashPaid,
+                                            balance: data[i].balance
                                         })
-                                        this.loadItemsOfSelectedInvoice(data[i].invoiceNum);
                                     }}
                                     color="warning"
                                     className="edit"
@@ -120,10 +161,297 @@ class Recievable extends React.Component {
             });
     };
 
+    settleTradeReceivable = () =>{
+        if (this.state.additionalDiscount + this.state.additionalPayment <= 0) {
+            this.setState({
+                alertOpen: true,
+                alertDiscription: "You have not done any change"
+            });
+        } else {
+            let newDiscount = Number(this.state.discount) + Number(this.state.additionalDiscount);
+            let newCashPaid = Number(this.state.cashPaid) + Number(this.state.additionalPayment);
+            let newBalance = this.state.balance - this.state.additionalPayment -this.state.additionalDiscount;
+
+            if (newBalance < 0) {
+                this.setState({
+                    alertOpen: true,
+                    alertDiscription: "You are paying more than the payment due"
+                });
+            }else {
+                Helper.http
+                    .jsonPost("tradeReceivablePayments", {
+                        invoiceNum: this.state.invoiceNum,
+                        discount: newDiscount,
+                        cashPaid: newCashPaid,
+                        balance: newBalance,
+                    })
+                    .then(response => {
+                        this.setState({
+                            additionalDiscount: '',
+                            additionalPayment: '',
+                            additionalDiscountState: '',
+                            additionalPaymentState: '',
+                            successAlert: true,
+                            succesAlertMsg: "Payment Due settlement for invoice number " + this.state.invoiceNum + " is successful"
+                        });
+                    })
+                    .catch(exception => {
+                        console.log(exception);
+                    });
+
+                    if(this.state.additionalPayment > 0){
+                        Helper.http
+                            .jsonPost("addCashReceived", {
+                                invoiceNum: this.state.invoiceNum,
+                                date: this.state.selectedDate,
+                                cashPaid: this.state.additionalPayment
+                            })
+                            .then(response => {
+
+                            })
+                            .catch(exception => {
+                                console.log(exception);
+                            });
+                    }
+            }
+            
+        }
+    }
+
+    //dialog box close
+    dialogBoxClose = () => {
+        this.setState({
+            open: false,
+            additionalDiscount: 0,
+            additionalPayment: 0,
+
+            //states success false
+            additionalDiscountState: '',
+            additionalPaymentState: '',
+        });
+    }
+
+    //alert close
+    alertClose = () => {
+        this.setState({
+            alertOpen: false
+        });
+    }
+
+    //success message sweet alert hide function
+    hideAlert_success = () => {
+        this.setState({
+            successAlert: false,
+            succesAlertMsg: "",
+            open: false
+        });
+        this.getTradeReceivableDetails();
+    };
+
+    change(event, stateName, type, stateNameEqualTo, maxValue) {
+        switch (type) {
+            case "additionalDiscountLength":
+                if ((event.target.value >= 0)) {
+                    this.setState({
+                        [stateName + "State"]: "success",
+                        additionalDiscount: event.target.value
+                    });
+                } else {
+                    this.setState({
+                        [stateName + "State"]: "error",
+                        additionalDiscount: event.target.value
+                    });
+                }
+                break;
+            case "additionalPaymentLength":
+                if ((event.target.value >= 0)) {
+                    this.setState({
+                        [stateName + "State"]: "success",
+                        additionalPayment: event.target.value
+                    });
+                } else {
+                    this.setState({
+                        [stateName + "State"]: "error",
+                        additionalPayment: event.target.value
+                    });
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     render() {
         const { classes } = this.props;
         return (
             <div>
+
+                {/* alert dialog box */}
+                <Dialog
+                    open={this.state.alertOpen}
+                    onClose={this.alertClose}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">{"Alert"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            {this.state.alertDiscription}
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.alertClose} color="info" autoFocus simple> Got it! </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* success alert */}
+                <SweetAlert
+                    show={this.state.successAlert}
+                    success
+                    style={{ display: "block", marginTop: "-150px" }}
+                    title="successful!"
+                    onConfirm={() => this.hideAlert_success()}
+                    onCancel={() => this.hideAlert_success()}
+                    confirmBtnCssClass={
+                        this.props.classes.button + " " + this.props.classes.success
+                    }
+                >
+                    {this.state.succesAlertMsg}
+                </SweetAlert>
+                
+                {/* trade receivable more info dialog box */}
+                <Dialog
+                    open={this.state.open}
+                    aria-labelledby="alert-dialog-title"
+                >
+                <br />
+                    <Button
+                        justIcon
+                        round
+                        simple
+                        onClick={this.dialogBoxClose}
+                        color="danger"
+                        className={classes.dialogBoxCloseIcon}
+                    >
+                        <Close />
+                    </Button>
+                    <Card className={classes.cardSize}>
+                        <CardHeader color="primary" icon>
+                            <CardIcon color="primary">
+                                <Cash />
+                            </CardIcon>
+                            <h4 className={classes.cardIconTitle}>Settle Payment - <small>{this.state.invoiceNum}</small></h4>
+                        </CardHeader>
+                        <br />
+                        <CardBody>
+                        <GridContainer>
+                            <GridItem xs={12} sm={12} md={6}>
+                                
+                                    <FormControl >
+                                        <CustomInput
+                                            disabled={true}
+                                            labelText="Total Bill"
+                                            id="totalBill"
+                                            formControlProps={{
+                                                fullWidth: true
+                                            }}
+                                            value={this.state.totalBill}
+                                        />
+                                    </FormControl>
+                                    <FormControl >
+                                        <CustomInput
+                                            disabled = {true}
+                                            labelText="Promo Discount"
+                                            id="discount"
+                                            formControlProps={{
+                                                fullWidth: true
+                                            }}
+                                            value={this.state.discount}
+                                        />
+                                    </FormControl>
+                                    <FormControl >
+                                        <CustomInput
+                                            disabled = {true}
+                                            labelText="Cash Paid"
+                                            id="cashPaid"
+                                            formControlProps={{
+                                                fullWidth: true
+                                            }}
+                                            value={this.state.cashPaid}
+                                        />
+                                    </FormControl>
+                                    <FormControl >
+                                        <CustomInput
+                                            disabled={true}
+                                            labelText="Payment Due"
+                                            id="balance"
+                                            formControlProps={{
+                                                fullWidth: true
+                                            }}
+                                            value={this.state.balance}
+                                        />
+                                    </FormControl>
+                            </GridItem>
+                            <GridItem xs={12} sm={12} md={6}>
+                                    <InputLabel className={classes.label}>Date</InputLabel>
+                                    <br />
+                                    <FormControl >
+                                        <Datetime
+                                            timeFormat={false}
+                                            dateFormat="YYYY-MM-DD"
+                                            defaultValue={Moment(Date()).format("YYYY-MM-DD")}
+                                            onChange={this.updateState}
+                                        />
+                                    </FormControl>
+                                    <FormControl >
+                                        <CustomInput
+                                            success={this.state.additionalDiscountState === "success"}
+                                            error={this.state.additionalDiscountState === "error"}
+                                            labelText="Additional Discount"
+                                            id="additionalDiscount"
+                                            formControlProps={{
+                                                fullWidth: true
+                                            }}
+                                            inputProps={{
+                                                onChange: event =>
+                                                    this.change(event, "additionalDiscount", "additionalDiscountLength", 1),
+                                                type: "number"
+                                            }}
+                                            onChange={(event) => this.setState({ additionalDiscount: event.target.value })}
+                                            value={this.state.additionalDiscount.toString()}
+                                        />
+                                    </FormControl>
+                                    <FormControl >
+                                        <CustomInput
+                                            success={this.state.additionalPaymentState === "success"}
+                                            error={this.state.additionalPaymentState === "error"}
+                                            labelText="Additional Payment"
+                                            id="additionalPayment"
+                                            formControlProps={{
+                                                fullWidth: true
+                                            }}
+                                            inputProps={{
+                                                onChange: event =>
+                                                    this.change(event, "additionalPayment", "additionalPaymentLength", 1),
+                                                type: "number"
+                                            }}
+                                            onChange={(event) => this.setState({ additionalPayment: event.target.value })}
+                                            value={this.state.additionalPayment.toString()}
+                                        />
+                                        <br />
+                                        <Button
+                                            size='sm'
+                                            color="info"
+                                            onClick={this.settleTradeReceivable}>
+                                            <AddCircle className={classes.icons} /> Add
+                                        </Button>
+                                    </FormControl>
+                            </GridItem>
+                        </GridContainer>
+                        </CardBody>
+                    </Card>
+                </Dialog>
+
                 <GridContainer>
                     <GridItem xs={12}>
                         <LoadingOverlay
@@ -144,6 +472,12 @@ class Recievable extends React.Component {
                                         filterable={false}
                                         sortable={false}
                                         showPagination={false}
+                                        defaultSorted={[
+                                            {
+                                                id: "invoiceNum",
+                                                desc: true
+                                            }
+                                        ]}
                                         columns={[
                                             {
                                                 Header: () => (

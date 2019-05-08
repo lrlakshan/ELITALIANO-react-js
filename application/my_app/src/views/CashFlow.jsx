@@ -15,10 +15,10 @@ import withStyles from "@material-ui/core/styles/withStyles";
 // @material-ui/icons
 import Search from "@material-ui/icons/Search";
 import Airplay from "@material-ui/icons/TabletMac";
-import Info from "@material-ui/icons/Info";
-import LocationOn from "@material-ui/icons/LocationOn";
-import Gavel from "@material-ui/icons/Gavel";
-import HelpOutline from "@material-ui/icons/HelpOutline";
+import cashReceivedIcon from "@material-ui/icons/VerticalAlignBottom";
+import cashPaidIcon from "@material-ui/icons/VerticalAlignTop";
+import expenseIcon from "@material-ui/icons/MoneyOff";
+import salaryIcon from "@material-ui/icons/MonetizationOn";
 
 // core components
 import NavPills from "../components/NavPills/NavPills.jsx";
@@ -669,8 +669,8 @@ class CashFlow extends React.Component {
                             alignCenter
                             tabs={[
                                 {
-                                    tabButton: "Cash Reecived",
-                                    tabIcon: Info,
+                                    tabButton: "Cash Received",
+                                    tabIcon: cashReceivedIcon,
                                     tabContent: (
                                         <Card>
                                             <CardHeader>
@@ -732,7 +732,7 @@ class CashFlow extends React.Component {
                                 },
                                 {
                                     tabButton: "Cash Paid",
-                                    tabIcon: LocationOn,
+                                    tabIcon: cashPaidIcon,
                                     tabContent: (
                                         <Card>
                                                 <CardHeader>
@@ -794,7 +794,7 @@ class CashFlow extends React.Component {
                                 },
                                 {
                                     tabButton: "Expenses",
-                                    tabIcon: Gavel,
+                                    tabIcon: expenseIcon,
                                     tabContent: (
                                         <Card>
                                             <CardHeader>
@@ -865,7 +865,7 @@ class CashFlow extends React.Component {
                                 },
                                 {
                                     tabButton: "Salary",
-                                    tabIcon: HelpOutline,
+                                    tabIcon: salaryIcon,
                                     tabContent: (
                                         <Card>
                                             <CardHeader>
