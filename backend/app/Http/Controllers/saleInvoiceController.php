@@ -43,6 +43,58 @@ class saleInvoiceController extends Controller
         }
     }
 
+    //update sales invoice record for trade receivable payments
+    public function tradeReceivablePayments(Request $request){
+
+        try {
+
+            $validator = Validator::make($request->all(), [
+            'invoiceNum'=> 'required',
+            'discount'=> 'required',
+            'cashPaid' => 'required',
+            'balance'=> 'required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['success'=>false,'error'=>$validator->errors(),'code'=>401]);
+        }
+
+        $data = $request->all();
+        $invoiceNum = $data['invoiceNum'];
+
+        if($invoiceNum != "" && !empty($invoiceNum)){
+
+            $update = sale_invoice::where('invoiceNum', $invoiceNum)->first();
+
+            if($update){
+                    sale_invoice::where('invoiceNum', $invoiceNum)->update([
+                    'discount' => $request->discount,
+                    'cashPaid' => $request->cashPaid,
+                    'balance' => $request->balance
+                ]);
+
+                return response()->json([
+                    'success'=>true,
+                    'error'=>[],
+                    'code'=>200
+                ],200);
+            }   
+        }
+        return response()->json([
+                    'success'=>false,
+                    'error'=>'Record not found',
+                    'code'=>401
+                ],401);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
     //get the next invoice number for sales
     public function salesInvoiceNextNumber(){
     	try {
@@ -540,6 +592,9 @@ class saleInvoiceController extends Controller
                                 'customer_details.customerName', 
                                 'sale_invoices.date', 
                                 'sale_invoices.details',
+                                'sale_invoices.totalBill',
+                                'sale_invoices.discount',
+                                'sale_invoices.cashPaid',
                                 'sale_invoices.balance'
                             )
                             ->where('balance','!=',"0.00")

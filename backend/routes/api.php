@@ -50,6 +50,8 @@ Route::post('searchBySupplierBetweenTimePeriod','purchaseInvoiceController@searc
 Route::post('searchPurchasesBetweenTimePeriod','purchaseInvoiceController@searchPurchasesBetweenTimePeriod');
 Route::post('getPurchasesDataFromDetails','purchaseInvoiceController@getPurchasesDataFromDetails');
 Route::post('getPurchasesDataFromDetailsBetweenTimePeriod','purchaseInvoiceController@getPurchasesDataFromDetailsBetweenTimePeriod');
+Route::get('getTradePayableDetails','purchaseInvoiceController@getTradePayableDetails');
+Route::post('tradePayablePayments','purchaseInvoiceController@tradePayablePayments');
 
 //api from sales table
 Route::post('addSales','saleController@addSales');
@@ -70,6 +72,8 @@ Route::post('searchBetweenTimePeriod','saleInvoiceController@searchBetweenTimePe
 Route::post('getSalesDataFromDetails','saleInvoiceController@getSalesDataFromDetails');
 Route::post('getSalesDataFromDetailsBetweenTimePeriod','saleInvoiceController@getSalesDataFromDetailsBetweenTimePeriod');
 Route::get('getTradeReceivableDetails','saleInvoiceController@getTradeReceivableDetails');
+Route::post('tradeReceivablePayments','saleInvoiceController@tradeReceivablePayments');
+
 
 //api's from supplier_details table
 Route::get('supplierDetails','supplierDetailController@supplierDetails');

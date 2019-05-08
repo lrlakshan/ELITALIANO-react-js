@@ -42,6 +42,56 @@ class purchaseInvoiceController extends Controller
         }
     }
 
+    //update purchases invoice record for trade payable payments
+    public function tradePayablePayments(Request $request){
+
+        try {
+
+            $validator = Validator::make($request->all(), [
+            'invoiceNum'=> 'required',
+            'cashPaid' => 'required',
+            'balance'=> 'required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['success'=>false,'error'=>$validator->errors(),'code'=>401]);
+        }
+
+        $data = $request->all();
+        $invoiceNum = $data['invoiceNum'];
+
+        if($invoiceNum != "" && !empty($invoiceNum)){
+
+            $update = purchase_invoice::where('invoiceNum', $invoiceNum)->first();
+
+            if($update){
+                    purchase_invoice::where('invoiceNum', $invoiceNum)->update([
+                    'cashPaid' => $request->cashPaid,
+                    'balance' => $request->balance
+                ]);
+
+                return response()->json([
+                    'success'=>true,
+                    'error'=>[],
+                    'code'=>200
+                ],200);
+            }   
+        }
+        return response()->json([
+                    'success'=>false,
+                    'error'=>'Record not found',
+                    'code'=>401
+                ],401);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
     //get the next invoice number for purchase
     public function purchaseInvoiceNextNumber(){
     	try {
@@ -428,6 +478,41 @@ class purchaseInvoiceController extends Controller
                 'cashPaid'=>$cashPaid,
                 'balance'=>$balance,
                 'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
+    //get remaining trade payable details
+    public function getTradePayableDetails(){
+        try {
+        $payableDetials = array();
+        $payableDetials = DB::table('purchase_invoices')
+                            ->join('supplier_details', 'purchase_invoices.supplierId', '=', 'supplier_details.id')
+                            ->select(
+                                'purchase_invoices.invoiceNum',
+                                'supplier_details.supplierName', 
+                                'purchase_invoices.date', 
+                                'purchase_invoices.details',
+                                'purchase_invoices.totalBill',
+                                'purchase_invoices.cashPaid',
+                                'purchase_invoices.balance'
+                            )
+                            ->where('balance','!=',"0.00")
+                            ->orderBy('purchase_invoices.invoiceNum', 'ASC')
+                            ->get();
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($payableDetials),
+                'data'=>$payableDetials
             ], 200);
             
         } catch (Exception $e) {
