@@ -5,7 +5,7 @@ import { createBrowserHistory } from "history";
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { Router } from 'react-router-dom';
+import { HashRouter as Router } from 'react-router-dom';
 
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
@@ -26,7 +26,7 @@ const store = createStore(reducer);
 
 // const hist = createBrowserHistory();
 
-ReactDOM.render(<Router history={hist}><Provider store={store}><App /></Provider></Router>, document.getElementById('root'));
+ReactDOM.render(<Router><Provider store={store}><App /></Provider></Router>, document.getElementById('root'));
 // ReactDOM.render(
 //     <Router history={hist}>
 //         <Switch>

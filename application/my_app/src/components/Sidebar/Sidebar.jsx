@@ -80,7 +80,7 @@ class Sidebar extends React.Component {
   }
   doLogout = e => {
     localStorage.clear();
-    this.props.history.push('/login');
+    this.props.history.push('/');
 
   };
   render() {
@@ -206,7 +206,7 @@ class Sidebar extends React.Component {
                 </ListItem>
                 <ListItem className={classes.collapseItem}>
                   <NavLink
-                    to="/login"
+                    to="/"
                     className={
                       classes.itemLink + " " + classes.userCollapseLinks
                     }

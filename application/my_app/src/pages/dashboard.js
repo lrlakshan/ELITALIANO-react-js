@@ -87,13 +87,6 @@ class dashboard extends Component {
         }
     }
 
-    doLogout = e => {
-
-        localStorage.clear();
-        this.props.history.push('/');
-
-    }
-
     render() {
         const { classes, ...rest } = this.props;
         const mainPanel =

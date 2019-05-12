@@ -15,16 +15,10 @@ class App extends Component {
         <Switch>
           {indexRoutes.map((prop, key) => {
             if (localStorage.length > 0) {
-              if (window.location.pathname === '/login' || window.location.pathname === '/') {
-                return <Redirect to='/main/dashboard' key='0' />;
-              }
               return <Route path={prop.path} component={prop.component} key={key} />;
             }
-            if (window.location.pathname !== '/login') {
-              return <Redirect to='/login' key='0' />;
-            }
-            return <Route path='/login' component={Login} key={key} />;
-          })}
+            return <Route path='/' component={Login} key={key} />;
+        })}
         </Switch>
       </div>
 

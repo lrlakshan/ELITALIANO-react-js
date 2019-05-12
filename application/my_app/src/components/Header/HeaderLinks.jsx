@@ -31,12 +31,6 @@ class HeaderLinks extends React.Component {
   handleClose = () => {
     this.setState({ open: false });
   };
-  doLogout = e => {
-    this.setState({ open: false });
-    localStorage.clear();
-    this.props.history.push('/login');
-
-  };
 
   render() {
     const { classes, rtlActive } = this.props;
