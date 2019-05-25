@@ -42,6 +42,7 @@ Route::post('purchasesHistoryMoreDetails','purchaseController@purchasesHistoryMo
 //api's from purchase_invoices table
 Route::get('purchaseInvoiceNextNumber','purchaseInvoiceController@purchaseInvoiceNextNumber');
 Route::post('addPurchaseInvoice','purchaseInvoiceController@addPurchaseInvoice');
+Route::get('getLast15PurchasesInvoiceDetails','purchaseInvoiceController@getLast15PurchasesInvoiceDetails');
 Route::get('getAllPurchasesInvoiceDetails','purchaseInvoiceController@getAllPurchasesInvoiceDetails');
 Route::get('getTodayPurchasesInvoiceDetails','purchaseInvoiceController@getTodayPurchasesInvoiceDetails');
 Route::post('searchByPurchasesInvoiceNumber','purchaseInvoiceController@searchByPurchasesInvoiceNumber');
@@ -122,6 +123,9 @@ Route::post('addNewSalary','wagesController@addNewSalary');
 Route::get('getAllSalaryDetails','wagesController@getAllSalaryDetails');
 Route::get('getTodaySalaryDetails','wagesController@getTodaySalaryDetails');
 Route::post('searchSalaryBetweenTimePeriod','wagesController@searchSalaryBetweenTimePeriod');
+
+//api from other_income table
+Route::post('addOtherIncome','otherIncomeController@addOtherIncome');
 
 
 

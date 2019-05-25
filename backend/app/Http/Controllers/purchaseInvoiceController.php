@@ -153,6 +153,41 @@ class purchaseInvoiceController extends Controller
         }
     }
 
+    //get last 15 records of purchases invoices list
+    public function getLast15PurchasesInvoiceDetails(){
+        try {
+        $invoiceDetials = array();
+        $invoiceDetials = DB::table('purchase_invoices')
+                            ->join('supplier_details', 'purchase_invoices.supplierId', '=', 'supplier_details.id')
+                            ->select(
+                                'purchase_invoices.invoiceNum',
+                                'supplier_details.supplierName', 
+                                'purchase_invoices.date', 
+                                'purchase_invoices.details',
+                                'purchase_invoices.totalBill',
+                                'purchase_invoices.cashPaid',
+                                'purchase_invoices.balance'
+                            )
+                            ->orderBy('invoiceNum', 'DESC')
+                            ->paginate(15);
+
+            return response()->json([
+                'success'=>true,
+                'error'=>null,
+                'code'=>200,
+                'total'=>count($invoiceDetials),
+                'data'=>$invoiceDetials
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success'=>false,
+                'error'=>($e->getMessage()),
+                'code'=>500
+            ], 500);
+        }
+    }
+
     //get today's purchases invoices list
     public function getTodayPurchasesInvoiceDetails(){
 
