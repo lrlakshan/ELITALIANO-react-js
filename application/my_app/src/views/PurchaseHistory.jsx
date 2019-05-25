@@ -292,7 +292,7 @@ class PurchaseHistory extends React.Component {
             });
     };
 
-    //det the typed invoice number to typingInvoice state 
+    //the typed invoice number to typingInvoice state 
     invoiceNumberCatch = (value) => {
         this.setState({ typingInvoice: value });
     }
@@ -1164,8 +1164,8 @@ class PurchaseHistory extends React.Component {
                                                     tabContent: (
                                                         <span>
                                                             <ReactSearchBox
-                                                                placeholder="Insert Purchase Invoice Number"
-                                                                value={this.state.typingName}
+                                                                placeholder="Insert Purchases Number"
+                                                                value={this.state.typingInvoice}
                                                                 callback={record => console.log(record)}
                                                                 onChange={this.invoiceNumberCatch}
                                                             />

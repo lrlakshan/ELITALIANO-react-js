@@ -72,6 +72,8 @@ class CashFlow extends React.Component {
             customerTableLoading: false,
             CRnumberOfRows: 0,
             CPnumberOfRows: 0,
+            ExnumberOfRows: 0,
+            SalnumberOfRows: 0,
             cumCashReceived: '0',
             cumCashPaid: '0',
             cumExpenses: '0',
@@ -337,7 +339,7 @@ class CashFlow extends React.Component {
                 this.setState({ expenseDetails });
                 this.setState({
                     expenseLoading: false,
-                    numberOfRows: data.length,
+                    ExnumberOfRows: data.length,
                     cumExpenses: response.cumExpensePaid
                 });
             })
@@ -367,7 +369,7 @@ class CashFlow extends React.Component {
                 this.setState({ expenseDetails });
                 this.setState({
                     expenseLoading: false,
-                    numberOfRows: data.length,
+                    ExnumberOfRows: data.length,
                     cumExpenses: response.cumExpensePaid
                 });
             })
@@ -400,7 +402,7 @@ class CashFlow extends React.Component {
                 this.setState({ expenseDetails });
                 this.setState({
                     expenseLoading: false,
-                    numberOfRows: data.length,
+                    ExnumberOfRows: data.length,
                     cumExpenses: response.cumExpensePaid
                 });
             })
@@ -433,7 +435,7 @@ class CashFlow extends React.Component {
                 this.setState({ salaryDetails });
                 this.setState({
                     salaryLoading: false,
-                    numberOfRows: data.length,
+                    SalnumberOfRows: data.length,
                     cumSalary: response.cumSalaryPaid
                 });
             })
@@ -463,7 +465,7 @@ class CashFlow extends React.Component {
                 this.setState({ salaryDetails });
                 this.setState({
                     salaryLoading: false,
-                    numberOfRows: data.length,
+                    SalnumberOfRows: data.length,
                     cumSalary: response.cumSalaryPaid
                 });
             })
@@ -496,7 +498,7 @@ class CashFlow extends React.Component {
                 this.setState({ salaryDetails });
                 this.setState({
                     salaryLoading: false,
-                    numberOfRows: data.length,
+                    SalnumberOfRows: data.length,
                     cumSalary: response.cumSalaryPaid
                 });
             })
@@ -855,7 +857,7 @@ class CashFlow extends React.Component {
                                                             Cell: row => <div className="actions-right">{row.value}</div>
                                                         }
                                                     ]}
-                                                    pageSize={this.state.numberOfRows}
+                                                    pageSize={this.state.ExnumberOfRows}
                                                     showPaginationBottom={false}
                                                     className="-striped -highlight"
                                                 />
@@ -926,7 +928,7 @@ class CashFlow extends React.Component {
                                                             Cell: row => <div className="actions-right">{row.value}</div>
                                                         }
                                                     ]}
-                                                    pageSize={this.state.numberOfRows}
+                                                    pageSize={this.state.SalnumberOfRows}
                                                     showPaginationBottom={false}
                                                     className="-striped -highlight"
                                                 />
