@@ -126,6 +126,12 @@ Route::post('searchSalaryBetweenTimePeriod','wagesController@searchSalaryBetween
 
 //api from other_income table
 Route::post('addOtherIncome','otherIncomeController@addOtherIncome');
+Route::get('otherIncomeNextNumber','otherIncomeController@otherIncomeNextNumber');
+Route::get('getOtherIncomeReceivableDetails','otherIncomeController@getOtherIncomeReceivableDetails');
+Route::post('OtherIncomeReceivablePayments','otherIncomeController@OtherIncomeReceivablePayments');
+
+//api from cash_received_from_other_income table
+Route::post('addCashReceivedFromOtherIncome','cashReceivedFromOtherIncomesController@addCashReceivedFromOtherIncome');
 
 
 

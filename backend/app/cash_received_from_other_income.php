@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class other_income extends Model
+class cash_received_from_other_income extends Model
 {
     //
     /**
@@ -13,6 +13,6 @@ class other_income extends Model
      * @var array
      */
     protected $fillable = [
-         'date', 'details', 'totalBill', 'cashPaid', 'balance','otherIncomeId'
+        'otherIncomeId', 'date', 'cashPaid'
     ];
 }
