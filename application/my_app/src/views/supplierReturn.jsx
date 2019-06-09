@@ -86,6 +86,7 @@ class supplierReturn extends React.Component {
             successAlert: false,
             failAlert: false,
             numberOfRows: 0,
+            otherIncomeNextNumber: null,
             productId: '',
             productName: '',
             purchasePrice: '',
@@ -112,6 +113,7 @@ class supplierReturn extends React.Component {
     componentDidMount() {
         this.getProductDetails();
         this.getSupplierList();
+        this.getOtherIncomeNextNumber();
     }
 
     //get the selected date from the calender and convert it to YYYY-MM-DD format
@@ -253,11 +255,24 @@ class supplierReturn extends React.Component {
         }
     };
 
+    //get the next other income ID number after the last other income generated
+    getOtherIncomeNextNumber = () => {
+        Helper.http
+            .jsonGet("otherIncomeNextNumber")
+            .then(response => {
+                this.setState({ otherIncomeNextNumber: response.data });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
     //return button click funtion to add return details to the database
     returnBtnClick = () => {
         Helper.http
             .jsonPost("addOtherIncome", {
                 date: this.state.selectedDate,
+                otherIncomeId: this.state.otherIncomeNextNumber,
                 details: "Return to "+this.state.selectedSupplierName,
                 cashPaid: this.state.cashPaid,
                 balance: this.state.receivable - this.state.cashPaid,
@@ -268,6 +283,20 @@ class supplierReturn extends React.Component {
                     successAlert: true,
                     succesAlertMsg: "Successfully returned '" + this.state.returnAmount + "' " + this.state.productName
                 });
+                if (this.state.cashPaid !== "0") {
+                    Helper.http
+                        .jsonPost("addCashReceivedFromOtherIncome", {
+                            otherIncomeId: this.state.otherIncomeNextNumber,
+                            date: this.state.selectedDate,
+                            cashPaid: this.state.cashPaid,
+                        })
+                        .then(response => {
+                            console.log('added cash received from other income');
+                        })
+                        .catch(exception => {
+                            console.log(exception);
+                        });
+                }
 
             })
             .catch(exception => {
@@ -313,6 +342,7 @@ class supplierReturn extends React.Component {
         this.handleClose();
         this.getProductDetails();
         this.getSupplierList();
+        this.getOtherIncomeNextNumber();
     };
 
     //failed message sweet alert hide function

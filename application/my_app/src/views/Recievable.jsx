@@ -42,7 +42,7 @@ import extendedFormsStyle from "../assets/jss/material-dashboard-pro-react/views
 const styles = {
     cardIconTitle: {
         ...cardTitle,
-        marginTop: "15px",
+        marginTop: "5px",
         marginBottom: "0px"
     },
     dialogBoxCloseIcon: {
@@ -52,6 +52,10 @@ const styles = {
     },
     cardSize: {
         width: "570px"
+    },
+    otherCardSize: {
+        width: "570px",
+        height: "390px"
     },
     addButton: {
         float: "right"
@@ -65,40 +69,62 @@ class Recievable extends React.Component {
         super(props);
         this.state = {
             tradeReceivables: [],
+            otherIncomeReceivables: [],
             loading: false,
             open: false,
+            otherIncomeOpen: false,
             alertOpen: false,
             successAlert: false,
             numberOfRows: 1,
             succesAlertMsg: "",
             formTitle: "",
             invoiceNum: "",
+            detailsOther: '',
+            otherIncomeId: '',
             totalBill: 0,
             discount: 0,
             cashPaid: 0,
+            totalBillOther: 0,
+            cashPaidOther: 0,
+            balanceOther: 0,
             additionalDiscount: 0,
             additionalPayment: 0,
-            selectedDate: Moment(Date()).format("YYYY-MM-DD"),
+            additionalPaymentOther: 0,
+            TRselectedDate: Moment(Date()).format("YYYY-MM-DD"),
+            ICselectedDate: Moment(Date()).format("YYYY-MM-DD"),
 
             //states success false
             additionalDiscountState: '',
             additionalPaymentState: '',
+            additionalPaymentOtherState: ''
         };
-        this.updateState = this.updateState.bind(this);
+        this.tradeReceivableRepayDate = this.tradeReceivableRepayDate.bind(this);
+        this.OtherIncomeReceivableRepayDate = this.OtherIncomeReceivableRepayDate.bind(this);
     }
 
     //get the selected date from the calender and convert it to YYYY-MM-DD format
-    updateState(date) {
+    tradeReceivableRepayDate(date) {
         // This function gives you the moment object of date selected. 
         var dateString = date._d;
         var dateObj = new Date(dateString);
         var momentObj = Moment(dateObj);
         var momentString = momentObj.format('YYYY-MM-DD');
-        this.setState({ selectedDate: momentString });
+        this.setState({ TRselectedDate: momentString });
+    }
+
+    //get the selected date from the calender and convert it to YYYY-MM-DD format
+    OtherIncomeReceivableRepayDate(date) {
+        // This function gives you the moment object of date selected. 
+        var dateString = date._d;
+        var dateObj = new Date(dateString);
+        var momentObj = Moment(dateObj);
+        var momentString = momentObj.format('YYYY-MM-DD');
+        this.setState({ ICselectedDate: momentString });
     }
 
     componentDidMount() {
         this.getTradeReceivableDetails();
+        this.getOtherIncomeReceivableDetails();
     }
 
     //get purhcase invoice details
@@ -161,6 +187,7 @@ class Recievable extends React.Component {
             });
     };
 
+    //settle payment due in trade receivable history
     settleTradeReceivable = () =>{
         if (this.state.additionalDiscount + this.state.additionalPayment <= 0) {
             this.setState({
@@ -203,7 +230,7 @@ class Recievable extends React.Component {
                         Helper.http
                             .jsonPost("addCashReceived", {
                                 invoiceNum: this.state.invoiceNum,
-                                date: this.state.selectedDate,
+                                date: this.state.TRselectedDate,
                                 cashPaid: this.state.additionalPayment
                             })
                             .then(response => {
@@ -218,6 +245,118 @@ class Recievable extends React.Component {
         }
     }
 
+    //settle payment due in other receivable history
+    settleTradeReceivableOther = () => {
+        if (this.state.additionalPaymentOther <= 0) {
+            this.setState({
+                alertOpen: true,
+                alertDiscription: "You have not done any change"
+            });
+        } else {
+            let newCashPaid = Number(this.state.cashPaidOther) + Number(this.state.additionalPaymentOther);
+            let newBalance = this.state.balanceOther - this.state.additionalPaymentOther;
+
+            if (newBalance < 0) {
+                this.setState({
+                    alertOpen: true,
+                    alertDiscription: "You are paying more than the payment due"
+                });
+            } else {
+                Helper.http
+                    .jsonPost("OtherIncomeReceivablePayments", {
+                        otherIncomeId: this.state.otherIncomeId,
+                        cashPaid: newCashPaid,
+                        balance: newBalance,
+                    })
+                    .then(response => {
+                        this.setState({
+                            additionalPayment: '',
+                            additionalPaymentOtherState: '',
+                            successAlert: true,
+                            succesAlertMsg: "Payment Due settlement for Other Income ID " + this.state.otherIncomeId + " is successful"
+                        });
+                    })
+                    .catch(exception => {
+                        console.log(exception);
+                    });
+
+                if (this.state.additionalPaymentOther > 0) {
+                    Helper.http
+                        .jsonPost("addCashReceivedFromOtherIncome", {
+                            otherIncomeId: this.state.otherIncomeId,
+                            date: this.state.ICselectedDate,
+                            cashPaid: this.state.additionalPaymentOther
+                        })
+                        .then(response => {
+
+                        })
+                        .catch(exception => {
+                            console.log(exception);
+                        });
+                }
+            }
+
+        }
+    }
+
+    //get purhcase invoice details
+    getOtherIncomeReceivableDetails = () => {
+        const otherIncomeReceivables = [];
+        this.setState({ loading: true });
+
+        Helper.http
+            .jsonGet("getOtherIncomeReceivableDetails")
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        otherIncomeId: data[i].otherIncomeId,
+                        date: data[i].date,
+                        details: data[i].details,
+                        totalBill: data[i].totalBill,
+                        cashPaid: data[i].cashPaid,
+                        balance: data[i].balance,
+
+                        actions: (
+                            // we've added some custom button actions
+                            <div className="actions-right">
+                                {/* use this button to add a edit kind of action */}
+                                <Button
+                                    justIcon
+                                    round
+                                    simple
+                                    onClick={() => {
+                                        //let obj = this.state.data.find(o => o.id === key);
+                                        this.setState({
+                                            otherIncomeOpen: true,
+                                            otherIncomeId: data[i].otherIncomeId,
+                                            detailsOther: data[i].details,
+                                            totalBillOther: data[i].totalBill,
+                                            cashPaidOther: data[i].cashPaid,
+                                            balanceOther: data[i].balance
+                                        })
+                                    }}
+                                    color="warning"
+                                    className="edit"
+                                >
+                                    <Dvr />
+                                </Button>{" "}
+                            </div>
+                        )
+                    };
+                    otherIncomeReceivables.push(_data);
+                }
+                this.setState({ otherIncomeReceivables });
+                this.setState({
+                    loading: false,
+                    numberOfRows: data.length,
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
     //dialog box close
     dialogBoxClose = () => {
         this.setState({
@@ -228,6 +367,17 @@ class Recievable extends React.Component {
             //states success false
             additionalDiscountState: '',
             additionalPaymentState: '',
+        });
+    }
+
+    //dialog box close
+    otherIncomeDialogBoxClose = () => {
+        this.setState({
+            otherIncomeOpen: false,
+            additionalPaymentOther: 0,
+
+            //states success false
+            additionalPaymentOtherState: '',
         });
     }
 
@@ -243,9 +393,11 @@ class Recievable extends React.Component {
         this.setState({
             successAlert: false,
             succesAlertMsg: "",
-            open: false
         });
+        this.dialogBoxClose();
+        this.otherIncomeDialogBoxClose();
         this.getTradeReceivableDetails();
+        this.getOtherIncomeReceivableDetails();
     };
 
     change(event, stateName, type, stateNameEqualTo, maxValue) {
@@ -273,6 +425,19 @@ class Recievable extends React.Component {
                     this.setState({
                         [stateName + "State"]: "error",
                         additionalPayment: event.target.value
+                    });
+                }
+                break;
+            case "additionalPaymentLengthOther":
+                if ((event.target.value >= 0)) {
+                    this.setState({
+                        [stateName + "State"]: "success",
+                        additionalPaymentOther: event.target.value
+                    });
+                } else {
+                    this.setState({
+                        [stateName + "State"]: "error",
+                        additionalPaymentOther: event.target.value
                     });
                 }
                 break;
@@ -400,7 +565,7 @@ class Recievable extends React.Component {
                                             timeFormat={false}
                                             dateFormat="YYYY-MM-DD"
                                             defaultValue={Moment(Date()).format("YYYY-MM-DD")}
-                                            onChange={this.updateState}
+                                            onChange={this.tradeReceivableRepayDate}
                                         />
                                     </FormControl>
                                     <FormControl >
@@ -452,6 +617,121 @@ class Recievable extends React.Component {
                     </Card>
                 </Dialog>
 
+                {/* other income receivable more info dialog box */}
+                <Dialog
+                    open={this.state.otherIncomeOpen}
+                    aria-labelledby="alert-dialog-title"
+                >
+                    <br />
+                    <Button
+                        justIcon
+                        round
+                        simple
+                        onClick={this.otherIncomeDialogBoxClose}
+                        color="danger"
+                        className={classes.dialogBoxCloseIcon}
+                    >
+                        <Close />
+                    </Button>
+                    <Card className={classes.otherCardSize}>
+                        <CardHeader color="primary" icon>
+                            <CardIcon color="primary">
+                                <Cash />
+                            </CardIcon>
+                            <h4 className={classes.cardIconTitle}>Settle Payment</h4>
+                        </CardHeader>
+                        <br />
+                        <CardBody>
+                            <GridContainer>
+                                <GridItem xs={12} sm={12} md={6}>
+                                    <FormControl >
+                                        <CustomInput
+                                            disabled={true}
+                                            labelText="Details"
+                                            id="details"
+                                            formControlProps={{
+                                                fullWidth: true
+                                            }}
+                                            value={this.state.detailsOther}
+                                        />
+                                    </FormControl>
+                                    <FormControl >
+                                        <CustomInput
+                                            disabled={true}
+                                            labelText="Total Bill"
+                                            id="totalBill"
+                                            formControlProps={{
+                                                fullWidth: true
+                                            }}
+                                            value={this.state.totalBillOther}
+                                        />
+                                    </FormControl>
+                                    <FormControl >
+                                        <CustomInput
+                                            disabled={true}
+                                            labelText="Cash Paid"
+                                            id="cashPaid"
+                                            formControlProps={{
+                                                fullWidth: true
+                                            }}
+                                            value={this.state.cashPaidOther}
+                                        />
+                                    </FormControl>
+                                    <FormControl >
+                                        <CustomInput
+                                            disabled={true}
+                                            labelText="Payment Due"
+                                            id="balance"
+                                            formControlProps={{
+                                                fullWidth: true
+                                            }}
+                                            value={this.state.balanceOther}
+                                        />
+                                    </FormControl>
+                                </GridItem>
+                                <GridItem xs={12} sm={12} md={6}>
+                                    <InputLabel className={classes.label}>Date</InputLabel>
+                                    <br />
+                                    <FormControl >
+                                        <Datetime
+                                            timeFormat={false}
+                                            dateFormat="YYYY-MM-DD"
+                                            defaultValue={Moment(Date()).format("YYYY-MM-DD")}
+                                            onChange={this.OtherIncomeReceivableRepayDate}
+                                        />
+                                    </FormControl>
+                                    <FormControl >
+                                        <CustomInput
+                                            success={this.state.additionalPaymentOtherState === "success"}
+                                            error={this.state.additionalPaymentOtherState === "error"}
+                                            labelText="Additional Payment"
+                                            id="additionalPaymentOther"
+                                            formControlProps={{
+                                                fullWidth: true
+                                            }}
+                                            inputProps={{
+                                                onChange: event =>
+                                                    this.change(event, "additionalPaymentOther", "additionalPaymentLengthOther", 1),
+                                                type: "number"
+                                            }}
+                                            onChange={(event) => this.setState({ additionalPaymentOther: event.target.value })}
+                                            value={this.state.additionalPaymentOther.toString()}
+                                        />
+                                        <br />
+                                        <Button
+                                            size='sm'
+                                            color="info"
+                                            onClick={this.settleTradeReceivableOther}>
+                                            <AddCircle className={classes.icons} /> Add
+                                        </Button>
+                                    </FormControl>
+                                </GridItem>
+                            </GridContainer>
+                        </CardBody>
+                    </Card>
+                </Dialog>
+
+                {/* trade receivable card */}
                 <GridContainer>
                     <GridItem xs={12}>
                         <LoadingOverlay
@@ -459,14 +739,14 @@ class Recievable extends React.Component {
                             spinner
                             text='Loading...'
                         >
-                        <Card>
-                            <CardHeader color="primary" icon>
-                                <CardIcon color="primary">
-                                    <Assignment />
-                                </CardIcon>
-                                <h4 className={classes.cardIconTitle}>Trade Receivables</h4>
-                            </CardHeader>
-                            <CardBody>
+                            <Card>
+                                <CardHeader color="primary" icon>
+                                    <CardIcon color="primary">
+                                        <Assignment />
+                                    </CardIcon>
+                                    <h4 className={classes.cardIconTitle}>Trade Receivables</h4>
+                                </CardHeader>
+                                <CardBody>
                                     <ReactTable
                                         data={this.state.tradeReceivables}
                                         filterable={false}
@@ -526,11 +806,87 @@ class Recievable extends React.Component {
                                         className="-striped -highlight"
                                         pageSize={this.state.numberOfRows}
                                     />
-                            </CardBody>
-                        </Card>
+                                </CardBody>
+                            </Card>
                         </LoadingOverlay>
                     </GridItem>
                 </GridContainer>
+
+                {/* Other Income receivable card */}
+                <GridContainer>
+                    <GridItem xs={12}>
+                        <LoadingOverlay
+                            active={this.state.loading}
+                            spinner
+                            text='Loading...'
+                        >
+                            <Card>
+                                <CardHeader color="primary" icon>
+                                    <CardIcon color="primary">
+                                        <Assignment />
+                                    </CardIcon>
+                                    <h4 className={classes.cardIconTitle}>Other Income Receivables</h4>
+                                </CardHeader>
+                                <CardBody>
+                                    <ReactTable
+                                        data={this.state.otherIncomeReceivables}
+                                        filterable={false}
+                                        sortable={false}
+                                        showPagination={false}
+                                        defaultSorted={[
+                                            {
+                                                id: "otherIncomeId",
+                                                desc: true
+                                            }
+                                        ]}
+                                        columns={[
+                                            {
+                                                Header: () => (
+                                                    <div className="actions-center"><strong>ID</strong></div>),
+                                                accessor: "otherIncomeId",
+                                                filterable: false,
+                                                width: 100,
+                                                Cell: row => <div className="actions-center">{row.value}</div>
+                                            },
+                                            {
+                                                Header: () => (
+                                                    <div className="actions-center"><strong>Date</strong></div>),
+                                                accessor: "date",
+                                                width: 150,
+                                                Cell: row => <div className="actions-center">{row.value}</div>
+                                            },
+                                            {
+                                                Header: () => (
+                                                    <div className="actions-left"><strong>Details</strong></div>),
+                                                accessor: "details",
+                                                width: 250,
+                                                Cell: row => <div className="actions-left">{row.value}</div>
+                                            },
+                                            {
+                                                Header: () => (
+                                                    <div className="actions-right"><strong>Payment Due</strong></div>),
+                                                accessor: "balance",
+                                                width: 120,
+                                                Cell: row => <div className="actions-right">{row.value}</div>
+                                            },
+                                            {
+                                                Header: "",
+                                                accessor: "actions",
+                                                width: 100,
+                                                sortable: false,
+                                                filterable: false
+                                            }
+                                        ]}
+                                        className="-striped -highlight"
+                                        pageSize={this.state.numberOfRows}
+                                    />
+                                </CardBody>
+                            </Card>
+                        </LoadingOverlay>
+                    </GridItem>
+                </GridContainer>
+
+                
             </div>
         );
     }
