@@ -132,6 +132,9 @@ Route::post('OtherIncomeReceivablePayments','otherIncomeController@OtherIncomeRe
 
 //api from cash_received_from_other_income table
 Route::post('addCashReceivedFromOtherIncome','cashReceivedFromOtherIncomesController@addCashReceivedFromOtherIncome');
+Route::get('getAllOtherIncomeReceivedDetails','cashReceivedFromOtherIncomesController@getAllOtherIncomeReceivedDetails');
+Route::get('getTodayOtherIncomeReceivedDetails','cashReceivedFromOtherIncomesController@getTodayOtherIncomeReceivedDetails');
+Route::post('searchOtherIncomeReceivedBetweenTimePeriod','cashReceivedFromOtherIncomesController@searchOtherIncomeReceivedBetweenTimePeriod');
 
 
 
