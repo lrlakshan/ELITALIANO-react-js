@@ -65,7 +65,9 @@ class CashFlow extends React.Component {
             cashPaidDetails: [],
             expenseDetails: [],
             salaryDetails: [],
+            otherIncomeReceivedDetails: [],
             cashReceivedTableLoading: false,    //this loading state is common for all types of cash flow summary grid
+            otherIncomeReceivedTableLoading: false,
             cashPaidLoading: false,
             expenseLoading: false,
             salaryLoading: false,
@@ -74,7 +76,9 @@ class CashFlow extends React.Component {
             CPnumberOfRows: 0,
             ExnumberOfRows: 0,
             SalnumberOfRows: 0,
+            OInumberOfRows:0,
             cumCashReceived: '0',
+            cumOtherIncomeReceived: '0',
             cumCashPaid: '0',
             cumExpenses: '0',
             cumSalary: "0",
@@ -212,6 +216,109 @@ class CashFlow extends React.Component {
                 console.log(exception);
             });
     };
+
+//--------------------------------OTHER INCOME FUNCTION-------------------------------------
+
+    //get today other income received 
+    getAllOtherIncomeReceivedDetails = () => {
+        const otherIncomeReceivedDetails = [];
+        this.setState({
+            otherIncomeReceivedTableLoading: true,
+        });
+
+        Helper.http
+            .jsonGet("getAllOtherIncomeReceivedDetails")
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        details: data[i].details,
+                        otherIncomeId: data[i].otherIncomeId,
+                        date: data[i].date,
+                        cashPaid: data[i].cashPaid
+                    };
+                    otherIncomeReceivedDetails.push(_data);
+                }
+                this.setState({ otherIncomeReceivedDetails });
+                this.setState({
+                    otherIncomeReceivedTableLoading: false,
+                    OInumberOfRows: data.length,
+                    cumOtherIncomeReceived: response.cumCashReceived
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    //get today other income received details
+    getTodayOtherIncomeReceivedDetails = () => {
+        const otherIncomeReceivedDetails = [];
+        this.setState({
+            otherIncomeReceivedTableLoading: true,
+        });
+
+        Helper.http
+            .jsonGet("getTodayOtherIncomeReceivedDetails")
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        details: data[i].details,
+                        otherIncomeId: data[i].otherIncomeId,
+                        date: data[i].date,
+                        cashPaid: data[i].cashPaid
+                    };
+                    otherIncomeReceivedDetails.push(_data);
+                }
+                this.setState({ otherIncomeReceivedDetails });
+                this.setState({
+                    otherIncomeReceivedTableLoading: false,
+                    OInumberOfRows: data.length,
+                    cumOtherIncomeReceived: response.cumCashReceived
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
+    //get other income received details between two dates
+    searchOtherIncomeReceivedBetweenTimePeriod = () => {
+        const otherIncomeReceivedDetails = [];
+        this.setState({
+            otherIncomeReceivedTableLoading: true,
+            CfBtn: ''
+        });
+
+        Helper.http
+            .jsonPost("searchOtherIncomeReceivedBetweenTimePeriod", {
+                from: this.state.selectedFromDate,
+                to: this.state.selectedToDate
+            })
+            .then(response => {
+                let data = response.data;
+                for (let i = 0; i < data.length; i++) {
+                    const _data = {
+                        details: data[i].details,
+                        otherIncomeId: data[i].otherIncomeId,
+                        date: data[i].date,
+                        cashPaid: data[i].cashPaid
+                    };
+                    otherIncomeReceivedDetails.push(_data);
+                }
+                this.setState({ otherIncomeReceivedDetails });
+                this.setState({
+                    otherIncomeReceivedTableLoading: false,
+                    OInumberOfRows: data.length,
+                    cumOtherIncomeReceived: response.cumCashReceived
+                });
+            })
+            .catch(exception => {
+                console.log(exception);
+            });
+    };
+
 
 //--------------------------------CASH PAID FUNCTIONS---------------------------------------
 
@@ -519,6 +626,7 @@ class CashFlow extends React.Component {
         this.getTodayCashPaidInvoiceDetails();
         this.getTodayExpensesDetails();
         this.getTodaySalaryDetails();
+        this.getTodayOtherIncomeReceivedDetails();
     }
 
     //all cash flow button click function
@@ -532,6 +640,7 @@ class CashFlow extends React.Component {
         this.getAllCashPaidInvoiceDetails();
         this.getAllExpensesDetails();
         this.getAllSalaryDetails();
+        this.getAllOtherIncomeReceivedDetails();
     }
 
     searchButtonClick = () =>{
@@ -543,6 +652,7 @@ class CashFlow extends React.Component {
         this.searchCashReceivedBetweenTimePeriod();
         this.searchExpenseBetweenTimePeriod();
         this.searchSalaryBetweenTimePeriod();
+        this.searchOtherIncomeReceivedBetweenTimePeriod();
     }
 
     render() {
@@ -641,6 +751,7 @@ class CashFlow extends React.Component {
                                     <GridItem xs={12} sm={12} md={6}>
                                         <CardBody>
                                             <h4>Cash Received</h4>
+                                            <h4>Other Income</h4>
                                             <h4>Cash Paid (-)</h4>
                                             <h4>Expenses (-)</h4>
                                             <h4>Salary (-)</h4>
@@ -651,11 +762,12 @@ class CashFlow extends React.Component {
                                     <GridItem xs={12} sm={12} md={6}>
                                         <CardBody>
                                             <h4 className={classes.alignright}><small>{parseInt(this.state.cumCashReceived, 10).toLocaleString() + ".00"}</small></h4>
+                                            <h4 className={classes.alignright}><small>{parseInt(this.state.cumOtherIncomeReceived, 10).toLocaleString() + ".00"}</small></h4>
                                             <h4 className={classes.alignright}><small>{parseInt(this.state.cumCashPaid, 10).toLocaleString() + ".00"}</small></h4>
                                             <h4 className={classes.alignright}><small>{parseInt(this.state.cumExpenses, 10).toLocaleString() + ".00"}</small></h4>
                                             <h4 className={classes.alignright}><small>{parseInt(this.state.cumSalary, 10).toLocaleString() + ".00"}</small></h4>
                                             <br />
-                                            <h4 className={classes.alignright}><small>{parseInt((this.state.cumCashReceived - this.state.cumCashPaid - this.state.cumExpenses - this.state.cumSalary), 10).toLocaleString() + ".00"}</small></h4>
+                                            <h4 className={classes.alignright}><small>{parseInt((Number(this.state.cumCashReceived) + Number(this.state.cumOtherIncomeReceived) - this.state.cumCashPaid - this.state.cumExpenses - this.state.cumSalary), 10).toLocaleString() + ".00"}</small></h4>
                                         </CardBody>
                                     </GridItem>
                                 </GridContainer>
@@ -727,6 +839,68 @@ class CashFlow extends React.Component {
                                                     ]}
                                                     className="-striped -highlight"
                                                     pageSize={this.state.CRnumberOfRows}
+                                                />
+                                            </CardBody>
+                                        </Card>
+                                    )
+                                },
+                                {
+                                    tabButton: "Other Income",
+                                    tabIcon: cashReceivedIcon,
+                                    tabContent: (
+                                        <Card>
+                                            <CardHeader>
+                                                <h4 className={classes.cardTitle}>
+                                                    Cash Received from Other Income - <small>{this.state.CfHistoryCaption}</small>
+                                                </h4>
+                                            </CardHeader>
+                                            <CardBody>
+                                                <ReactTable
+                                                    data={this.state.otherIncomeReceivedDetails}
+                                                    loading={this.state.otherIncomeReceivedTableLoading}
+                                                    filterable={false}
+                                                    sortable={false}
+                                                    showPagination={false}
+                                                    noDataText=""
+                                                    defaultSorted={[
+                                                        {
+                                                            id: "date",
+                                                            desc: true
+                                                        }
+                                                    ]}
+                                                    columns={[
+                                                        {
+                                                            Header: () => (
+                                                                <div className="actions-center"><strong>Date</strong></div>),
+                                                            accessor: "date",
+                                                            width: 150,
+                                                            Cell: row => <div className="actions-center">{row.value}</div>
+                                                        },
+                                                        {
+                                                            Header: () => (
+                                                                <div className="actions-center"><strong>Id</strong></div>),
+                                                            accessor: "otherIncomeId",
+                                                            filterable: false,
+                                                            width: 100,
+                                                            Cell: row => <div className="actions-center">{row.value}</div>
+                                                        },
+                                                        {
+                                                            Header: () => (
+                                                                <div className="actions-left"><strong>Details</strong></div>),
+                                                            accessor: "details",
+                                                            width: 250,
+                                                            Cell: row => <div className="actions-left">{row.value}</div>
+                                                        },
+                                                        {
+                                                            Header: () => (
+                                                                <div className="actions-right"><strong>Amount</strong></div>),
+                                                            accessor: "cashPaid",
+                                                            width: 120,
+                                                            Cell: row => <div className="actions-right">{row.value}</div>
+                                                        }
+                                                    ]}
+                                                    className="-striped -highlight"
+                                                    pageSize={this.state.OInumberOfRows}
                                                 />
                                             </CardBody>
                                         </Card>
