@@ -8,7 +8,7 @@
     "axios": "^0.18.0",
     "history": "^4.7.2",
     "html2canvas": "^1.0.0-alpha.12",
-    "jspdf": "1.4.1",
+    "jspdf": "2.3.1",
     "material-ui-icons": "^1.0.0-beta.36",
     "moment": "^2.24.0",
     "perfect-scrollbar": "^1.4.0",
